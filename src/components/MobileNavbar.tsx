@@ -2,7 +2,7 @@ const MobileNavbar = () => {
   //   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="relative border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl">
+    <nav className="border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl md:hidden">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
