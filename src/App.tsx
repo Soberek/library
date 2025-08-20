@@ -67,37 +67,26 @@ function App() {
         />
 
         {/* Fixed add book button */}
-        <button
-          className={`fixed right-6 bottom-4 z-50 flex h-20 w-20 items-center justify-center rounded-full ${
-            isFormVisible
-              ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-              : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-          } text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl focus:ring-4 focus:ring-blue-400 focus:outline-none active:scale-95`}
-          onClick={handleFormVisibility}
-        >
-          <svg
-            className="h-16 w-16"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {!isFormVisible && (
+          <button
+            className="fixed right-6 bottom-4 z-50 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:from-blue-700 hover:to-blue-800 hover:shadow-xl focus:ring-4 focus:ring-blue-400 focus:outline-none active:scale-95"
+            onClick={handleFormVisibility}
           >
-            {isFormVisible ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
+            <svg
+              className="h-16 w-16"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="M12 4v16m8-8H4"
               />
-            )}
-          </svg>
-        </button>
+            </svg>
+          </button>
+        )}
       </div>
     </>
   );
