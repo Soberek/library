@@ -4,6 +4,35 @@ type Props = {
   stars: number;
 };
 
+const bookGenres: { [key: string]: string } = {
+  powiesc_historyczna: "powieść historyczna",
+  powiesc_przygodowa: "powieść przygodowa",
+  powiesc_kryminalna: "powieść kryminalna",
+  powiesc_fantastyczno_naukowa: "powieść fantastyczno-naukowa",
+  powiesc_fantasy: "powieść fantasy",
+  romans: "romans",
+  science_fiction: "science fiction",
+  horror: "horror",
+  kryminal: "kryminał",
+  thriller: "thriller",
+  hymn: "hymn",
+  oda: "oda",
+  piesn: "pieśń",
+  psalm: "psalm",
+  elegia: "elegia",
+  tren: "tren",
+  fraszka: "fraszka",
+  sonet: "sonet",
+  komedia: "komedia",
+  tragedia: "tragedia",
+  tragedikomedia: "tragedikomedia",
+  opera: "opera",
+  esej: "esej",
+  satyra: "satyra",
+  listy: "listy",
+  dzienniki: "dzienniki",
+};
+
 const BookForm: React.FC<Props> = ({
   handleBookSubmit,
   handleStarClick,
@@ -45,14 +74,14 @@ const BookForm: React.FC<Props> = ({
         className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
         aria-placeholder="Wybierz gatunek"
       >
-        <option value="" disabled hidden>
+        <option value="" disabled>
           Wybierz gatunek
         </option>
-        <option value="Fiction">Fikcja</option>
-        <option value="Non-Fiction">Non-Fikcja</option>
-        <option value="Fantasy">Fantastyka</option>
-        <option value="Science Fiction">Science Fiction</option>
-        <option value="Mystery">Tajemnica</option>
+        {Object.entries(bookGenres).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
       </select>
 
       <div className="flex w-full">
