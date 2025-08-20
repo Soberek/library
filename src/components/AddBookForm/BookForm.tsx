@@ -2,6 +2,7 @@ type Props = {
   handleBookSubmit: (e: React.ChangeEvent<HTMLFormElement>) => void;
   handleStarClick: (index: number) => void;
   stars: number;
+  handleFormVisibility: () => void;
 };
 
 const bookGenres: { [key: string]: string } = {
@@ -37,107 +38,128 @@ const BookForm: React.FC<Props> = ({
   handleBookSubmit,
   handleStarClick,
   stars,
+  handleFormVisibility,
 }) => {
   return (
-    <form
-      className="mx-6 mt-4 flex flex-col rounded-lg p-4 shadow-lg"
-      onSubmit={handleBookSubmit}
-    >
-      <h2 className="mb-2 text-3xl font-semibold">Dodaj nową książkę</h2>
-      <input
-        type="text"
-        name="title"
-        placeholder="Tytuł"
-        className="mb-2 rounded-lg border border-gray-300 p-2"
+    <>
+      {/* full screen gray background */}
+      <div
+        className="fixed inset-0 z-10 bg-gray-300 opacity-40"
+        onClick={handleFormVisibility}
       />
-      <input
-        type="text"
-        name="author"
-        placeholder="Autor"
-        className="mb-2 rounded-lg border border-gray-300 p-2"
-      />
-      {/* How to style select?? */}
 
-      <select
-        name="read"
-        className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
+      <form
+        className="fixed top-1/2 left-1/2 z-20 flex w-[80%] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-white p-4 shadow-lg"
+        onSubmit={handleBookSubmit}
       >
-        <option value="" disabled hidden>
-          Wybierz status
-        </option>
-        <option value="W trakcie">W trakcie</option>
-        <option value="Przeczytana">Przeczytana</option>
-        <option value="Porzucona">Porzucona</option>
-      </select>
-
-      {/* genre */}
-
-      <select
-        name="genre"
-        className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
-        aria-placeholder="Wybierz gatunek"
-      >
-        <option value="" disabled>
-          Wybierz gatunek
-        </option>
-        {Object.entries(bookGenres).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
-
-      <div className="flex w-full">
-        <input
-          type="number"
-          name="readPages"
-          placeholder="Przeczytane strony"
-          max={5000}
-          min={0}
-          className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
-        />
-        <div className="mx-2 my-2 h-full w-px bg-black" />
-        <input
-          type="number"
-          name="pages"
-          placeholder="Liczba stron"
-          max={5000}
-          min={1}
-          className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
-        />
-        {/* Divider */}
-      </div>
-
-      {/* Star SVG*/}
-      <div className="my-3 flex w-full justify-between">
-        {[...Array(10)].map((_, i) => (
-          <svg
-            key={i}
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-8 w-8 cursor-pointer fill-current ${
-              i < stars ? "text-yellow-500" : "text-gray-300"
-            }`}
-            viewBox="0 0 24 24"
-            onClick={() => handleStarClick(i)}
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-800">
+            Dodaj nową książkę
+          </h1>
+          <button
+            type="button"
+            className="cursor-pointer rounded-full px-4 py-2 text-3xl font-semibold text-black shadow transition-colors duration-150 hover:bg-red-600 hover:text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
+            onClick={handleFormVisibility}
+            aria-label="Zamknij formularz"
           >
-            <path d="M12 .587l3.668 7.431 8.232 1.194-5.95 5.787 1.404 8.193L12 18.896l-7.354 3.866 1.404-8.193-5.95-5.787 8.232-1.194z" />
-          </svg>
-        ))}
-      </div>
+            &#10005;
+          </button>
+        </div>
+        <input
+          type="text"
+          name="title"
+          placeholder="Tytuł"
+          className="mb-2 rounded-lg border border-gray-300 p-2"
+        />
+        <input
+          type="text"
+          name="author"
+          placeholder="Autor"
+          className="mb-2 rounded-lg border border-gray-300 p-2"
+        />
+        {/* How to style select?? */}
 
-      <input
-        type="text"
-        name="cover"
-        placeholder="Okładka (URL)"
-        className="mb-2 rounded-lg border border-gray-300 p-2"
-      />
-      <button
-        type="submit"
-        className="mt-4 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-      >
-        Dodaj książkę
-      </button>
-    </form>
+        <select
+          name="read"
+          className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
+        >
+          <option value="" disabled hidden>
+            Wybierz status
+          </option>
+          <option value="W trakcie">W trakcie</option>
+          <option value="Przeczytana">Przeczytana</option>
+          <option value="Porzucona">Porzucona</option>
+        </select>
+
+        {/* genre */}
+
+        <select
+          name="genre"
+          className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
+          aria-placeholder="Wybierz gatunek"
+        >
+          <option value="" disabled>
+            Wybierz gatunek
+          </option>
+          {Object.entries(bookGenres).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex w-full">
+          <input
+            type="number"
+            name="readPages"
+            placeholder="Przeczytane strony"
+            max={5000}
+            min={0}
+            className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
+          />
+          <div className="mx-2 my-2 h-full w-px bg-black" />
+          <input
+            type="number"
+            name="pages"
+            placeholder="Liczba stron"
+            max={5000}
+            min={1}
+            className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
+          />
+          {/* Divider */}
+        </div>
+
+        {/* Star SVG*/}
+        <div className="my-3 flex w-full justify-between">
+          {[...Array(10)].map((_, i) => (
+            <svg
+              key={i}
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-8 w-8 cursor-pointer fill-current ${
+                i < stars ? "text-yellow-500" : "text-gray-300"
+              }`}
+              viewBox="0 0 24 24"
+              onClick={() => handleStarClick(i)}
+            >
+              <path d="M12 .587l3.668 7.431 8.232 1.194-5.95 5.787 1.404 8.193L12 18.896l-7.354 3.866 1.404-8.193-5.95-5.787 8.232-1.194z" />
+            </svg>
+          ))}
+        </div>
+
+        <input
+          type="text"
+          name="cover"
+          placeholder="Okładka (URL)"
+          className="mb-2 rounded-lg border border-gray-300 p-2"
+        />
+        <button
+          type="submit"
+          className="mt-4 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        >
+          Dodaj książkę
+        </button>
+      </form>
+    </>
   );
 };
 
