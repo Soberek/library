@@ -51,7 +51,7 @@ const BookForm: React.FC<Props> = ({
         type="text"
         name="author"
         placeholder="Autor"
-        className="mb-2 border border-gray-300 p-2"
+        className="mb-2 rounded-lg border border-gray-300 p-2"
       />
       {/* How to style select?? */}
 
@@ -91,7 +91,7 @@ const BookForm: React.FC<Props> = ({
           placeholder="Przeczytane strony"
           max={5000}
           min={0}
-          className="mb-2 w-1/2 border border-gray-300 p-2"
+          className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
         />
         <div className="mx-2 my-2 h-full w-px bg-black" />
         <input
@@ -100,7 +100,7 @@ const BookForm: React.FC<Props> = ({
           placeholder="Liczba stron"
           max={5000}
           min={1}
-          className="mb-2 w-1/2 border border-gray-300 p-2"
+          className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
         />
         {/* Divider */}
       </div>
@@ -111,7 +111,7 @@ const BookForm: React.FC<Props> = ({
           <svg
             key={i}
             xmlns="http://www.w3.org/2000/svg"
-            className={`h-6 w-6 cursor-pointer fill-current ${
+            className={`h-8 w-8 cursor-pointer fill-current ${
               i < stars ? "text-yellow-500" : "text-gray-300"
             }`}
             viewBox="0 0 24 24"
@@ -126,9 +126,11 @@ const BookForm: React.FC<Props> = ({
         type="text"
         name="cover"
         placeholder="Okładka (URL)"
-        className="mb-2 border border-gray-300 p-2"
+        className="mb-2 rounded-lg border border-gray-300 p-2"
       />
-      <button className="bg-blue-500 p-2 text-white">Dodaj książkę</button>
+      <button className="cursor-pointer rounded-lg bg-blue-500 p-2 text-white transition-colors hover:bg-blue-600">
+        Dodaj książkę
+      </button>
     </form>
   );
 };
