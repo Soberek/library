@@ -56,6 +56,7 @@ function App() {
             handleBookSubmit={handleBookSubmit}
             handleStarClick={handleStarClick}
             stars={stars}
+            isFormVisible={isFormVisible}
           />
         )}
 

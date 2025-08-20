@@ -3,6 +3,7 @@ type Props = {
   handleStarClick: (index: number) => void;
   stars: number;
   handleFormVisibility: () => void;
+  isFormVisible: boolean;
 };
 
 const bookGenres: { [key: string]: string } = {
@@ -39,6 +40,7 @@ const BookForm: React.FC<Props> = ({
   handleStarClick,
   stars,
   handleFormVisibility,
+  isFormVisible,
 }) => {
   return (
     <>
@@ -49,7 +51,7 @@ const BookForm: React.FC<Props> = ({
       />
 
       <form
-        className="fixed top-1/2 left-1/2 z-20 flex w-[80%] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-white p-4 shadow-lg"
+        className={`fixed top-1/2 left-1/2 z-20 flex w-[80%] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-white p-4 shadow-lg ${isFormVisible ? "fade-in" : "fade-out"}`}
         onSubmit={handleBookSubmit}
       >
         <div className="mb-4 flex items-center justify-between">
