@@ -39,7 +39,10 @@ const BookForm: React.FC<Props> = ({
   stars,
 }) => {
   return (
-    <form className="flex flex-col px-4 py-4" onSubmit={handleBookSubmit}>
+    <form
+      className="mx-6 mt-4 flex flex-col rounded-lg p-4 shadow-lg"
+      onSubmit={handleBookSubmit}
+    >
       <h2 className="mb-2 text-3xl font-semibold">Dodaj nową książkę</h2>
       <input
         type="text"
@@ -128,7 +131,10 @@ const BookForm: React.FC<Props> = ({
         placeholder="Okładka (URL)"
         className="mb-2 rounded-lg border border-gray-300 p-2"
       />
-      <button className="cursor-pointer rounded-lg bg-blue-500 p-2 text-white transition-colors hover:bg-blue-600">
+      <button
+        type="submit"
+        className="mt-4 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      >
         Dodaj książkę
       </button>
     </form>

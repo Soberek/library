@@ -135,7 +135,7 @@ function App() {
 
                 {/* Delete Button */}
                 <button
-                  className="w-full rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:from-red-600 hover:to-red-700 hover:shadow-lg focus:ring-4 focus:ring-red-200 focus:outline-none active:scale-95"
+                  className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:from-red-600 hover:to-red-700 hover:shadow-lg focus:ring-4 focus:ring-red-200 focus:outline-none active:scale-95"
                   onClick={() => handleBookDelete(index)}
                 >
                   <div className="flex items-center justify-center space-x-2">
