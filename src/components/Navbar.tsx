@@ -1,4 +1,10 @@
-const Navbar = () => {
+import Search from "./Search";
+type Props = {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+};
+
+const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
   return (
     <nav className="hidden border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl md:flex">
       <div className="container mx-auto flex items-center justify-between px-6 py-5">
@@ -10,8 +16,9 @@ const Navbar = () => {
             Library App dla Madzi
           </h1>
         </div>
+        <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center justify-center space-x-1">
           {["Home", "Books", "About"].map((item) => (
             <a
               key={item}

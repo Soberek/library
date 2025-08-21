@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Navbar from "./components/Navbar";
 import MobileNavbar from "./components/MobileNavbar";
 import "./App.css";
 import { useBooks } from "./hooks/useBooks";
 import BookForm from "./components/AddBookForm/BookForm";
 import BookList from "./components/BookList";
+import type { Book } from "./types/Book";
 
 function App() {
   // Form should be visible when User clicks button
@@ -30,15 +31,29 @@ function App() {
       document.body.style.overflow = "";
     }
 
-    // Cleanup, jeśli komponent zniknie z DOM, przywraca scroll
+    // Cleanup: restores scroll when the component is removed from the DOM
     return () => {
       document.body.style.overflow = "";
     };
   }, [isFormVisible]);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  let filteredBooks: Book[];
+
+  // Filter books based on searchTerm
+  filteredBooks = useMemo(() => {
+    if (searchTerm) {
+      return books.filter((book) =>
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    }
+    return books;
+  }, [books, searchTerm]);
+
   return (
     <>
-      <Navbar />
+      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <MobileNavbar />
       <div className="flex flex-col rounded-lg bg-white">
         {/* Add a button to toggle the form visibility */}
@@ -61,7 +76,7 @@ function App() {
         )}
 
         <BookList
-          books={books}
+          books={filteredBooks}
           handleStatusChange={handleStatusChange}
           handleRatingChange={handleRatingChange}
           handleBookDelete={handleBookDelete}

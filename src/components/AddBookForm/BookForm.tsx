@@ -1,3 +1,4 @@
+import Input from "../Input";
 type Props = {
   handleBookSubmit: (e: React.ChangeEvent<HTMLFormElement>) => void;
   handleStarClick: (index: number) => void;
@@ -67,18 +68,8 @@ const BookForm: React.FC<Props> = ({
             &#10005;
           </button>
         </div>
-        <input
-          type="text"
-          name="title"
-          placeholder="Tytuł"
-          className="mb-2 rounded-lg border border-gray-300 p-2"
-        />
-        <input
-          type="text"
-          name="author"
-          placeholder="Autor"
-          className="mb-2 rounded-lg border border-gray-300 p-2"
-        />
+        <Input type="text" name="title" placeholder="Tytuł" />
+        <Input type="text" name="author" placeholder="Autor" />
         {/* How to style select?? */}
 
         <select
@@ -110,23 +101,21 @@ const BookForm: React.FC<Props> = ({
           ))}
         </select>
 
-        <div className="flex w-full">
-          <input
+        <div className="flex w-full items-center justify-between">
+          <Input
             type="number"
             name="readPages"
             placeholder="Przeczytane strony"
             max={5000}
             min={0}
-            className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
           />
           <div className="mx-2 my-2 h-full w-px bg-black" />
-          <input
+          <Input
             type="number"
             name="pages"
             placeholder="Liczba stron"
             max={5000}
             min={1}
-            className="mb-2 w-1/2 rounded-lg border border-gray-300 p-2"
           />
           {/* Divider */}
         </div>
@@ -148,15 +137,10 @@ const BookForm: React.FC<Props> = ({
           ))}
         </div>
 
-        <input
-          type="text"
-          name="cover"
-          placeholder="Okładka (URL)"
-          className="mb-2 rounded-lg border border-gray-300 p-2"
-        />
+        <Input type="text" name="cover" placeholder="Okładka (URL)" />
         <button
           type="submit"
-          className="mt-4 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          className="mt-2 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
         >
           Dodaj książkę
         </button>

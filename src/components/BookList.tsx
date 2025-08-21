@@ -1,4 +1,5 @@
 import type { Book } from "../types/Book";
+
 type Props = {
   books: Book[];
   handleStatusChange: (index: number) => void;
@@ -13,18 +14,18 @@ const BookList: React.FC<Props> = ({
   handleBookDelete,
 }) => {
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 p-4 pb-8 md:grid-cols-2 lg:grid-cols-5">
       {books.map((book, index) => (
         <div
           key={index}
-          className="group relative transform overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          className="group relative transform overflow-hidden rounded-xl border border-gray-100 bg-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         >
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-purple-50/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-          <div className="relative p-6">
+          <div className="relative p-2">
             {/* Header */}
-            <div className="mb-4">
+            <div className="mb-2">
               <h3 className="mb-2 line-clamp-2 text-xl font-bold text-gray-800">
                 {book.title}
               </h3>
@@ -35,7 +36,7 @@ const BookList: React.FC<Props> = ({
             </div>
 
             {/* Status Badge */}
-            <div className="mb-4">
+            <div className="mb-2">
               <span className="text-sm font-medium text-gray-500">Status:</span>
               <div
                 onClick={() => handleStatusChange(index)}
@@ -52,19 +53,19 @@ const BookList: React.FC<Props> = ({
             </div>
 
             {/* Book Cover */}
-            <div className="mb-4 flex justify-center">
+            <div className="mb-2 flex justify-center">
               <div className="relative overflow-hidden rounded-lg shadow-md transition-shadow duration-300 group-hover:shadow-lg">
                 <img
                   src={book.cover}
                   alt={`${book.title} cover`}
-                  className="aspect-[2/3] max-w-[160px] object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="mx-auto w-1/2 object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
             </div>
 
             {/* Pages Progress */}
-            <div className="mb-4">
+            <div className="mb-2">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">
                   Postęp
@@ -90,7 +91,7 @@ const BookList: React.FC<Props> = ({
             </div>
 
             {/* Rating */}
-            <div className="mb-6">
+            <div className="mb-2">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Ocena</span>
                 <span className="text-sm font-bold text-gray-800">
@@ -119,7 +120,7 @@ const BookList: React.FC<Props> = ({
 
             {/* Delete Button */}
             <button
-              className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:from-red-600 hover:to-red-700 hover:shadow-lg focus:ring-4 focus:ring-red-200 focus:outline-none active:scale-95"
+              className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-2 py-1 font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:from-red-600 hover:to-red-700 hover:shadow-lg focus:ring-4 focus:ring-red-200 focus:outline-none active:scale-95"
               onClick={() => handleBookDelete(index)}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -144,9 +145,6 @@ const BookList: React.FC<Props> = ({
       ))}
     </div>
   );
-  {
-    /* Book list */
-  }
 };
 
 export default BookList;
