@@ -58,7 +58,7 @@ const BookList: React.FC<Props> = ({
                 <img
                   src={book.cover}
                   alt={`${book.title} cover`}
-                  className="mx-auto aspect-[2/3] max-w-[150px] transition-transform duration-300 group-hover:scale-105"
+                  className="mx-auto aspect-[2/3] h-[225px] w-[150px] object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
