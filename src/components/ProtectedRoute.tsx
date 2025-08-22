@@ -35,7 +35,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  return auth.user ? <Outlet /> : <Navigate to="/sign-up" />;
+  return auth.user ? <Outlet /> : <Navigate to="/sign-in" />;
 };
 
 export default ProtectedRoute;

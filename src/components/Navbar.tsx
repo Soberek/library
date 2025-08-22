@@ -1,5 +1,8 @@
 import Search from "./Search";
 import { useUser } from "../providers/UserContext";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
 type Props = {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
@@ -7,6 +10,17 @@ type Props = {
 
 const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
   const authContext = useUser();
+
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/sign-in", { replace: true }); // Przekierowanie po wylogowaniu
+    } catch (error) {
+      console.error("Błąd wylogowania:", error);
+    }
+  };
+
   return (
     <nav className="hidden border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl md:flex">
       <div className="container mx-auto flex items-center justify-between px-6 py-5">
@@ -38,13 +52,13 @@ const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
                 </div>
               </div>
 
-              {/* <button
-                onClick={() => authContext.logout?.()}
+              <button
+                onClick={() => handleLogout()}
                 className="ml-3 rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white transition-colors duration-150 hover:bg-white/30 active:scale-95"
                 aria-label="Wyloguj"
               >
                 Wyloguj
-              </button> */}
+              </button>
             </>
           ) : (
             <a

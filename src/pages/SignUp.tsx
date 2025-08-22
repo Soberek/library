@@ -2,10 +2,16 @@ import React, { useState } from "react";
 import { auth } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Navigate } from "react-router-dom";
+import { useUser } from "../providers/UserContext";
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const authContext = useUser();
+
+  if (authContext.user?.uid) {
+    return <Navigate to="/" />;
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
