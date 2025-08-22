@@ -17,7 +17,7 @@ const SignUp: React.FC = () => {
       );
       if (userCredential.user) {
         console.log("User created:", userCredential.user);
-        return <Navigate to="/" />;
+        return <Navigate to="/sign-in" />;
       }
     } catch (error) {
       console.error(
