@@ -15,6 +15,7 @@ type Props = {
 const Input: React.FC<Props> = ({
   type = "text",
   value,
+  name,
   onChange,
   placeholder,
   disabled = false,
@@ -26,6 +27,7 @@ const Input: React.FC<Props> = ({
     <input
       type={type}
       value={value}
+      name={name}
       onChange={(e) => onChange?.(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
