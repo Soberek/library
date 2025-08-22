@@ -12,6 +12,7 @@ import { useUser } from "../providers/UserContext";
 export const useBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [stars, setStars] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const userContext = useUser();
   const userId = userContext.user?.uid;
 
@@ -21,6 +22,7 @@ export const useBooks = () => {
         if (userId) {
           const userBooks = await getUserBooksData(userId);
           setBooks(userBooks);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Failed to fetch books:", error);
@@ -104,6 +106,7 @@ export const useBooks = () => {
   return {
     books,
     stars,
+    loading,
     handleBookDelete,
     handleRatingChange,
     handleStatusChange,

@@ -13,6 +13,7 @@ function App() {
   const {
     books,
     stars,
+    loading,
     handleBookDelete,
     handleRatingChange,
     handleStatusChange,
@@ -76,6 +77,7 @@ function App() {
         )}
 
         <BookList
+          loading={loading}
           books={filteredBooks}
           handleStatusChange={handleStatusChange}
           handleRatingChange={handleRatingChange}

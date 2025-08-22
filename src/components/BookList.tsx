@@ -2,6 +2,7 @@ import type { Book } from "../types/Book";
 
 type Props = {
   books: Book[];
+  loading: boolean;
   handleStatusChange: (bookId: string, newStatus: string) => void;
   handleRatingChange: (bookId: string, newRating: number) => void;
   handleBookDelete: (bookId: string) => void;
@@ -9,10 +10,22 @@ type Props = {
 
 const BookList: React.FC<Props> = ({
   books,
+  loading,
   handleStatusChange,
   handleRatingChange,
   handleBookDelete,
 }) => {
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+          <p className="font-medium text-gray-600">Ładowanie książek...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-6 p-4 pb-8 md:grid-cols-2 lg:grid-cols-5">
       {books.map((book) => (
