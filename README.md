@@ -16,11 +16,12 @@ Try the app live here: [https://membib.netlify.app/](https://membib.netlify.app/
 - [x] Search and filter books by title
 - [x] Mark books as read, unread or dropped
 - [x] View your progress
+- [x] Firestore database
+- [x] Auth with Firebase (email, password)
 
 ### TODO
 
 - [ ] Auth with Firebase (Google, Facebook)
-- [ ] Firestore database
 - [ ] Zod validation
 
 ## Technologies Used
