@@ -2,9 +2,9 @@ import type { Book } from "../types/Book";
 
 type Props = {
   books: Book[];
-  handleStatusChange: (index: number) => void;
-  handleRatingChange: (index: number, newRating: number) => void;
-  handleBookDelete: (index: number) => void;
+  handleStatusChange: (bookId: string, newStatus: string) => void;
+  handleRatingChange: (bookId: string, newRating: number) => void;
+  handleBookDelete: (bookId: string) => void;
 };
 
 const BookList: React.FC<Props> = ({
@@ -15,9 +15,9 @@ const BookList: React.FC<Props> = ({
 }) => {
   return (
     <div className="grid grid-cols-1 gap-6 p-4 pb-8 md:grid-cols-2 lg:grid-cols-5">
-      {books.map((book, index) => (
+      {books.map((book) => (
         <div
-          key={index}
+          key={book.id}
           className="group relative transform overflow-hidden rounded-xl border border-gray-100 bg-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         >
           {/* Gradient overlay */}
@@ -39,7 +39,7 @@ const BookList: React.FC<Props> = ({
             <div className="mb-2">
               <span className="text-sm font-medium text-gray-500">Status:</span>
               <div
-                onClick={() => handleStatusChange(index)}
+                onClick={() => handleStatusChange(book.id, book.read)}
                 className={`ml-2 inline-block cursor-pointer rounded-full px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-md ${
                   book.read === "Przeczytana"
                     ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
@@ -110,7 +110,7 @@ const BookList: React.FC<Props> = ({
                     }`}
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    onClick={() => handleRatingChange(index, i + 1)}
+                    onClick={() => handleRatingChange(book.id, i + 1)}
                   >
                     <path d="M12 .587l3.668 7.431 8.232 1.194-5.95 5.787 1.404 8.193L12 18.896l-7.354 3.866 1.404-8.193-5.95-5.787 8.232-1.194z" />
                   </svg>
@@ -121,7 +121,7 @@ const BookList: React.FC<Props> = ({
             {/* Delete Button */}
             <button
               className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-2 py-1 font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:from-red-600 hover:to-red-700 hover:shadow-lg focus:ring-4 focus:ring-red-200 focus:outline-none active:scale-95"
-              onClick={() => handleBookDelete(index)}
+              onClick={() => handleBookDelete(book.id)}
             >
               <div className="flex items-center justify-center space-x-2">
                 <svg

@@ -1,55 +1,81 @@
 import { useEffect, useState } from "react";
 import type { Book } from "../types/Book";
 
-function getBooksFromLocalStorage() {
-  const savedBooks = localStorage.getItem("books");
-  return savedBooks ? JSON.parse(savedBooks) : [];
-}
+import {
+  getUserBooksData,
+  addBook,
+  deleteBook,
+  updateBook,
+} from "../services/booksService";
+import { useUser } from "../providers/UserContext";
 
 export const useBooks = () => {
-  const [books, setBooks] = useState<Book[]>(() => getBooksFromLocalStorage());
+  const [books, setBooks] = useState<Book[]>([]);
   const [stars, setStars] = useState<number>(0);
+  const userContext = useUser();
+  const userId = userContext.user?.uid;
 
   useEffect(() => {
-    // Save books to localStorage whenever they change
-    localStorage.setItem("books", JSON.stringify(books));
-  }, [books]);
+    const fetchBooks = async () => {
+      try {
+        if (userId) {
+          const userBooks = await getUserBooksData(userId);
+          console.log("Fetched user books:", userBooks);
+          setBooks(userBooks);
+        }
+      } catch (error) {
+        console.error("Failed to fetch books:", error);
+      }
+    };
+    fetchBooks();
+  }, [userContext.user?.uid]);
 
-  const handleBookDelete = (index: number) => {
-    setBooks(books.filter((_, i) => i !== index));
+  const handleBookDelete = (bookId: string) => {
+    const bookToDelete = books.find((book) => book.id === bookId);
+    if (bookToDelete) {
+      deleteBook(bookToDelete.id)
+        .then(() => {
+          const updatedBooks = books.filter((book) => book.id !== bookId);
+          setBooks(updatedBooks);
+        })
+        .catch((error) => {
+          console.error("Failed to delete book:", error);
+        });
+    }
   };
 
-  const handleRatingChange = (id: number, rating: number) => {
-    setBooks(
-      books.map((book, index) => (index === id ? { ...book, rating } : book)),
-    );
+  // TODO
+  const handleRatingChange = (id: string, rating: number) => {
+    const bookToUpdate = books.find((book) => book.id === id);
+    if (bookToUpdate) {
+      const updatedBooks = books.map((book) =>
+        book.id === id ? { ...book, rating } : book,
+      );
+      setBooks(updatedBooks);
+      updateBook(id, { rating });
+    }
   };
 
-  const handleStatusChange = (id: number) => {
+  const handleStatusChange = (bookId: string, newStatus: string) => {
     const statuses = ["W trakcie", "Przeczytana", "Porzucona"];
+    const nextStatus =
+      statuses[(statuses.indexOf(newStatus) + 1) % statuses.length];
 
-    setBooks(
-      books.map((book, index) =>
-        index === id
-          ? {
-              ...book,
-              read: statuses[
-                (statuses.indexOf(book.read) + 1) % statuses.length
-              ],
-            }
-          : book,
-      ),
+    const updatedBooks = books.map((book) =>
+      book.id === bookId ? { ...book, read: nextStatus } : book,
     );
+    setBooks(updatedBooks);
+    updateBook(bookId, { read: nextStatus });
   };
 
   const handleStarClick = (index: number) => {
-    setStars(index + 1);
+    setStars(index);
   };
 
-  const handleBookSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleBookSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = new FormData(e.target);
-    const newBook: Book = {
+    const newBook: Omit<Book, "id"> = {
       title: form.get("title") as string,
       author: form.get("author") as string,
       read: form.get("read") as string,
@@ -66,7 +92,12 @@ export const useBooks = () => {
       newBook.overallPages &&
       newBook.cover
     ) {
-      setBooks([...books, newBook]);
+      if (userId) {
+        const newBookId = await addBook({ ...newBook, userId: userId });
+        if (newBookId) {
+          setBooks([...books, { ...newBook, id: newBookId }]);
+        }
+      }
     }
     // e.target.reset();
   };
