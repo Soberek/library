@@ -1,10 +1,12 @@
 import Search from "./Search";
+import { useUser } from "../providers/UserContext";
 type Props = {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
 };
 
 const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
+  const authContext = useUser();
   return (
     <nav className="hidden border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl md:flex">
       <div className="container mx-auto flex items-center justify-between px-6 py-5">
@@ -17,17 +19,41 @@ const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
           </h1>
         </div>
         <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <div className="flex items-center space-x-3 rounded-full bg-white/10 px-3 py-1 backdrop-blur-md">
+          {authContext.user ? (
+            <>
+              <div className="flex items-center space-x-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white shadow-sm">
+                  <span className="font-semibold">
+                    {authContext.user.email?.charAt(0).toUpperCase() ?? "U"}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="max-w-[200px] truncate text-sm font-medium text-white">
+                    {authContext.user.email}
+                  </span>
+                  <span className="hidden text-xs text-white/70 sm:block">
+                    Witaj!
+                  </span>
+                </div>
+              </div>
 
-        <div className="flex items-center justify-center space-x-1">
-          {["Home", "Books", "About"].map((item) => (
+              {/* <button
+                onClick={() => authContext.logout?.()}
+                className="ml-3 rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white transition-colors duration-150 hover:bg-white/30 active:scale-95"
+                aria-label="Wyloguj"
+              >
+                Wyloguj
+              </button> */}
+            </>
+          ) : (
             <a
-              key={item}
-              href="#"
-              className="rounded-lg px-4 py-2 font-medium text-white/90 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:text-white hover:shadow-lg active:scale-95"
+              href="/login"
+              className="rounded-md bg-indigo-500/60 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform duration-150 hover:scale-105 hover:bg-indigo-500/80 active:scale-95"
             >
-              {item}
+              Zaloguj
             </a>
-          ))}
+          )}
         </div>
       </div>
     </nav>
