@@ -4,8 +4,6 @@ import { useUser } from "../providers/UserContext";
 const ProtectedRoute = () => {
   const auth = useUser();
 
-  console.log(auth?.user?.uid);
-
   if (auth.loading) {
     return (
       <div
