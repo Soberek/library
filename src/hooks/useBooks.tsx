@@ -20,7 +20,6 @@ export const useBooks = () => {
       try {
         if (userId) {
           const userBooks = await getUserBooksData(userId);
-          console.log("Fetched user books:", userBooks);
           setBooks(userBooks);
         }
       } catch (error) {

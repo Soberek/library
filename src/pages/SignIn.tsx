@@ -11,12 +11,8 @@ const SignIn: React.FC = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      console.log("User signed in:", userCredential.user);
+      await signInWithEmailAndPassword(auth, email, password);
+
       navigate("/", { replace: true });
     } catch (error) {
       console.error(
