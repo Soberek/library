@@ -9,6 +9,7 @@ type Props = {
   className?: string;
   max?: number;
   min?: number;
+  dataTestId?: string;
 };
 
 const Input: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const Input: React.FC<Props> = ({
   disabled = false,
   required = false,
   className = "",
+  dataTestId,
 }) => {
   return (
     <input
@@ -29,6 +31,7 @@ const Input: React.FC<Props> = ({
       disabled={disabled}
       required={required}
       className={`my-2 w-full rounded-lg border border-gray-300 bg-white p-2 focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 ${className}`}
+      data-testid={dataTestId}
     />
   );
 };

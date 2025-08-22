@@ -121,7 +121,10 @@ const BookForm: React.FC<Props> = ({
         </div>
 
         {/* Star SVG*/}
-        <div className="my-3 flex w-full justify-between">
+        <div
+          data-testid="star-rating"
+          className="my-3 flex w-full justify-between"
+        >
           {[...Array(10)].map((_, i) => (
             <svg
               key={i}
@@ -137,9 +140,15 @@ const BookForm: React.FC<Props> = ({
           ))}
         </div>
 
-        <Input type="text" name="cover" placeholder="Okładka (URL)" />
+        <Input
+          type="text"
+          name="cover"
+          placeholder="Okładka (URL)"
+          dataTestId="cover-input"
+        />
         <button
           type="submit"
+          name="submit"
           className="mt-2 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
         >
           Dodaj książkę
