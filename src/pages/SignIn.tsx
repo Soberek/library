@@ -1,26 +1,39 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
+import { useUser } from "../providers/UserContext";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
       navigate("/", { replace: true });
-    } catch (error) {
-      console.error(
-        "Error signing in:",
-        error instanceof Error ? error.message : "Unknown error",
-      );
+    } catch (error: any) {
+      const message = error?.message || "Wystąpił błąd podczas logowania.";
+      setErrorMessage(message);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error signing in:", message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
+  const userContext = useUser();
+
+  if (userContext.user) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div
@@ -86,23 +99,40 @@ const SignIn: React.FC = () => {
         />
         <button
           type="submit"
+          disabled={loading}
           style={{
             padding: "0.75rem 1rem",
             borderRadius: "8px",
             border: "none",
-            background: "linear-gradient(90deg, #5f2c82 0%, #49a09d 100%)",
+            background: loading
+              ? "linear-gradient(90deg, #bdbdbd 0%, #e0e0e0 100%)"
+              : "linear-gradient(90deg, #5f2c82 0%, #49a09d 100%)",
             color: "#fff",
             fontWeight: 600,
             fontSize: "1rem",
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
             boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
             transition: "background 0.2s",
           }}
         >
-          Zaloguj
+          {loading ? "Logowanie..." : "Zaloguj"}
         </button>
-
-        {/* If no account */}
+        {errorMessage && (
+          <div
+            style={{
+              color: "#d32f2f",
+              background: "#fdecea",
+              borderRadius: "8px",
+              padding: "0.75rem 1rem",
+              marginTop: "-1rem",
+              fontSize: "0.95rem",
+              textAlign: "center",
+              border: "1px solid #f8bbbc",
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
         <p
           style={{
             margin: 0,
@@ -112,8 +142,8 @@ const SignIn: React.FC = () => {
           }}
         >
           Nie masz konta?{" "}
-          <a
-            href="/sign-up"
+          <Link
+            to="/sign-up"
             style={{
               color: "#5f2c82",
               textDecoration: "none",
@@ -121,7 +151,7 @@ const SignIn: React.FC = () => {
             }}
           >
             Zarejestruj się
-          </a>
+          </Link>
         </p>
       </form>
     </div>

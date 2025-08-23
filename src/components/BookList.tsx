@@ -129,7 +129,7 @@ const BookList: React.FC<Props> = ({
                   onClick={() => handleStatusChange(book.id, book.read)}
                 />
               </Box>
-              <Box mb={2}>
+              <Box mb={1}>
                 <Box display="flex" justifyContent="space-between" mb={0.5}>
                   <Typography variant="body2" color="text.secondary">
                     Postęp
@@ -148,6 +148,10 @@ const BookList: React.FC<Props> = ({
                     height: 8,
                     borderRadius: 5,
                     mb: 0.5,
+                    background: "redwhite",
+                    "& .MuiLinearProgress-bar": {
+                      background: "linear-gradient(to right, #3f51b5, #f50057)",
+                    },
                   }}
                   color="primary"
                 />
@@ -158,7 +162,7 @@ const BookList: React.FC<Props> = ({
                   % ukończone
                 </Typography>
               </Box>
-              <Box mb={2}>
+              <Box mb={1}>
                 <Box display="flex" justifyContent="space-between" mb={0.5}>
                   <Typography variant="body2" color="text.secondary">
                     Ocena
@@ -189,7 +193,6 @@ const BookList: React.FC<Props> = ({
                 onClick={() => handleBookDelete(book.id)}
                 sx={{
                   fontWeight: 600,
-                  mt: 1,
                   textTransform: "none",
                   boxShadow: 2,
                   "&:hover": { boxShadow: 4 },
