@@ -69,6 +69,7 @@ export const useBooks = () => {
   };
 
   const handleBookSubmit = async (book: Book) => {
+    const createdAt = new Date().toISOString();
     const newBook: Omit<Book, "id"> = {
       title: book.title,
       author: book.author,
@@ -87,9 +88,16 @@ export const useBooks = () => {
       newBook.cover
     ) {
       if (userId) {
-        const newBookId = await addBook({ ...newBook, userId: userId });
+        const newBookId = await addBook({
+          ...newBook,
+          userId: userId,
+          createdAt: createdAt,
+        });
         if (newBookId) {
-          setBooks([{ ...newBook, id: newBookId }, ...books]);
+          setBooks([
+            { ...newBook, id: newBookId, createdAt: createdAt },
+            ...books,
+          ]);
         }
       }
     }

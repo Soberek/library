@@ -23,6 +23,19 @@ const theme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          background: "rgba(255, 255, 255, 1)",
+          borderRadius: 8,
+          "& .MuiInputBase-input": {
+            color: "black",
+            background: "rgba(255, 255, 255, 1)",
+            borderRadius: 8,
+          },
+        },
+      },
+    },
   },
 });
 

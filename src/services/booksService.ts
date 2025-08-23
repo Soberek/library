@@ -43,7 +43,10 @@ const getAllBooksData = async (): Promise<BookWithId[]> => {
   }
 };
 
-type BookToAdd = Omit<Book, "id" | "userId"> & { userId: string };
+type BookToAdd = Omit<Book, "id" | "userId"> & {
+  userId: string;
+  createdAt: string;
+};
 
 const addBook = async (book: BookToAdd): Promise<string> => {
   try {
