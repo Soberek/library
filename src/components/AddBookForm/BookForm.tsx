@@ -1,39 +1,11 @@
 import Input from "../Input";
+import { GENRES } from "../../constants/genres";
 type Props = {
   handleBookSubmit: (e: React.ChangeEvent<HTMLFormElement>) => void;
   handleStarClick: (index: number) => void;
   stars: number;
   handleFormVisibility: () => void;
   isFormVisible: boolean;
-};
-
-const bookGenres: { [key: string]: string } = {
-  powiesc_historyczna: "powieść historyczna",
-  powiesc_przygodowa: "powieść przygodowa",
-  powiesc_kryminalna: "powieść kryminalna",
-  powiesc_fantastyczno_naukowa: "powieść fantastyczno-naukowa",
-  powiesc_fantasy: "powieść fantasy",
-  romans: "romans",
-  science_fiction: "science fiction",
-  horror: "horror",
-  kryminal: "kryminał",
-  thriller: "thriller",
-  hymn: "hymn",
-  oda: "oda",
-  piesn: "pieśń",
-  psalm: "psalm",
-  elegia: "elegia",
-  tren: "tren",
-  fraszka: "fraszka",
-  sonet: "sonet",
-  komedia: "komedia",
-  tragedia: "tragedia",
-  tragedikomedia: "tragedikomedia",
-  opera: "opera",
-  esej: "esej",
-  satyra: "satyra",
-  listy: "listy",
-  dzienniki: "dzienniki",
 };
 
 const BookForm: React.FC<Props> = ({
@@ -94,11 +66,13 @@ const BookForm: React.FC<Props> = ({
           <option value="" disabled>
             Wybierz gatunek
           </option>
-          {Object.entries(bookGenres).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
+          {Object.entries(GENRES)
+            .sort()
+            .map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
         </select>
 
         <div className="flex w-full items-center justify-between">
