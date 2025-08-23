@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { TextField } from "@mui/material";
-type Props = {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-};
+import { useSearch } from "../providers/SearchProvider";
+type Props = {};
 
-const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
+const Navbar: React.FC<Props> = () => {
   const authContext = useUser();
+  const searchContext = useSearch();
 
   const navigate = useNavigate();
   const handleLogout = async () => {
@@ -33,8 +32,8 @@ const Navbar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
       </div>
       <div className="mx-8 w-72">
         <TextField
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchContext?.searchTerm}
+          onChange={(e) => searchContext?.setSearchTerm(e.target.value)}
           placeholder="Szukaj książek..."
           variant="outlined"
           size="small"
