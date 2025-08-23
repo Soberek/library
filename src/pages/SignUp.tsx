@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { auth } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -12,12 +12,22 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
+import { useForm } from "react-hook-form";
+
+type FormData = {
+  email: string;
+  password: string;
+};
 
 const SignUp: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    // setError,
+    clearErrors,
+  } = useForm<FormData>();
+  const [error, setLocalError] = React.useState<string | null>(null);
   const authContext = useUser();
   const navigate = useNavigate();
 
@@ -25,27 +35,24 @@ const SignUp: React.FC = () => {
     return <Navigate to="/" />;
   }
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const onSubmit = async (data: FormData) => {
+    clearErrors();
+    setLocalError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password,
+        data.email,
+        data.password,
       );
       if (userCredential.user) {
         navigate("/sign-in");
       }
-    } catch (error) {
-      setError(
+    } catch (error: any) {
+      setLocalError(
         error instanceof Error
           ? `Wystąpił błąd: ${error.message}`
           : "Wystąpił nieznany błąd",
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -85,32 +92,46 @@ const SignUp: React.FC = () => {
           </Alert>
         )}
         <form
-          onSubmit={handleSignUp}
+          onSubmit={handleSubmit(onSubmit)}
           style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
           <TextField
             type="email"
             label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             variant="outlined"
             fullWidth
             required
+            {...register("email", {
+              required: "Email jest wymagany",
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Nieprawidłowy format email",
+              },
+            })}
+            error={!!errors.email}
+            helperText={errors.email?.message}
           />
           <TextField
             type="password"
             label="Hasło"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             variant="outlined"
             fullWidth
             required
+            {...register("password", {
+              required: "Hasło jest wymagane",
+              minLength: {
+                value: 6,
+                message: "Hasło musi mieć co najmniej 6 znaków",
+              },
+            })}
+            error={!!errors.password}
+            helperText={errors.password?.message}
           />
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            disabled={loading}
+            disabled={isSubmitting}
             fullWidth
             sx={{
               fontWeight: 600,
@@ -118,9 +139,9 @@ const SignUp: React.FC = () => {
               py: 1.5,
               borderRadius: 2,
             }}
-            startIcon={loading ? <CircularProgress size={20} /> : null}
+            startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
           >
-            {loading ? "Rejestruję..." : "Zarejestruj"}
+            {isSubmitting ? "Rejestruję..." : "Zarejestruj"}
           </Button>
         </form>
         <Typography
