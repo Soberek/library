@@ -33,7 +33,7 @@ export const GENRES: { [key: string]: string } = {
   psalm: "psalm",
   piesn: "pieśń",
   fraszka: "fraszka",
-  hymn: "hymn",
+  //   hymn: "hymn",
   oda: "oda",
   elegia: "elegia",
   sielanka: "sielanka",
