@@ -13,20 +13,28 @@ import {
   Link,
   CircularProgress,
 } from "@mui/material";
+import { useForm } from "react-hook-form";
+
+type FormData = {
+  email: string;
+  password: string;
+};
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     setErrorMessage(null);
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
       navigate("/", { replace: true });
     } catch (error: any) {
       const message = "Wystąpił błąd podczas logowania.";
@@ -66,7 +74,7 @@ const SignIn: React.FC = () => {
           gap: 3,
         }}
         component="form"
-        onSubmit={handleSignIn}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <Typography
           variant="h5"
@@ -80,20 +88,36 @@ const SignIn: React.FC = () => {
         <TextField
           type="email"
           label="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           variant="outlined"
+          required
           fullWidth
           autoComplete="email"
+          {...register("email", {
+            required: "Email jest wymagany",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Nieprawidłowy format email",
+            },
+          })}
+          error={!!errors.email}
+          helperText={errors.email?.message}
         />
         <TextField
           type="password"
           label="Hasło"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          required
           variant="outlined"
           fullWidth
           autoComplete="current-password"
+          {...register("password", {
+            required: "Hasło jest wymagane",
+            minLength: {
+              value: 6,
+              message: "Hasło musi mieć co najmniej 6 znaków",
+            },
+          })}
+          error={!!errors.password}
+          helperText={errors.password?.message}
         />
         <Button
           type="submit"
