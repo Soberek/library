@@ -11,7 +11,6 @@ import { useUser } from "../providers/UserContext";
 
 export const useBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
-  const [stars, setStars] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const userContext = useUser();
   const userId = userContext.user?.uid;
@@ -69,22 +68,16 @@ export const useBooks = () => {
     updateBook(bookId, { read: nextStatus });
   };
 
-  const handleStarClick = (index: number) => {
-    setStars(index);
-  };
-
-  const handleBookSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = new FormData(e.target);
+  const handleBookSubmit = async (book: Book) => {
     const newBook: Omit<Book, "id"> = {
-      title: form.get("title") as string,
-      author: form.get("author") as string,
-      read: form.get("read") as string,
-      overallPages: Number(form.get("pages")),
-      readPages: Number(form.get("readPages")),
-      cover: form.get("cover") as string,
-      genre: form.get("genre") as string,
-      rating: stars,
+      title: book.title,
+      author: book.author,
+      read: book.read,
+      overallPages: book.overallPages,
+      readPages: book.readPages,
+      cover: book.cover,
+      genre: book.genre,
+      rating: book.rating,
     };
     if (
       newBook.title &&
@@ -96,7 +89,7 @@ export const useBooks = () => {
       if (userId) {
         const newBookId = await addBook({ ...newBook, userId: userId });
         if (newBookId) {
-          setBooks([...books, { ...newBook, id: newBookId }]);
+          setBooks([{ ...newBook, id: newBookId }, ...books]);
         }
       }
     }
@@ -105,12 +98,10 @@ export const useBooks = () => {
 
   return {
     books,
-    stars,
     loading,
     handleBookDelete,
     handleRatingChange,
     handleStatusChange,
-    handleStarClick,
     handleBookSubmit,
   };
 };

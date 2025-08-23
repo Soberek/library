@@ -1,134 +1,245 @@
-import Input from "../Input";
+import React from "react";
 import { GENRES } from "../../constants/genres";
+import type { Book } from "../../types/Book";
+import { useForm, Controller } from "react-hook-form";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TextField,
+  MenuItem,
+  Autocomplete,
+  Divider,
+  Rating,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
+// type FormValues = {
+//   title: string;
+//   author: string;
+//   read: string;
+//   genre: string;
+//   readPages: number;
+//   pages: number;
+//   cover: string;
+//   stars: number;
+// };
+
 type Props = {
-  handleBookSubmit: (e: React.ChangeEvent<HTMLFormElement>) => void;
-  handleStarClick: (index: number) => void;
-  stars: number;
+  handleBookSubmit: (data: Book) => void;
   handleFormVisibility: () => void;
   isFormVisible: boolean;
 };
 
+const genreOptions = Object.entries(GENRES)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([value, label]) => ({
+    value,
+    label,
+  }));
+
 const BookForm: React.FC<Props> = ({
   handleBookSubmit,
-  handleStarClick,
-  stars,
   handleFormVisibility,
   isFormVisible,
 }) => {
+  const { control, handleSubmit, reset } = useForm<Book>({
+    defaultValues: {
+      title: "",
+      author: "",
+      read: "",
+      genre: "",
+      readPages: 0,
+      overallPages: 1,
+      cover: "",
+      rating: 0,
+    },
+  });
+
+  const onSubmit = (data: Book) => {
+    console.log(data);
+    handleBookSubmit(data);
+    reset();
+  };
+
   return (
-    <>
-      {/* full screen gray background */}
-      <div
-        className="fixed inset-0 z-10 bg-gray-300 opacity-40"
-        onClick={handleFormVisibility}
-      />
-
-      <form
-        className={`fixed top-1/2 left-1/2 z-20 flex w-full max-w-[550px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-white px-4 py-4 shadow-lg ${isFormVisible ? "fade-in" : "fade-out"}`}
-        onSubmit={handleBookSubmit}
+    <Dialog
+      open={isFormVisible}
+      onClose={handleFormVisibility}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Dodaj nową książkę
-          </h1>
-          <button
-            type="button"
-            className="cursor-pointer rounded-full px-4 py-2 text-3xl font-semibold text-black shadow transition-colors duration-150 hover:bg-red-600 hover:text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
-            onClick={handleFormVisibility}
-            aria-label="Zamknij formularz"
+        Dodaj nową książkę
+        <IconButton
+          onClick={handleFormVisibility}
+          aria-label="Zamknij formularz"
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
+          <Controller
+            name="title"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Tytuł"
+                variant="outlined"
+                fullWidth
+              />
+            )}
+          />
+          <Controller
+            name="author"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Autor"
+                variant="outlined"
+                fullWidth
+              />
+            )}
+          />
+          <Controller
+            name="read"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                label="Status"
+                variant="outlined"
+                fullWidth
+              >
+                <MenuItem value="" disabled>
+                  Wybierz status
+                </MenuItem>
+                <MenuItem value="W trakcie">W trakcie</MenuItem>
+                <MenuItem value="Przeczytana">Przeczytana</MenuItem>
+                <MenuItem value="Porzucona">Porzucona</MenuItem>
+              </TextField>
+            )}
+          />
+          <Controller
+            name="genre"
+            control={control}
+            render={({ field }) => (
+              <Autocomplete
+                options={genreOptions}
+                getOptionLabel={(option) => option.label}
+                onChange={(_, value) => field.onChange(value?.value)}
+                value={
+                  genreOptions.find((option) => option.value === field.value) ||
+                  null
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Gatunek"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
+            )}
+          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Controller
+              name="readPages"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="number"
+                  label="Przeczytane strony"
+                  inputProps={{ min: 0, max: 5000 }}
+                  variant="outlined"
+                  fullWidth
+                />
+              )}
+            />
+            <Divider orientation="vertical" flexItem />
+            <Controller
+              name="overallPages"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="number"
+                  label="Liczba stron"
+                  inputProps={{ min: 1, max: 5000 }}
+                  variant="outlined"
+                  fullWidth
+                />
+              )}
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyItems: "center",
+              gap: 2,
+              width: "100%",
+            }}
           >
-            &#10005;
-          </button>
-        </div>
-        <Input type="text" name="title" placeholder="Tytuł" />
-        <Input type="text" name="author" placeholder="Autor" />
-        {/* How to style select?? */}
-
-        <select
-          name="read"
-          className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
-        >
-          <option value="" disabled hidden>
-            Wybierz status
-          </option>
-          <option value="W trakcie">W trakcie</option>
-          <option value="Przeczytana">Przeczytana</option>
-          <option value="Porzucona">Porzucona</option>
-        </select>
-
-        {/* genre */}
-
-        <select
-          name="genre"
-          className="mb-2 block w-full appearance-none rounded-md border border-gray-300 bg-white px-2 py-2 text-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none"
-          aria-placeholder="Wybierz gatunek"
-        >
-          <option value="" disabled>
-            Wybierz gatunek
-          </option>
-          {Object.entries(GENRES)
-            .sort()
-            .map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-        </select>
-
-        <div className="flex w-full items-center justify-between">
-          <Input
-            type="number"
-            name="readPages"
-            placeholder="Przeczytane strony"
-            max={5000}
-            min={0}
+            <Controller
+              name="rating"
+              control={control}
+              render={({ field }) => (
+                <Rating
+                  {...field}
+                  size="large"
+                  name="star-rating"
+                  max={10}
+                  value={field.value}
+                  onChange={(_, value) => field.onChange(value ?? 0)}
+                />
+              )}
+            />
+          </Box>
+          <Controller
+            name="cover"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Okładka (URL)"
+                variant="outlined"
+                fullWidth
+                inputProps={{ "data-testid": "cover-input" }}
+              />
+            )}
           />
-          <div className="mx-2 my-2 h-full w-px bg-black" />
-          <Input
-            type="number"
-            name="pages"
-            placeholder="Liczba stron"
-            max={5000}
-            min={1}
-          />
-          {/* Divider */}
-        </div>
-
-        {/* Star SVG*/}
-        <div
-          data-testid="star-rating"
-          className="my-3 flex w-full justify-between"
-        >
-          {[...Array(10)].map((_, i) => (
-            <svg
-              key={i}
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-8 w-8 cursor-pointer fill-current ${
-                i < stars ? "text-yellow-500" : "text-gray-300"
-              }`}
-              viewBox="0 0 24 24"
-              onClick={() => handleStarClick(i)}
-            >
-              <path d="M12 .587l3.668 7.431 8.232 1.194-5.95 5.787 1.404 8.193L12 18.896l-7.354 3.866 1.404-8.193-5.95-5.787 8.232-1.194z" />
-            </svg>
-          ))}
-        </div>
-
-        <Input
-          type="text"
-          name="cover"
-          placeholder="Okładka (URL)"
-          dataTestId="cover-input"
-        />
-        <button
-          type="submit"
-          name="submit"
-          className="mt-2 cursor-pointer rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2 text-lg font-semibold text-white shadow-md transition-transform duration-150 hover:scale-105 hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-        >
-          Dodaj książkę
-        </button>
-      </form>
-    </>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2, fontWeight: "bold" }}
+            fullWidth
+          >
+            Dodaj książkę
+          </Button>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 };
 
