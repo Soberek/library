@@ -8,4 +8,5 @@ export interface Book {
   cover: string;
   genre: string;
   rating: number;
+  createdAt?: string;
 }

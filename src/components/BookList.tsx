@@ -26,9 +26,15 @@ const BookList: React.FC<Props> = ({
     );
   }
 
+  const sortedBooks = [...books].sort((a, b) => {
+    const dateA = new Date(a.createdAt ?? 0).getTime();
+    const dateB = new Date(b.createdAt ?? 0).getTime();
+    return dateB - dateA;
+  });
+
   return (
     <div className="grid grid-cols-1 gap-6 p-4 pb-8 md:grid-cols-2 lg:grid-cols-5">
-      {books.map((book) => (
+      {sortedBooks.map((book) => (
         <div
           key={book.id}
           className="group relative transform overflow-hidden rounded-xl border border-gray-100 bg-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
