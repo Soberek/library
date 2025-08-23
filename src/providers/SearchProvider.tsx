@@ -12,8 +12,6 @@ export const SearchProvider: React.FC<React.PropsWithChildren<{}>> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  console.log(searchTerm);
-
   return (
     <SearchContext.Provider value={{ searchTerm, setSearchTerm }}>
       {children}
