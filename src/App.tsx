@@ -12,12 +12,10 @@ function App() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const {
     books,
-    stars,
     loading,
     handleBookDelete,
     handleRatingChange,
     handleStatusChange,
-    handleStarClick,
     handleBookSubmit,
   } = useBooks();
 
@@ -70,8 +68,6 @@ function App() {
           <BookForm
             handleFormVisibility={handleFormVisibility}
             handleBookSubmit={handleBookSubmit}
-            handleStarClick={handleStarClick}
-            stars={stars}
             isFormVisible={isFormVisible}
           />
         )}
