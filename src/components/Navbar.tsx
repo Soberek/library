@@ -21,7 +21,7 @@ const Navbar: React.FC<Props> = () => {
   };
 
   return (
-    <nav className="hidden w-full border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-4 py-4 shadow-xl md:flex">
+    <nav className="hidden w-full justify-between border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-4 py-4 shadow-xl md:flex">
       <div className="flex items-center space-x-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
           <span className="text-lg font-bold text-white">📚</span>
