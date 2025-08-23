@@ -16,8 +16,6 @@ const Books = () => {
 
   const searchContext = useSearch();
 
-  console.log("books context -> " + searchContext);
-
   const [isFormVisible, setIsFormVisible] = useState(false);
   const handleFormVisibility = () => {
     setIsFormVisible(!isFormVisible);
