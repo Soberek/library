@@ -10,6 +10,9 @@ import NotFound from "./pages/NotFound.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import SignIn from "./pages/SignIn.tsx";
 
+import { ThemeProvider } from "@mui/material";
+import theme from "./providers/ThemeProvider.tsx";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -38,7 +41,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <UserProvider>
-      <RouterProvider router={router} />
+      <ThemeProvider theme={theme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </UserProvider>
   </StrictMode>,
 );
