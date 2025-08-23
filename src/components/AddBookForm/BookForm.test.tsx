@@ -16,7 +16,6 @@ import BookForm from "./BookForm";
 // This will execute all test files (e.g., *.test.tsx) using Jest.
 
 const mockOnSubmit = jest.fn();
-const mockHandleStarClick = jest.fn();
 const mockHandleFormVisibility = jest.fn();
 
 describe("BookForm", () => {
@@ -24,8 +23,6 @@ describe("BookForm", () => {
     const { container } = render(
       <BookForm
         handleBookSubmit={mockOnSubmit}
-        handleStarClick={mockHandleStarClick}
-        stars={0}
         handleFormVisibility={mockHandleFormVisibility}
         isFormVisible={true}
       />,
