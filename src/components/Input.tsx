@@ -2,7 +2,9 @@ type Props = {
   type?: "text" | "number" | "email" | "password";
   value?: string;
   name?: string;
-  onChange?: (value: string) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -17,6 +19,8 @@ const Input: React.FC<Props> = ({
   value,
   name,
   onChange,
+  onBlur,
+  onFocus,
   placeholder,
   disabled = false,
   required = false,
@@ -28,7 +32,9 @@ const Input: React.FC<Props> = ({
       type={type}
       value={value}
       name={name}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={onChange}
+      onBlur={onBlur}
+      onFocus={onFocus}
       placeholder={placeholder}
       disabled={disabled}
       required={required}
