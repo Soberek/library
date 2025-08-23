@@ -99,6 +99,7 @@ const BookForm: React.FC<Props> = ({
             render={({ field }) => (
               <TextField
                 {...field}
+                required
                 label="Tytuł"
                 variant="outlined"
                 fullWidth
@@ -112,6 +113,7 @@ const BookForm: React.FC<Props> = ({
               <TextField
                 {...field}
                 label="Autor"
+                required
                 variant="outlined"
                 fullWidth
               />
@@ -124,6 +126,7 @@ const BookForm: React.FC<Props> = ({
               <TextField
                 {...field}
                 select
+                required
                 label="Status"
                 variant="outlined"
                 fullWidth
@@ -152,6 +155,7 @@ const BookForm: React.FC<Props> = ({
                 renderInput={(params) => (
                   <TextField
                     {...params}
+                    required
                     label="Gatunek"
                     variant="outlined"
                     fullWidth
