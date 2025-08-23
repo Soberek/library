@@ -1,28 +1,46 @@
 import React from "react";
-import { useNavigate, Link, Navigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink, Navigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { useUser } from "../providers/UserContext";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  Alert,
+  Link,
+  CircularProgress,
+} from "@mui/material";
+import { useForm } from "react-hook-form";
+
+type FormData = {
+  email: string;
+  password: string;
+};
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     setErrorMessage(null);
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
       navigate("/", { replace: true });
     } catch (error: any) {
-      const message = error?.message || "Wystąpił błąd podczas logowania.";
+      const message = "Wystąpił błąd podczas logowania.";
       setErrorMessage(message);
       if (process.env.NODE_ENV === "development") {
-        console.error("Error signing in:", message);
+        console.error("Error signing in:", error?.message);
       }
     } finally {
       setLoading(false);
@@ -36,125 +54,100 @@ const SignIn: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{
         background: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)",
       }}
     >
-      <form
-        onSubmit={handleSignIn}
-        style={{
-          background: "#fff",
-          padding: "2rem 2.5rem",
-          borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(44, 62, 80, 0.15)",
+      <Paper
+        elevation={6}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          minWidth: 320,
           display: "flex",
           flexDirection: "column",
-          gap: "1.5rem",
-          minWidth: "320px",
+          gap: 3,
         }}
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
       >
-        <h2
-          style={{
-            margin: 0,
-            color: "#5f2c82",
-            textAlign: "center",
-            fontWeight: 700,
-            letterSpacing: "1px",
-          }}
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          color="primary"
+          textAlign="center"
+          gutterBottom
         >
           Zaloguj się
-        </h2>
-        <input
+        </Typography>
+        <TextField
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            fontSize: "1rem",
-            outline: "none",
-            transition: "border-color 0.2s",
-          }}
+          label="Email"
+          variant="outlined"
+          required
+          fullWidth
+          autoComplete="email"
+          {...register("email", {
+            required: "Email jest wymagany",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Nieprawidłowy format email",
+            },
+          })}
+          error={!!errors.email}
+          helperText={errors.email?.message}
         />
-        <input
+        <TextField
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Hasło"
-          style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            fontSize: "1rem",
-            outline: "none",
-            transition: "border-color 0.2s",
-          }}
+          label="Hasło"
+          required
+          variant="outlined"
+          fullWidth
+          autoComplete="current-password"
+          {...register("password", {
+            required: "Hasło jest wymagane",
+            minLength: {
+              value: 6,
+              message: "Hasło musi mieć co najmniej 6 znaków",
+            },
+          })}
+          error={!!errors.password}
+          helperText={errors.password?.message}
         />
-        <button
+        <Button
           type="submit"
+          variant="contained"
+          color="primary"
           disabled={loading}
-          style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "8px",
-            border: "none",
-            background: loading
-              ? "linear-gradient(90deg, #bdbdbd 0%, #e0e0e0 100%)"
-              : "linear-gradient(90deg, #5f2c82 0%, #49a09d 100%)",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: "1rem",
-            cursor: loading ? "not-allowed" : "pointer",
-            boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
-            transition: "background 0.2s",
-          }}
+          fullWidth
+          sx={{ py: 1.5, fontWeight: 600 }}
         >
-          {loading ? "Logowanie..." : "Zaloguj"}
-        </button>
+          {loading ? <CircularProgress size={26} color="info" /> : "Zaloguj"}
+        </Button>
         {errorMessage && (
-          <div
-            style={{
-              color: "#d32f2f",
-              background: "#fdecea",
-              borderRadius: "8px",
-              padding: "0.75rem 1rem",
-              marginTop: "-1rem",
-              fontSize: "0.95rem",
-              textAlign: "center",
-              border: "1px solid #f8bbbc",
-            }}
-          >
+          <Alert severity="error" sx={{ mt: -2 }}>
             {errorMessage}
-          </div>
+          </Alert>
         )}
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.875rem",
-            textAlign: "center",
-            color: "#666",
-          }}
-        >
+        <Typography variant="body2" textAlign="center" color="text.secondary">
           Nie masz konta?{" "}
           <Link
+            component={RouterLink}
             to="/sign-up"
-            style={{
-              color: "#5f2c82",
-              textDecoration: "none",
-              fontWeight: 500,
-            }}
+            underline="none"
+            color="primary"
+            fontWeight={500}
           >
             Zarejestruj się
           </Link>
-        </p>
-      </form>
-    </div>
+        </Typography>
+      </Paper>
+    </Box>
   );
 };
 

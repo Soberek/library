@@ -1,119 +1,173 @@
-import React, { useState } from "react";
+import React from "react";
 import { auth } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useUser } from "../providers/UserContext";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import { useForm } from "react-hook-form";
+
+type FormData = {
+  email: string;
+  password: string;
+};
 
 const SignUp: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    // setError,
+    clearErrors,
+  } = useForm<FormData>();
+  const [error, setLocalError] = React.useState<string | null>(null);
   const authContext = useUser();
+  const navigate = useNavigate();
 
   if (authContext.user?.uid) {
     return <Navigate to="/" />;
   }
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
+    clearErrors();
+    setLocalError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password,
+        data.email,
+        data.password,
       );
       if (userCredential.user) {
-        console.log("User created:", userCredential.user);
-        return <Navigate to="/sign-in" />;
+        navigate("/sign-in");
       }
-    } catch (error) {
-      console.error(
-        "Error signing up:",
-        error instanceof Error ? error.message : "Unknown error",
+    } catch (error: any) {
+      setLocalError(
+        error instanceof Error
+          ? `Wystąpił błąd: ${error.message}`
+          : "Wystąpił nieznany błąd",
       );
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{
         background: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)",
       }}
     >
-      <form
-        onSubmit={handleSignUp}
-        style={{
-          background: "#fff",
-          padding: "2rem 2.5rem",
-          borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(44, 62, 80, 0.15)",
+      <Paper
+        elevation={6}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          minWidth: 320,
           display: "flex",
           flexDirection: "column",
-          gap: "1.5rem",
-          minWidth: "320px",
+          gap: 3,
         }}
       >
-        <h2
-          style={{
-            margin: 0,
-            color: "#5f2c82",
-            textAlign: "center",
-            fontWeight: 700,
-            letterSpacing: "1px",
-          }}
+        <Typography
+          variant="h5"
+          align="center"
+          fontWeight={700}
+          color="primary"
+          gutterBottom
         >
           Zarejestruj się
-        </h2>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            fontSize: "1rem",
-            outline: "none",
-            transition: "border-color 0.2s",
-          }}
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Hasło"
-          style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            fontSize: "1rem",
-            outline: "none",
-            transition: "border-color 0.2s",
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: "0.75rem 1rem",
-            borderRadius: "8px",
-            border: "none",
-            background: "linear-gradient(90deg, #5f2c82 0%, #49a09d 100%)",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: "1rem",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(44, 62, 80, 0.08)",
-            transition: "background 0.2s",
+        </Typography>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        >
+          <TextField
+            type="email"
+            label="Email"
+            variant="outlined"
+            fullWidth
+            required
+            {...register("email", {
+              required: "Email jest wymagany",
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Nieprawidłowy format email",
+              },
+            })}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+          <TextField
+            type="password"
+            label="Hasło"
+            variant="outlined"
+            fullWidth
+            required
+            {...register("password", {
+              required: "Hasło jest wymagane",
+              minLength: {
+                value: 6,
+                message: "Hasło musi mieć co najmniej 6 znaków",
+              },
+            })}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={isSubmitting}
+            fullWidth
+            sx={{
+              fontWeight: 600,
+              fontSize: "1rem",
+              py: 1.5,
+              borderRadius: 2,
+            }}
+            startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
+          >
+            {isSubmitting ? "Rejestruję..." : "Zarejestruj"}
+          </Button>
+        </form>
+        <Typography
+          align="center"
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            fontWeight: 500,
+            letterSpacing: 0.2,
           }}
         >
-          Zarejestruj
-        </button>
-      </form>
-    </div>
+          Masz już konto?{" "}
+          <Link
+            to="/sign-in"
+            replace
+            style={{
+              color: "#7b1fa2",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            Zaloguj się
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
   );
 };
 
