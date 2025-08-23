@@ -148,6 +148,10 @@ const BookList: React.FC<Props> = ({
                     height: 8,
                     borderRadius: 5,
                     mb: 0.5,
+                    background: "redwhite",
+                    "& .MuiLinearProgress-bar": {
+                      background: "linear-gradient(to right, #3f51b5, #f50057)",
+                    },
                   }}
                   color="primary"
                 />
