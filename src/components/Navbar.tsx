@@ -1,81 +1,123 @@
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  TextField,
+  Button,
+  Avatar,
+  Box,
+} from "@mui/material";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { useUser } from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
-import { TextField } from "@mui/material";
 import { useSearch } from "../hooks/useSearch";
 
 const Navbar: React.FC = () => {
   const authContext = useUser();
   const searchContext = useSearch();
-
   const navigate = useNavigate();
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/sign-in", { replace: true }); // Przekierowanie po wylogowaniu
+      navigate("/sign-in", { replace: true });
     } catch (error) {
-      console.error("Błąd wylogowania:", error);
+      console.error("Logout error:", error);
     }
   };
 
   return (
-    <nav className="hidden w-full justify-between border-b border-white/10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-4 py-4 shadow-xl md:flex">
-      <div className="flex items-center space-x-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-          <span className="text-lg font-bold text-white">📚</span>
-        </div>
-        <h1 className="text-2xl font-bold tracking-wide text-white drop-shadow-sm">
-          Library App
-        </h1>
-      </div>
-      <div className="mx-8 w-72">
-        <TextField
-          value={searchContext?.searchTerm}
-          onChange={(e) => searchContext?.setSearchTerm(e.target.value)}
-          placeholder="Szukaj książek..."
-          variant="outlined"
-          size="small"
-          fullWidth
-        />
-      </div>
-      <div className="flex items-center space-x-3 rounded-full bg-white/10 px-3 py-1 backdrop-blur-md">
-        {authContext.user ? (
-          <>
-            <div className="flex items-center space-x-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white shadow-sm">
-                <span className="font-semibold">
-                  {authContext.user.email?.charAt(0).toUpperCase() ?? "U"}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="max-w-[200px] truncate text-sm font-medium text-white">
-                  {authContext.user.email}
-                </span>
-                <span className="hidden text-xs text-white/70 sm:block">
-                  Witaj!
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleLogout()}
-              className="ml-3 rounded-md bg-white/20 px-3 py-1 text-sm font-semibold text-white transition-colors duration-150 hover:bg-white/30 active:scale-95"
-              aria-label="Wyloguj"
-            >
-              Wyloguj
-            </button>
-          </>
-        ) : (
-          <a
-            href="/login"
-            className="rounded-md bg-indigo-500/60 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform duration-150 hover:scale-105 hover:bg-indigo-500/80 active:scale-95"
+    <AppBar
+      position="static"
+      sx={{
+        background: "linear-gradient(to right, #4f46e5, #8b5cf6, #ec4899)",
+        display: { xs: "none", md: "block" },
+      }}
+    >
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Box display="flex" alignItems="center" gap={2}>
+          <IconButton
+            edge="start"
+            color="inherit"
+            sx={{ bgcolor: "white", mr: 1 }}
           >
-            Zaloguj
-          </a>
-        )}
-      </div>
-    </nav>
+            <MenuBookIcon sx={{ color: "#8b5cf6" }} />
+          </IconButton>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{ textShadow: "0 1px 2px rgba(0,0,0,0.2)" }}
+          >
+            Library App
+          </Typography>
+        </Box>
+        <Box sx={{ mx: 4, width: 300 }}>
+          <TextField
+            value={searchContext?.searchTerm}
+            onChange={(e) => searchContext?.setSearchTerm(e.target.value)}
+            placeholder="Szukaj książek..."
+            variant="outlined"
+            size="small"
+            fullWidth
+            InputProps={{
+              sx: { bgcolor: "white", borderRadius: 1 },
+            }}
+          />
+        </Box>
+        <Box display="flex" alignItems="center" gap={2}>
+          {authContext.user ? (
+            <>
+              <Avatar sx={{ bgcolor: "#8b5cf6" }}>
+                {authContext.user.email?.charAt(0).toUpperCase() ?? "U"}
+              </Avatar>
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{ maxWidth: 200, color: "white" }}
+                  noWrap
+                >
+                  {authContext.user.email}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "white", opacity: 0.7 }}
+                >
+                  Witaj!
+                </Typography>
+              </Box>
+              <Button
+                onClick={handleLogout}
+                variant="contained"
+                color="secondary"
+                sx={{
+                  ml: 2,
+                  bgcolor: "#8b5cf6",
+                  color: "white",
+                  "&:hover": { bgcolor: "#7c3aed" },
+                }}
+              >
+                Wyloguj
+              </Button>
+            </>
+          ) : (
+            <Button
+              href="/login"
+              variant="contained"
+              sx={{
+                bgcolor: "#4f46e5",
+                color: "white",
+                "&:hover": { bgcolor: "#4338ca" },
+              }}
+            >
+              Zaloguj
+            </Button>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 
