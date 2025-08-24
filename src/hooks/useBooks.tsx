@@ -44,15 +44,14 @@ export const useBooks = () => {
     }
   };
 
-  // TODO
-  const handleRatingChange = (id: string, rating: number) => {
-    const bookToUpdate = books.find((book) => book.id === id);
-    if (bookToUpdate) {
+  const handleBookUpdate = (bookId: string, updatedData: Partial<Book>) => {
+    const bookToEdit = books.find((book) => book.id === bookId);
+    if (bookToEdit) {
       const updatedBooks = books.map((book) =>
-        book.id === id ? { ...book, rating } : book,
+        book.id === bookId ? { ...book, ...updatedData } : book,
       );
       setBooks(updatedBooks);
-      updateBook(id, { rating });
+      updateBook(bookId, updatedData);
     }
   };
 
@@ -108,7 +107,7 @@ export const useBooks = () => {
     books,
     loading,
     handleBookDelete,
-    handleRatingChange,
+    handleBookUpdate,
     handleStatusChange,
     handleBookSubmit,
   };
