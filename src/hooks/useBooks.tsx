@@ -44,18 +44,22 @@ export const useBooks = () => {
     }
   };
 
-  const handleBookUpdate = (bookId: string, updatedData: Partial<Book>) => {
+  const handleBookUpdate = async (
+    bookId: string,
+    updatedData: Partial<Book>,
+  ) => {
     const bookToEdit = books.find((book) => book.id === bookId);
     if (bookToEdit) {
       const updatedBooks = books.map((book) =>
         book.id === bookId ? { ...book, ...updatedData } : book,
       );
+      const result = await updateBook(bookId, updatedData);
       setBooks(updatedBooks);
-      updateBook(bookId, updatedData);
+      return result;
     }
   };
 
-  const handleStatusChange = (bookId: string, newStatus: string) => {
+  const handleStatusChange = async (bookId: string, newStatus: string) => {
     const statuses = ["W trakcie", "Przeczytana", "Porzucona"];
     const nextStatus =
       statuses[(statuses.indexOf(newStatus) + 1) % statuses.length];
@@ -63,8 +67,8 @@ export const useBooks = () => {
     const updatedBooks = books.map((book) =>
       book.id === bookId ? { ...book, read: nextStatus } : book,
     );
+    await updateBook(bookId, { read: nextStatus });
     setBooks(updatedBooks);
-    updateBook(bookId, { read: nextStatus });
   };
 
   const handleBookSubmit = async (book: Book) => {
@@ -91,12 +95,14 @@ export const useBooks = () => {
           userId: userId,
           createdAt: createdAt,
         });
+
         if (newBookId) {
           setBooks([
             { ...newBook, id: newBookId, createdAt: createdAt },
             ...books,
           ]);
         }
+        return true;
       }
     }
     // e.target.reset();

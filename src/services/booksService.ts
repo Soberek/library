@@ -72,10 +72,11 @@ const deleteBook = async (bookId: string): Promise<void> => {
 const updateBook = async (
   bookId: string,
   updatedData: Partial<Book>,
-): Promise<void> => {
+): Promise<boolean> => {
   try {
     const bookDoc = doc(db, "books", bookId);
     await updateDoc(bookDoc, updatedData);
+    return true;
   } catch (error) {
     console.error("Error updating book:", error);
     throw new Error("Failed to update book");

@@ -27,13 +27,8 @@ const Books = () => {
 
   const searchContext = useSearch();
 
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const handleFormVisibility = (visible: boolean) => {
-    setIsFormVisible(visible);
-  };
-
   useEffect(() => {
-    if (isFormVisible) {
+    if (isEditing.status) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -43,7 +38,7 @@ const Books = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isFormVisible]);
+  }, [isEditing.status]);
 
   // Filter books based on searchTerm
   const filteredBooks = useMemo(() => {
@@ -57,55 +52,75 @@ const Books = () => {
     return books;
   }, [books, searchContext?.searchTerm]);
 
-  const handleBookUpdateModal = (bookId: string) => {
-    setIsFormVisible(true);
-    setIsEditing({ mode: "edit", status: true, bookId });
+  const handleBookModalOpen = ({
+    bookId,
+    mode,
+  }: {
+    bookId: string | null;
+    mode: "add" | "edit";
+  }) => {
+    if (mode === "edit") {
+      console.log("Opening edit modal for book:", bookId);
+
+      setIsEditing({
+        mode: mode,
+        status: true,
+        bookId: bookId,
+      });
+    } else {
+      console.log("Opening add modal");
+      setIsEditing({
+        mode: mode,
+        status: true,
+        bookId: null,
+      });
+    }
   };
 
-  const handleBookAddModal = () => {
-    setIsFormVisible(true);
-    setIsEditing({ mode: "add", status: true, bookId: null });
+  const handleBookModalClose = () => {
+    console.log("Closing modal for book:");
+    setIsEditing((prev) => ({ ...prev, status: false }));
   };
+
+  console.log("Current editing state:", isEditing);
 
   return (
     <div className="flex flex-col rounded-lg bg-white">
       {/* Add a button to toggle the form visibility */}
       <button
         className="m-4 hidden cursor-pointer rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none md:flex"
-        onClick={handleBookAddModal}
+        onClick={() => handleBookModalOpen({ mode: "add", bookId: null })}
       >
-        {isFormVisible && !isEditing.status && isEditing.mode === "add"
+        {!isEditing.status && isEditing.mode === "add"
           ? "Ukryj formularz"
           : "Dodaj książkę"}
       </button>
 
       {/* Add a book form */}
-      {isFormVisible && isEditing.status && isEditing.mode === "add" && (
+      {isEditing.status && isEditing.mode === "add" && (
         <BookForm
           mode="add"
-          handleFormVisibility={handleFormVisibility}
           handleBookSubmit={handleBookSubmit}
-          handleBookAddModal={handleBookAddModal}
-          isFormVisible={isFormVisible}
+          handleBookModalOpen={handleBookModalOpen}
+          handleBookModalClose={handleBookModalClose}
+          isFormVisible={isEditing.status}
         />
       )}
 
       {/* Edit Book Form */}
-      {isFormVisible &&
-        isEditing.status &&
-        isEditing.bookId &&
-        isEditing.mode === "edit" && (
-          <BookForm
-            mode="edit"
-            bookToEdit={
-              books.find((book) => book.id === isEditing.bookId) || null
-            }
-            handleFormVisibility={handleFormVisibility}
-            handleBookSubmit={handleBookSubmit}
-            handleBookUpdate={handleBookUpdate}
-            isFormVisible={isFormVisible}
-          />
-        )}
+      {isEditing.status && isEditing.bookId && isEditing.mode === "edit" && (
+        <BookForm
+          mode="edit"
+          bookToEdit={
+            books.find((book) => book.id === isEditing.bookId) || null
+          }
+          handleBookSubmit={handleBookSubmit}
+          handleBookUpdate={handleBookUpdate}
+          handleBookModalOpen={handleBookModalOpen}
+          handleBookModalClose={handleBookModalClose}
+          isFormVisible={isEditing.status}
+        />
+      )}
 
       <BookList
         loading={loading}
@@ -113,11 +128,12 @@ const Books = () => {
         handleStatusChange={handleStatusChange}
         handleBookUpdate={handleBookUpdate}
         handleBookDelete={handleBookDelete}
-        handleBookUpdateModal={handleBookUpdateModal}
+        handleBookModalOpen={handleBookModalOpen}
+        handleBookModalClose={handleBookModalClose}
       />
 
       {/* Fixed add book button */}
-      <BottomNav handleBookAddModal={handleBookAddModal} />
+      <BottomNav handleBookModalOpen={handleBookModalOpen} />
     </div>
   );
 };
