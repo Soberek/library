@@ -17,7 +17,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { Link } from "react-router-dom";
 
-const menuItems = [{ name: "Lista książek", path: "/books" }];
+const menuItems = [{ name: "Lista książek", path: "/" }];
 
 const MobileNavbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
