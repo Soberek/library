@@ -9,10 +9,20 @@ const Books = () => {
     books,
     loading,
     handleBookDelete,
-    handleRatingChange,
+    handleBookUpdate,
     handleStatusChange,
     handleBookSubmit,
   } = useBooks();
+
+  const [isEditing, setIsEditing] = useState<{
+    status: boolean;
+    mode: "add" | "edit";
+    bookId: string | null;
+  }>({
+    status: false,
+    mode: "add",
+    bookId: null,
+  });
 
   const searchContext = useSearch();
 
@@ -46,31 +56,63 @@ const Books = () => {
     return books;
   }, [books, searchContext?.searchTerm]);
 
+  const handleBookUpdateModal = (bookId: string) => {
+    setIsFormVisible(true);
+    setIsEditing({ mode: "edit", status: true, bookId });
+  };
+
+  const handleBookAddModal = () => {
+    setIsFormVisible(true);
+    setIsEditing({ mode: "add", status: true, bookId: null });
+  };
+
   return (
     <div className="flex flex-col rounded-lg bg-white">
       {/* Add a button to toggle the form visibility */}
       <button
         className="m-4 hidden cursor-pointer rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none md:flex"
-        onClick={handleFormVisibility}
+        onClick={handleBookAddModal}
       >
-        {isFormVisible ? "Ukryj formularz" : "Dodaj książkę"}
+        {isFormVisible && !isEditing.status && isEditing.mode === "add"
+          ? "Ukryj formularz"
+          : "Dodaj książkę"}
       </button>
 
       {/* Add a book form */}
-      {isFormVisible && (
+      {isFormVisible && isEditing.status && isEditing.mode === "add" && (
         <BookForm
+          mode="add"
           handleFormVisibility={handleFormVisibility}
           handleBookSubmit={handleBookSubmit}
+          handleBookAddModal={handleBookAddModal}
           isFormVisible={isFormVisible}
         />
       )}
+
+      {/* Edit Book Form */}
+      {isFormVisible &&
+        isEditing.status &&
+        isEditing.bookId &&
+        isEditing.mode === "edit" && (
+          <BookForm
+            mode="edit"
+            bookToEdit={
+              books.find((book) => book.id === isEditing.bookId) || null
+            }
+            handleFormVisibility={handleFormVisibility}
+            handleBookSubmit={handleBookSubmit}
+            handleBookUpdate={handleBookUpdate}
+            isFormVisible={isFormVisible}
+          />
+        )}
 
       <BookList
         loading={loading}
         books={filteredBooks}
         handleStatusChange={handleStatusChange}
-        handleRatingChange={handleRatingChange}
+        handleBookUpdate={handleBookUpdate}
         handleBookDelete={handleBookDelete}
+        handleBookUpdateModal={handleBookUpdateModal}
       />
 
       {/* Fixed add book button */}
