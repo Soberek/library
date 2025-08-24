@@ -93,7 +93,10 @@ const BookForm: React.FC<Props> = ({
           alignItems: "center",
         }}
       >
-        Dodaj nową książkę
+        {mode === "add"
+          ? "Dodaj nową książkę"
+          : `Edytujesz książkę: ${bookToEdit?.title}`}
+
         <IconButton
           onClick={handleFormVisibility}
           aria-label="Zamknij formularz"
@@ -246,15 +249,30 @@ const BookForm: React.FC<Props> = ({
               />
             )}
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2, fontWeight: "bold" }}
-            fullWidth
-          >
-            Dodaj książkę
-          </Button>
+          {mode === "edit" && (
+            <Button
+              type="submit"
+              variant="outlined"
+              color="secondary"
+              sx={{
+                mt: 2,
+                fontWeight: "bold",
+                background:
+                  "linear-gradient(30deg, #00ce67ff 30%, #186600ff 90%)",
+              }}
+            >
+              Edytuj książkę
+            </Button>
+          )}
+          {mode === "add" && (
+            <Button
+              type="submit"
+              variant="outlined"
+              sx={{ mt: 2, fontWeight: "bold" }}
+            >
+              Dodaj książkę
+            </Button>
+          )}
         </Box>
       </DialogContent>
     </Dialog>

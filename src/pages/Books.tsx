@@ -119,7 +119,7 @@ const Books = () => {
       {!isFormVisible && (
         <button
           className="fixed right-6 bottom-4 z-50 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:from-blue-700 hover:to-blue-800 hover:shadow-xl focus:ring-4 focus:ring-blue-400 focus:outline-none active:scale-95 md:hidden"
-          onClick={handleFormVisibility}
+          onClick={handleBookAddModal}
         >
           <svg
             className="h-16 w-16"
