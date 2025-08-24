@@ -72,19 +72,7 @@ const MobileNavbar = () => {
               Library App for Magdzialena
             </Typography>
           </Box>
-          <Box display="flex" alignItems="center" sx={{ mr: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#fff",
-                mr: 1,
-                fontWeight: 500,
-                fontSize: "1rem",
-              }}
-            >
-              Zalogowano jako: {user.user?.email}
-            </Typography>
-          </Box>
+
           <IconButton
             edge="end"
             color="inherit"
