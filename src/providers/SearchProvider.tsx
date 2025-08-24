@@ -1,13 +1,8 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
 
-type SearchContextType = {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-};
+import { SearchContext } from "../hooks/useSearch";
 
-const SearchContext = createContext<SearchContextType | undefined>(undefined);
-
-export const SearchProvider: React.FC<React.PropsWithChildren<{}>> = ({
+export const SearchProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,8 +12,4 @@ export const SearchProvider: React.FC<React.PropsWithChildren<{}>> = ({
       {children}
     </SearchContext.Provider>
   );
-};
-
-export const useSearch = () => {
-  return useContext(SearchContext);
 };
