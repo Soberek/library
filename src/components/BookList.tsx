@@ -16,12 +16,19 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 
+import { Edit } from "@mui/icons-material";
+
+// editing existing book
+// on textfield click set to isEditing, setIsEditingBookId to book.id
+// on textfield blur set to isEditing to false
+
 type Props = {
   books: Book[];
   loading: boolean;
   handleStatusChange: (bookId: string, newStatus: string) => void;
-  handleRatingChange: (bookId: string, newRating: number) => void;
+  handleBookUpdate: (bookId: string, newBook: Book) => void;
   handleBookDelete: (bookId: string) => void;
+  handleBookUpdateModal: (bookId: string) => void;
 };
 
 const statusColors: Record<string, "success" | "warning" | "error"> = {
@@ -34,8 +41,9 @@ const BookList: React.FC<Props> = ({
   books,
   loading,
   handleStatusChange,
-  handleRatingChange,
+  handleBookUpdate,
   handleBookDelete,
+  handleBookUpdateModal,
 }) => {
   if (loading) {
     return (
@@ -95,6 +103,7 @@ const BookList: React.FC<Props> = ({
                 "&:hover": { transform: "scale(1.05)" },
               }}
             />
+            {}
             <CardContent sx={{ flex: 1 }}>
               <Typography
                 variant="h6"
@@ -178,28 +187,63 @@ const BookList: React.FC<Props> = ({
                     max={10}
                     precision={1}
                     onChange={(_, newValue) =>
-                      handleRatingChange(book.id, newValue ?? book.rating)
+                      handleBookUpdate(book.id, {
+                        ...book,
+                        rating: newValue ?? book.rating,
+                      })
                     }
                     icon={<StarIcon sx={{ color: "#FFD600" }} />}
                     emptyIcon={<StarBorderIcon sx={{ color: "#E0E0E0" }} />}
                   />
                 </Box>
               </Box>
-              <Button
-                variant="contained"
-                color="error"
-                fullWidth
-                startIcon={<DeleteIcon />}
-                onClick={() => handleBookDelete(book.id)}
+              <Box
                 sx={{
-                  fontWeight: 600,
-                  textTransform: "none",
-                  boxShadow: 2,
-                  "&:hover": { boxShadow: 4 },
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 2,
                 }}
               >
-                Usuń książkę
-              </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  fullWidth
+                  startIcon={<DeleteIcon />}
+                  onClick={() => handleBookDelete(book.id)}
+                  sx={{
+                    fontWeight: 600,
+                    textTransform: "none",
+                    boxShadow: 2,
+                    "&:hover": { boxShadow: 4 },
+                  }}
+                >
+                  Usuń
+                </Button>
+                <Button
+                  variant="contained"
+                  color="success"
+                  fullWidth
+                  startIcon={<Edit />}
+                  onClick={() => handleBookUpdateModal(book.id)}
+                  sx={{
+                    fontWeight: 600,
+                    textTransform: "none",
+                    boxShadow: 2,
+                    transition: "box-shadow 0.2s, background 0.2s",
+                    "&:hover": {
+                      boxShadow: 4,
+                      background:
+                        "linear-gradient(to right, #34e615ff, #004a20ff)",
+                      opacity: 0.9,
+                    },
+                    background:
+                      "linear-gradient(to right, #34e615ff, #004a20ff)",
+                  }}
+                >
+                  Edytuj
+                </Button>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
