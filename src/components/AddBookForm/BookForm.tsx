@@ -29,8 +29,12 @@ import CloseIcon from "@mui/icons-material/Close";
 // };
 
 type Props = {
-  handleBookSubmit: (data: Book) => void;
+  mode: "add" | "edit";
+  bookToEdit?: Book | null;
+  handleBookSubmit?: (data: Book) => void;
   handleFormVisibility: () => void;
+  handleBookUpdate?: (bookId: string, newBook: Book) => void;
+  handleBookAddModal?: () => void;
   isFormVisible: boolean;
 };
 
@@ -41,27 +45,37 @@ const genreOptions = Object.entries(GENRES)
     label,
   }));
 
+const DEFAULT_VALUES = {
+  id: "",
+  title: "",
+  author: "",
+  read: "",
+  genre: "",
+  readPages: 0,
+  overallPages: 1,
+  cover: "",
+  rating: 0,
+};
+
 const BookForm: React.FC<Props> = ({
+  mode,
+  bookToEdit,
   handleBookSubmit,
   handleFormVisibility,
+  handleBookUpdate,
   isFormVisible,
 }) => {
   const { control, handleSubmit, reset } = useForm<Book>({
-    defaultValues: {
-      title: "",
-      author: "",
-      read: "",
-      genre: "",
-      readPages: 0,
-      overallPages: 1,
-      cover: "",
-      rating: 0,
-    },
+    defaultValues: mode === "edit" && bookToEdit ? bookToEdit : DEFAULT_VALUES,
   });
 
   const onSubmit = (data: Book) => {
     console.log(data);
-    handleBookSubmit(data);
+    if (mode === "add") {
+      handleBookSubmit?.(data);
+    } else if (mode === "edit") {
+      handleBookUpdate?.(bookToEdit?.id || "", data);
+    }
     reset();
   };
 
