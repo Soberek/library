@@ -16,7 +16,8 @@ import BookForm from "./BookForm";
 // This will execute all test files (e.g., *.test.tsx) using Jest.
 
 const mockOnSubmit = jest.fn();
-const mockHandleFormVisibility = jest.fn();
+const mockBookModalOpen = jest.fn();
+const mockBookModalClose = jest.fn();
 
 describe("BookForm", () => {
   test.only("renders form fields", () => {
@@ -24,7 +25,8 @@ describe("BookForm", () => {
       <BookForm
         handleBookSubmit={mockOnSubmit}
         mode="add"
-        handleFormVisibility={mockHandleFormVisibility}
+        handleBookModalOpen={mockBookModalOpen}
+        handleBookModalClose={mockBookModalClose}
         isFormVisible={true}
       />,
     );
