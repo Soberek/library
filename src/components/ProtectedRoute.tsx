@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useUser } from "../providers/UserContext";
+import { useUser } from "../hooks/useUser";
 
 const ProtectedRoute = () => {
   const auth = useUser();
