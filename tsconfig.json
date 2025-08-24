@@ -8,6 +8,7 @@
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "types": ["jest", "@testing-library/jest-dom"],
-    "lib": ["dom", "esnext"]
+    "lib": ["dom", "esnext"],
+    "strict": true
   }
 }

@@ -29,6 +29,19 @@ Try the app live here: [https://membib.netlify.app/](https://membib.netlify.app/
 - React
 - TypeScript
 - Tailwind CSS
+- Material UI
+- React Hook Form
+- React Testing Library
+- ESLint
+- Prettier
+
+## Scripts
+
+- `npm start` — Start the development server
+- `npm run build` — Build the app for production
+- `npm test` — Run tests with React Testing Library
+- `npm run lint` — Run ESLint for code quality checks
+- `npm run format` — Format code with Prettier
 
 ## Installation
 

@@ -7,7 +7,7 @@ import {
   deleteBook,
   updateBook,
 } from "../services/booksService";
-import { useUser } from "../providers/UserContext";
+import { useUser } from "../hooks/useUser";
 
 export const useBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -28,7 +28,7 @@ export const useBooks = () => {
       }
     };
     fetchBooks();
-  }, [userContext.user?.uid]);
+  }, [userId]);
 
   const handleBookDelete = (bookId: string) => {
     const bookToDelete = books.find((book) => book.id === bookId);
