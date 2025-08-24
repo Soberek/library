@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import BookForm from "../components/AddBookForm/BookForm";
 import BookList from "../components/BookList";
 import { useBooks } from "../hooks/useBooks";
-import { useSearch } from "../providers/SearchProvider";
+import { useSearch } from "../hooks/useSearch";
 
 const Books = () => {
   const {
