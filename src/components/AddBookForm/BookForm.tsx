@@ -32,7 +32,7 @@ type Props = {
   mode: "add" | "edit";
   bookToEdit?: Book | null;
   handleBookSubmit?: (data: Book) => void;
-  handleFormVisibility: () => void;
+  handleFormVisibility: (visible: boolean) => void;
   handleBookUpdate?: (bookId: string, newBook: Book) => void;
   handleBookAddModal?: () => void;
   isFormVisible: boolean;
@@ -73,8 +73,10 @@ const BookForm: React.FC<Props> = ({
     console.log(data);
     if (mode === "add") {
       handleBookSubmit?.(data);
+      handleFormVisibility(false);
     } else if (mode === "edit") {
       handleBookUpdate?.(bookToEdit?.id || "", data);
+      handleFormVisibility(false);
     }
     reset();
   };
@@ -98,7 +100,7 @@ const BookForm: React.FC<Props> = ({
           : `Edytujesz książkę: ${bookToEdit?.title}`}
 
         <IconButton
-          onClick={handleFormVisibility}
+          onClick={() => handleFormVisibility(false)}
           aria-label="Zamknij formularz"
         >
           <CloseIcon />

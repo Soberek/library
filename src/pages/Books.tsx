@@ -28,8 +28,8 @@ const Books = () => {
   const searchContext = useSearch();
 
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const handleFormVisibility = () => {
-    setIsFormVisible(!isFormVisible);
+  const handleFormVisibility = (visible: boolean) => {
+    setIsFormVisible(visible);
   };
 
   useEffect(() => {
