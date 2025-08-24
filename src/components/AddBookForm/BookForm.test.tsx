@@ -23,6 +23,7 @@ describe("BookForm", () => {
     const { container } = render(
       <BookForm
         handleBookSubmit={mockOnSubmit}
+        mode="add"
         handleFormVisibility={mockHandleFormVisibility}
         isFormVisible={true}
       />,
