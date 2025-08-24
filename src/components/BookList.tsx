@@ -88,22 +88,80 @@ const BookList: React.FC<Props> = ({
               },
             }}
           >
-            <CardMedia
-              component="img"
-              image={book.cover}
-              alt={`${book.title} cover`}
-              sx={{
-                height: 225,
-                width: 150,
-                margin: "16px auto 0 auto",
-                borderRadius: 2,
-                objectFit: "cover",
-                boxShadow: 3,
-                transition: "transform 0.2s",
-                "&:hover": { transform: "scale(1.05)" },
-              }}
-            />
-            {}
+            {book.cover ? (
+              <CardMedia
+                component="img"
+                image={book.cover}
+                alt={`${book.title} cover`}
+                sx={{
+                  height: 225,
+                  width: 150,
+                  margin: "16px auto 0 auto",
+                  borderRadius: 2,
+                  objectFit: "cover",
+                  boxShadow: 3,
+                  transition: "transform 0.2s",
+                  "&:hover": { transform: "scale(1.05)" },
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  height: 225,
+                  width: 150,
+                  margin: "16px auto 0 auto",
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background:
+                    "linear-gradient(135deg, #e0e0e0 60%, #f5f5f5 100%)",
+                  position: "relative",
+                  transition: "transform 0.2s",
+                  "&:hover": { transform: "scale(1.05)" },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 64,
+                      bgcolor: "#bdbdbd",
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="h3"
+                      color="white"
+                      fontWeight={700}
+                      sx={{ opacity: 0.7 }}
+                    >
+                      ?
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    fontWeight={500}
+                    textAlign="center"
+                  >
+                    Brak okładki
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+
             <CardContent sx={{ flex: 1 }}>
               <Typography
                 variant="h6"
