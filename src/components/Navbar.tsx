@@ -4,9 +4,8 @@ import { signOut } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { TextField } from "@mui/material";
 import { useSearch } from "../providers/SearchProvider";
-type Props = {};
 
-const Navbar: React.FC<Props> = () => {
+const Navbar: React.FC = () => {
   const authContext = useUser();
   const searchContext = useSearch();
 
