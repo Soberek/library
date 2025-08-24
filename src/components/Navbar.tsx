@@ -91,12 +91,12 @@ const Navbar: React.FC = () => {
               <Button
                 onClick={handleLogout}
                 variant="contained"
-                color="secondary"
                 sx={{
                   ml: 2,
-                  bgcolor: "#8b5cf6",
-                  color: "white",
-                  "&:hover": { bgcolor: "#7c3aed" },
+                  fontWeight: "medium",
+                  background: "white",
+                  color: "black",
+                  "&:hover": { background: "#7c3aed", color: "white" },
                 }}
               >
                 Wyloguj
