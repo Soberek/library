@@ -83,8 +83,7 @@ export const useBooks = () => {
       newBook.title &&
       newBook.author &&
       newBook.read &&
-      newBook.overallPages &&
-      newBook.cover
+      newBook.overallPages
     ) {
       if (userId) {
         const newBookId = await addBook({
