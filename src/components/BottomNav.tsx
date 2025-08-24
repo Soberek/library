@@ -5,9 +5,12 @@ import AddBoxIcon from "@mui/icons-material/AddBox";
 // import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
 type Props = {
-  handleBookAddModal: () => void;
+  handleBookModalOpen: (params: {
+    mode: "add" | "edit";
+    bookId: string | null;
+  }) => void;
 };
-const BottomNav: React.FC<Props> = ({ handleBookAddModal }) => {
+const BottomNav: React.FC<Props> = ({ handleBookModalOpen }) => {
   const [value, setValue] = React.useState(0);
 
   return (
@@ -35,7 +38,7 @@ const BottomNav: React.FC<Props> = ({ handleBookAddModal }) => {
         <BottomNavigationAction
           label="Dodaj książkę"
           icon={<AddBoxIcon />}
-          onClick={handleBookAddModal}
+          onClick={() => handleBookModalOpen({ mode: "add", bookId: null })}
         />
       </BottomNavigation>
     </Paper>

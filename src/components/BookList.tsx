@@ -28,7 +28,14 @@ type Props = {
   handleStatusChange: (bookId: string, newStatus: string) => void;
   handleBookUpdate: (bookId: string, newBook: Book) => void;
   handleBookDelete: (bookId: string) => void;
-  handleBookUpdateModal: (bookId: string) => void;
+  handleBookModalOpen: (params: {
+    mode: "add" | "edit";
+    bookId: string | null;
+  }) => void;
+  handleBookModalClose: (params: {
+    bookId: string | null;
+    mode: "add" | "edit";
+  }) => void;
 };
 
 const statusColors: Record<string, "success" | "warning" | "error"> = {
@@ -43,7 +50,7 @@ const BookList: React.FC<Props> = ({
   handleStatusChange,
   handleBookUpdate,
   handleBookDelete,
-  handleBookUpdateModal,
+  handleBookModalOpen,
 }) => {
   if (loading) {
     return (
@@ -283,7 +290,9 @@ const BookList: React.FC<Props> = ({
                   color="success"
                   fullWidth
                   startIcon={<Edit />}
-                  onClick={() => handleBookUpdateModal(book.id)}
+                  onClick={() =>
+                    handleBookModalOpen({ mode: "edit", bookId: book.id })
+                  }
                   sx={{
                     fontWeight: 600,
                     textTransform: "none",

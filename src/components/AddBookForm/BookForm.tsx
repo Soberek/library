@@ -32,9 +32,12 @@ type Props = {
   mode: "add" | "edit";
   bookToEdit?: Book | null;
   handleBookSubmit?: (data: Book) => void;
-  handleFormVisibility: (visible: boolean) => void;
   handleBookUpdate?: (bookId: string, newBook: Book) => void;
-  handleBookAddModal?: () => void;
+  handleBookModalOpen: (params: {
+    mode: "add" | "edit";
+    bookId: string | null;
+  }) => void;
+  handleBookModalClose: () => void;
   isFormVisible: boolean;
 };
 
@@ -61,8 +64,8 @@ const BookForm: React.FC<Props> = ({
   mode,
   bookToEdit,
   handleBookSubmit,
-  handleFormVisibility,
   handleBookUpdate,
+  handleBookModalClose,
   isFormVisible,
 }) => {
   const { control, handleSubmit, reset } = useForm<Book>({
@@ -70,21 +73,26 @@ const BookForm: React.FC<Props> = ({
   });
 
   const onSubmit = (data: Book) => {
-    console.log(data);
     if (mode === "add") {
-      handleBookSubmit?.(data);
-      handleFormVisibility(false);
+      const result = handleBookSubmit?.(data);
+      if (result) {
+        handleBookModalClose();
+      }
     } else if (mode === "edit") {
-      handleBookUpdate?.(bookToEdit?.id || "", data);
-      handleFormVisibility(false);
+      const result = handleBookUpdate?.(bookToEdit?.id || "", data);
+      if (result) {
+        handleBookModalClose();
+      }
     }
     reset();
   };
 
+  console.log("book form mode:", mode);
+
   return (
     <Dialog
       open={isFormVisible}
-      onClose={handleFormVisibility}
+      onClose={handleBookModalClose}
       maxWidth="sm"
       fullWidth
     >
@@ -100,7 +108,7 @@ const BookForm: React.FC<Props> = ({
           : `Edytujesz książkę: ${bookToEdit?.title}`}
 
         <IconButton
-          onClick={() => handleFormVisibility(false)}
+          onClick={() => handleBookModalClose()}
           aria-label="Zamknij formularz"
         >
           <CloseIcon />
@@ -263,7 +271,7 @@ const BookForm: React.FC<Props> = ({
                   "linear-gradient(30deg, #00ce67ff 30%, #186600ff 90%)",
               }}
             >
-              Edytuj książkę
+              Edytuj książkę {mode}
             </Button>
           )}
           {mode === "add" && (
