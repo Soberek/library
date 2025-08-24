@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, Link as RouterLink, Navigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
-import { useUser } from "../providers/UserContext";
+import { useUser } from "../hooks/useUser";
 import {
   Box,
   Button,
@@ -36,11 +36,13 @@ const SignIn: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       navigate("/", { replace: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = "Wystąpił błąd podczas logowania.";
       setErrorMessage(message);
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error signing in:", error?.message);
+      if (error instanceof Error) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Error signing in:", error.message);
+        }
       }
     } finally {
       setLoading(false);

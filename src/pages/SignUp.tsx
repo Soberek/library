@@ -2,7 +2,7 @@ import React from "react";
 import { auth } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { useUser } from "../providers/UserContext";
+import { useUser } from "../hooks/useUser";
 import {
   Box,
   Button,
@@ -47,12 +47,12 @@ const SignUp: React.FC = () => {
       if (userCredential.user) {
         navigate("/sign-in");
       }
-    } catch (error: any) {
-      setLocalError(
-        error instanceof Error
-          ? `Wystąpił błąd: ${error.message}`
-          : "Wystąpił nieznany błąd",
-      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setLocalError(`Wystąpił błąd: ${error.message}`);
+      } else {
+        setLocalError("Wystąpił nieznany błąd");
+      }
     }
   };
 
