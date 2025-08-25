@@ -29,9 +29,10 @@ Try the app live here: [https://membib.netlify.app/](https://membib.netlify.app/
 - React
 - TypeScript
 - Tailwind CSS
-- Material UI
 - React Hook Form
 - React Testing Library
+- Firebase Auth
+- Firebase Firestore
 - ESLint
 - Prettier
 
