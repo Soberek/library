@@ -203,7 +203,7 @@ const BookList: React.FC<Props> = memo(({
   }
 
   return (
-    <Grid container spacing={2} sx={{ p: 1 }}>
+    <Grid container spacing={2} sx={{ p: 1, mb: 8 }}>
       {sortedBooks.map((book, index) => (
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }} key={book.id}>
           <Zoom in={mounted} timeout={600 + index * 100}>
