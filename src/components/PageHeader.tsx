@@ -29,29 +29,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     <Box sx={{ mb: 4 }}>
       <Box
         display="flex"
-        justifyContent="space-between"
+        justifyContent="flex-end"
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box>
-          <Typography
-            variant="h3"
-            fontWeight="700"
-            sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              mb: 1,
-            }}
-          >
-            Moja Biblioteka
-          </Typography>
-          <Typography variant="h6" color="text.secondary" fontWeight="500">
-            Zarządzaj swoimi książkami i śledź postęp czytania
-          </Typography>
-        </Box>
-        
         <Box display="flex" gap={2} sx={{ display: { xs: "none", md: "flex" } }}>
           <Tooltip title="Filtruj książki">
             <IconButton
