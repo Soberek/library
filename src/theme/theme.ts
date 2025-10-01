@@ -1,5 +1,48 @@
 import { createTheme } from "@mui/material";
 
+/**
+ * Theme Constants
+ * Centralized color and style values used throughout the application
+ */
+export const THEME_CONSTANTS = {
+  // Brand Colors
+  gradient: {
+    primary: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    primaryHover: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+  },
+  // Transitions
+  transitions: {
+    default: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    smooth: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  },
+  // Border Radius
+  borderRadius: {
+    small: 8,
+    medium: 12,
+    large: 16,
+    xlarge: 20,
+  },
+  // Shadows
+  shadows: {
+    light: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+    medium:
+      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    large:
+      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    xlarge: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+  },
+  // Glassmorphism
+  glass: {
+    background: "rgba(255, 255, 255, 0.95)",
+    backdropFilter: "blur(20px)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+  },
+} as const;
+
+/**
+ * Main application theme
+ * Defines colors, typography, spacing, and component overrides
+ */
 const theme = createTheme({
   palette: {
     mode: "light",
@@ -121,21 +164,21 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: THEME_CONSTANTS.borderRadius.medium,
           textTransform: "none",
           fontWeight: 600,
           padding: "12px 24px",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          boxShadow: THEME_CONSTANTS.shadows.medium,
+          transition: THEME_CONSTANTS.transitions.default,
           "&:hover": {
             transform: "translateY(-1px)",
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+            boxShadow: THEME_CONSTANTS.shadows.large,
           },
         },
         contained: {
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          background: THEME_CONSTANTS.gradient.primary,
           "&:hover": {
-            background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+            background: THEME_CONSTANTS.gradient.primaryHover,
           },
         },
         outlined: {
@@ -150,8 +193,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            borderRadius: 12,
-            transition: "all 0.2s ease",
+            borderRadius: THEME_CONSTANTS.borderRadius.medium,
+            transition: THEME_CONSTANTS.transitions.default,
             "&:hover": {
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#667eea",
@@ -171,11 +214,11 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          borderRadius: THEME_CONSTANTS.borderRadius.large,
+          boxShadow: THEME_CONSTANTS.shadows.medium,
+          transition: THEME_CONSTANTS.transitions.smooth,
           "&:hover": {
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+            boxShadow: THEME_CONSTANTS.shadows.large,
           },
         },
       },
@@ -183,30 +226,23 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: THEME_CONSTANTS.borderRadius.small,
           fontWeight: 600,
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-        },
-      },
-    },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          textTransform: "none",
+          boxShadow: THEME_CONSTANTS.shadows.light,
+          transition: THEME_CONSTANTS.transitions.default,
+          "&:hover": {
+            boxShadow: THEME_CONSTANTS.shadows.medium,
+            transform: "translateY(-1px)",
+          },
         },
       },
     },
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: 16,
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          borderRadius: THEME_CONSTANTS.borderRadius.large,
+          boxShadow: THEME_CONSTANTS.shadows.xlarge,
         },
       },
     },
@@ -216,24 +252,24 @@ const theme = createTheme({
           backgroundImage: "none",
         },
         elevation1: {
-          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+          boxShadow: THEME_CONSTANTS.shadows.light,
         },
         elevation2: {
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+          boxShadow: THEME_CONSTANTS.shadows.medium,
         },
         elevation3: {
-          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          boxShadow: THEME_CONSTANTS.shadows.large,
         },
       },
     },
     MuiLinearProgress: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: THEME_CONSTANTS.borderRadius.small,
           height: 8,
         },
         bar: {
-          borderRadius: 8,
+          borderRadius: THEME_CONSTANTS.borderRadius.small,
         },
       },
     },
