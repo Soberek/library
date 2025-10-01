@@ -64,7 +64,10 @@ describe("booksService", () => {
     });
 
     it("should throw error when user ID is not provided", async () => {
-      await expect(getUserBooksData("")).rejects.toThrow();
+      await expect(getUserBooksData("")).rejects.toMatchObject({
+        code: "FIREBASE_ERROR",
+        message: "Wystąpił błąd. Spróbuj ponownie."
+      });
     });
 
     it("should handle network errors", async () => {
@@ -73,7 +76,9 @@ describe("booksService", () => {
       mockWhere.mockReturnValue({} as never);
       mockGetDocs.mockRejectedValue(new Error("Network error"));
 
-      await expect(getUserBooksData("test-user-id")).rejects.toThrow();
+      await expect(getUserBooksData("test-user-id")).rejects.toMatchObject({
+        code: "FIREBASE_ERROR"
+      });
     });
   });
 
@@ -119,7 +124,9 @@ describe("booksService", () => {
         createdAt: "2023-01-01T00:00:00.000Z",
       };
 
-      await expect(addBook(invalidBook)).rejects.toThrow();
+      await expect(addBook(invalidBook)).rejects.toMatchObject({
+        code: "FIREBASE_ERROR"
+      });
     });
   });
 
@@ -135,7 +142,10 @@ describe("booksService", () => {
     });
 
     it("should throw error when book ID is not provided", async () => {
-      await expect(deleteBook("")).rejects.toThrow();
+      await expect(deleteBook("")).rejects.toMatchObject({
+        code: "FIREBASE_ERROR",
+        message: "Wystąpił błąd. Spróbuj ponownie."
+      });
     });
   });
 
@@ -154,7 +164,10 @@ describe("booksService", () => {
     });
 
     it("should throw error when book ID is not provided", async () => {
-      await expect(updateBook("", { title: "Updated Title" })).rejects.toThrow();
+      await expect(updateBook("", { title: "Updated Title" })).rejects.toMatchObject({
+        code: "FIREBASE_ERROR",
+        message: "Wystąpił błąd. Spróbuj ponownie."
+      });
     });
   });
 });

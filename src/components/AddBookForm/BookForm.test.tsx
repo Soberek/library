@@ -34,18 +34,13 @@ describe("BookForm", () => {
     expect(screen.getByLabelText(/Tytuł/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Autor/i)).toBeInTheDocument();
 
-    const selectRead = container.querySelector("select[name='read']");
-    expect(selectRead).toBeInTheDocument();
+    expect(screen.getByLabelText(/Status/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Gatunek/i)).toBeInTheDocument();
 
-    const selectGenre = container.querySelector("select[name='genre']");
-    expect(selectGenre).toBeInTheDocument();
+    expect(screen.getByLabelText(/Przeczytane strony/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Liczba stron/i)).toBeInTheDocument();
 
-    expect(
-      screen.getByPlaceholderText(/Przeczytane strony/i),
-    ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Liczba stron/i)).toBeInTheDocument();
-
-    expect(screen.getByTestId("star-rating")).toBeInTheDocument();
+    expect(screen.getAllByRole("radio")).toHaveLength(11); // 10 stars + empty
     expect(screen.getByTestId("cover-input")).toBeInTheDocument();
 
     expect(
