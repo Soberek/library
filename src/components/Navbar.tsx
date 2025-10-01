@@ -126,28 +126,28 @@ const Navbar: React.FC = () => {
                   </InputAdornment>
                 ),
                 sx: {
-                  bgcolor: "rgba(255, 255, 255, 0.2)",
+                  bgcolor: "rgba(255, 255, 255, 0.4)",
                   borderRadius: 2,
                   backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  border: "1px solid rgba(255, 255, 255, 0.5)",
                   transition: "all 0.2s ease",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
                   "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.25)",
-                    border: "1px solid rgba(255, 255, 255, 0.4)",
+                    bgcolor: "rgba(255, 255, 255, 0.5)",
+                    border: "1px solid rgba(255, 255, 255, 0.6)",
                   },
                   "&.Mui-focused": {
-                    bgcolor: "rgba(255, 255, 255, 0.3)",
-                    border: "1px solid rgba(255, 255, 255, 0.5)",
-                    boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.2)",
+                    bgcolor: "rgba(255, 255, 255, 0.6)",
+                    border: "1px solid rgba(255, 255, 255, 0.7)",
+                    boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.3)",
                   },
                   "& input": {
                     color: "white",
                     fontSize: "0.9rem",
                     "&::placeholder": {
-                      color: "rgba(255, 255, 255, 0.7)",
+                      color: "rgba(255, 255, 255, 0.8)",
                       opacity: 1,
                     },
                   },
