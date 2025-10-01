@@ -185,7 +185,6 @@ const Books = () => {
             handleBookUpdate={handleBookUpdate}
             handleBookDelete={handleBookDelete}
             handleBookModalOpen={handleBookModalOpen}
-            handleBookModalClose={handleBookModalClose}
           />
         </Box>
 

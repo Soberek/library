@@ -21,13 +21,13 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { useUser } from "../hooks/useUser";
+import { useUser } from "../../hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../config/firebaseConfig";
-import { useSearch } from "../hooks/useSearch";
+import { auth } from "../../config/firebaseConfig";
+import { useSearch } from "../../hooks/useSearch";
 import { useState } from "react";
-import { useBooks } from "../hooks/useBooks";
+import { useBooks } from "../../hooks/useBooks";
 
 const Navbar: React.FC = () => {
   const authContext = useUser();

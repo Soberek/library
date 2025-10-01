@@ -1,6 +1,4 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
-import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 
 const StatisticsHeader: React.FC = () => {
   // Add safety check for SSR

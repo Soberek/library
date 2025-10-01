@@ -1,7 +1,7 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { Box, Typography, Button, Paper } from "@mui/material";
-import { ERROR_MESSAGES } from "../constants/validation";
+import { ERROR_MESSAGES } from "../../constants/validation";
 
 /**
  * Props for the ErrorBoundary component
