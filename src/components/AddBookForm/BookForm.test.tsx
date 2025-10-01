@@ -31,8 +31,8 @@ describe("BookForm", () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText(/Tytuł/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Autor/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Tytuł/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Autor/i)).toBeInTheDocument();
 
     const selectRead = container.querySelector("select[name='read']");
     expect(selectRead).toBeInTheDocument();
