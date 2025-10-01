@@ -76,7 +76,7 @@ const BookForm: React.FC<Props> = ({
     defaultValues: mode === "edit" && bookToEdit ? bookToEdit : DEFAULT_VALUES,
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: BookFormData) => {
     if (mode === "add") {
       const result = handleBookSubmit?.(data);
       if (result) {

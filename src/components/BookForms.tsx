@@ -9,7 +9,7 @@ interface BookFormsProps {
     bookId: string | null;
   };
   books: Book[];
-  handleBookSubmit: (book: any) => void;
+  handleBookSubmit: (book: BookFormData) => void;
   handleBookUpdate: (bookId: string, updatedData: Partial<Book>) => void;
   handleBookModalOpen: (params: { mode: "add" | "edit"; bookId: string | null }) => void;
   handleBookModalClose: () => void;

@@ -59,7 +59,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
   const [favoriteBooks] = useState<Set<string>>(new Set());
 
 
-  const applyFilters = () => {
+  const applyFilters = React.useCallback(() => {
     let filtered = [...books];
 
     // Status filter
@@ -89,7 +89,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
     // Sorting
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: string | number, bValue: string | number;
 
       switch (filters.sortBy) {
         case "title":
@@ -124,7 +124,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
     });
 
     onFilterChange(filtered);
-  };
+  }, [books, filters, favoriteBooks, onFilterChange]);
 
   const clearFilters = () => {
     setFilters({
@@ -151,7 +151,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
   React.useEffect(() => {
     applyFilters();
-  }, [filters, books, favoriteBooks]);
+  }, [filters, books, favoriteBooks, applyFilters]);
 
   const genreOptions = Object.entries(GENRES).map(([value, label]) => ({
     value,
@@ -269,7 +269,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   value={filters.sortBy}
                   label="Sortuj według"
                   onChange={(e) =>
-                    setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))
+                    setFilters(prev => ({ ...prev, sortBy: e.target.value as "title" | "author" | "rating" | "createdAt" }))
                   }
                 >
                   <MenuItem value="dateAdded">Data dodania</MenuItem>
