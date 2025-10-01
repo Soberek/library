@@ -165,7 +165,7 @@ export default function BookList({
                     <img
                       src={book.cover}
                       alt={`${book.title} cover`}
-                      className={`w-full h-56 object-cover transition-transform duration-400 ${
+                      className={`w-full h-56 object-contain bg-white transition-transform duration-400 ${
                         isHovered ? 'scale-110' : 'scale-100'
                       }`}
                     />
