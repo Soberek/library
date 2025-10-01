@@ -210,11 +210,18 @@ export default function BookList({
                 </div>
 
                 {/* Status Badge */}
-                <div
-                  className={`absolute top-6 left-6 ${statusColors[book.read]} px-3 py-1 rounded-lg text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm`}
+                <button
+                  onClick={() => {
+                    const statuses: BookStatus[] = ['W trakcie', 'Przeczytana', 'Porzucona'];
+                    const currentIndex = statuses.indexOf(book.read);
+                    const nextIndex = (currentIndex + 1) % statuses.length;
+                    handleStatusChange(book.id, statuses[nextIndex]);
+                  }}
+                  className={`absolute top-6 left-6 ${statusColors[book.read]} px-3 py-1 rounded-lg text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm hover:scale-105 transition-all duration-200 cursor-pointer`}
+                  title="Kliknij, aby zmienić status"
                 >
                   {BOOK_STATUS_LABELS[book.read]}
-                </div>
+                </button>
 
                 {/* Favorite Badge */}
                 {isFavorite && (
