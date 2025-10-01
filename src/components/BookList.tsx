@@ -1,86 +1,52 @@
-import React, { memo, useEffect, useState } from "react";
-import type { Book, BookStatus } from "../types/Book";
-import { BOOK_STATUS_LABELS } from "../constants/bookStatus";
-import {
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Chip,
-  LinearProgress,
-  Grid,
-  Button,
-  CircularProgress,
-  Rating,
-  IconButton,
-  Tooltip,
-  Fade,
-  Zoom,
-  Divider,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import EditIcon from "@mui/icons-material/Edit";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import ShareIcon from "@mui/icons-material/Share";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import React, { useState, useEffect } from 'react';
+import { Star, Trash2, Edit, Bookmark, Share2, MoreVertical, BookOpen } from 'lucide-react';
+import type { Book, BookStatus } from '../types/Book';
 
-// editing existing book
-// on textfield click set to isEditing, setIsEditingBookId to book.id
-// on textfield blur set to isEditing to false
+const BOOK_STATUS_LABELS: Record<BookStatus, string> = {
+  Przeczytana: 'Przeczytana',
+  'W trakcie': 'W trakcie',
+  Porzucona: 'Porzucona',
+};
 
-type Props = {
-  books: Book[];
+const statusColors: Record<BookStatus, string> = {
+  Przeczytana: 'bg-green-500 text-white',
+  'W trakcie': 'bg-amber-500 text-white',
+  Porzucona: 'bg-red-500 text-white',
+};
+
+const statusGradients: Record<BookStatus, string> = {
+  Przeczytana: 'from-green-500 to-emerald-600',
+  'W trakcie': 'from-amber-500 to-orange-600',
+  Porzucona: 'from-red-500 to-rose-600',
+};
+
+interface BookListProps {
   loading: boolean;
-  handleStatusChange: (bookId: string, currentStatus: BookStatus) => void;
-  handleBookUpdate: (bookId: string, newBook: Book) => void;
+  books: Book[];
+  handleStatusChange: (bookId: string, newStatus: BookStatus) => void;
+  handleBookUpdate: (bookId: string, updatedBook: Partial<Book>) => void;
   handleBookDelete: (bookId: string) => void;
-  handleBookModalOpen: (params: {
-    mode: "add" | "edit";
-    bookId: string | null;
-  }) => void;
-  handleBookModalClose: (params: {
-    bookId: string | null;
-    mode: "add" | "edit";
-  }) => void;
-};
+  handleBookModalOpen: (params: { mode: 'add' | 'edit'; bookId: string | null }) => void;
+  handleBookModalClose: () => void;
+}
 
-const statusColors: Record<BookStatus, "success" | "warning" | "error"> = {
-  Przeczytana: "success",
-  "W trakcie": "warning",
-  Porzucona: "error",
-};
-
-const BookList: React.FC<Props> = memo(({
-  books,
+export default function BookList({
   loading,
+  books,
   handleStatusChange,
   handleBookUpdate,
   handleBookDelete,
   handleBookModalOpen,
-}) => {
-  const [anchorEl, setAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
+  handleBookModalClose,
+}: BookListProps) {
   const [favoriteBooks, setFavoriteBooks] = useState<Set<string>>(new Set());
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, bookId: string) => {
-    setAnchorEl({ ...anchorEl, [bookId]: event.currentTarget });
-  };
-
-  const handleMenuClose = (bookId: string) => {
-    setAnchorEl({ ...anchorEl, [bookId]: null });
-  };
 
   const toggleFavorite = (bookId: string) => {
     setFavoriteBooks(prev => {
@@ -94,101 +60,61 @@ const BookList: React.FC<Props> = memo(({
     });
   };
 
-  const handleShare = async (book: Book) => {
+  const handleShare = (book: Book) => {
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: book.title,
-          text: `Sprawdź tę książkę: ${book.title} by ${book.author}`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      // Fallback to clipboard
-      navigator.clipboard.writeText(`${book.title} by ${book.author} - ${window.location.href}`);
+      navigator.share({
+        title: book.title,
+        text: `Sprawdź tę książkę: ${book.title} by ${book.author}`,
+      }).catch(() => {});
     }
   };
+
+  const handleDelete = (bookId: string) => {
+    handleBookDelete(bookId);
+    setOpenMenu(null);
+  };
+
+  const handleRatingChange = (bookId: string, newRating: number) => {
+    handleBookUpdate(bookId, { rating: newRating });
+  };
+
+  const handleEdit = (bookId: string) => {
+    handleBookModalOpen({ mode: 'edit', bookId });
+    setOpenMenu(null);
+  };
+
   if (loading) {
     return (
-      <Box
-        display="flex"
-        minHeight={400}
-        alignItems="center"
-        justifyContent="center"
-        sx={{ py: 8 }}
-      >
-        <Fade in timeout={800}>
-          <Box display="flex" flexDirection="column" alignItems="center" gap={3}>
-            <CircularProgress 
-              color="primary" 
-              size={60}
-              thickness={4}
-              sx={{
-                '& .MuiCircularProgress-circle': {
-                  strokeLinecap: 'round',
-                },
-              }}
-            />
-            <Typography 
-              color="text.secondary" 
-              fontWeight={600}
-              variant="h6"
-              sx={{ opacity: 0.8 }}
-            >
-              Ładowanie książek...
-            </Typography>
-          </Box>
-        </Fade>
-      </Box>
+      <div className="flex min-h-[400px] items-center justify-center py-16">
+        <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
+          <div className="relative">
+            <div className="w-18 h-18 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+            <BookOpen className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-indigo-600 opacity-60" />
+          </div>
+          <h3 className="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Ładowanie książek...
+          </h3>
+        </div>
+      </div>
     );
   }
 
   if (books.length === 0) {
     return (
-      <Box
-        display="flex"
-        minHeight={400}
-        alignItems="center"
-        justifyContent="center"
-        sx={{ py: 8 }}
-      >
-        <Fade in timeout={800}>
-          <Box display="flex" flexDirection="column" alignItems="center" gap={3}>
-            <Box
-              sx={{
-                width: 120,
-                height: 120,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 0.1,
-              }}
-            >
-              <BookmarkIcon sx={{ fontSize: 60, color: "white" }} />
-            </Box>
-            <Typography 
-              color="text.secondary" 
-              fontWeight={600}
-              variant="h5"
-              textAlign="center"
-            >
-              Brak książek w bibliotece
-            </Typography>
-            <Typography 
-              color="text.secondary" 
-              variant="body1"
-              textAlign="center"
-              sx={{ maxWidth: 400 }}
-            >
-              Dodaj swoją pierwszą książkę, aby rozpocząć śledzenie swoich lektur
-            </Typography>
-          </Box>
-        </Fade>
-      </Box>
+      <div className="flex min-h-[400px] items-center justify-center py-16">
+        <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
+          <div className="relative w-36 h-36 rounded-[30%_70%_70%_30%_/_30%_30%_70%_70%] bg-gradient-to-br from-indigo-500 to-purple-600 opacity-12 flex items-center justify-center animate-float">
+            <div className="absolute inset-[-8px] rounded-[30%_70%_70%_30%_/_30%_30%_70%_70%] bg-gradient-to-br from-indigo-500 to-purple-600 opacity-50 blur-xl -z-10" />
+            <BookOpen className="w-16 h-16 text-white" />
+          </div>
+          <h2 className="text-4xl font-bold text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Brak książek w bibliotece
+          </h2>
+          <p className="text-lg text-slate-600 text-center max-w-md leading-relaxed">
+            Dodaj swoją pierwszą książkę, aby rozpocząć śledzenie swoich lektur i budować cyfrową bibliotekę
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -198,388 +124,260 @@ const BookList: React.FC<Props> = memo(({
     return dateB - dateA;
   });
 
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <Grid container spacing={2} sx={{ p: 1, mb: 8 }}>
-      {sortedBooks.map((book, index) => (
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }} key={book.id}>
-          <Zoom in={mounted} timeout={600 + index * 100}>
-            <Card
-              sx={{
-                height: "100%",
-                display: "flex",
-                borderRadius: 3,
-                flexDirection: "column",
-                position: "relative",
-                background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                border: "1px solid rgba(0,0,0,0.06)",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                overflow: "hidden",
-                "&:hover": {
-                  transform: "translateY(-4px) scale(1.01)",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
-                  "& .book-cover": {
-                    transform: "scale(1.02)",
-                  },
-                  "& .book-actions": {
-                    opacity: 1,
-                    transform: "translateY(0)",
-                  },
-                },
-              }}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 p-4 mb-16">
+      {sortedBooks.map((book, index) => {
+        const progress = Math.min(((book.readPages ?? 0) / (book.overallPages ?? 1)) * 100, 100);
+        const isHovered = hoveredCard === book.id;
+        const isFavorite = favoriteBooks.has(book.id);
+
+        return (
+          <div
+            key={book.id}
+            className={`transition-all duration-500 ${mounted ? 'animate-in zoom-in' : 'opacity-0'}`}
+            style={{ animationDelay: `${index * 80}ms` }}
+            onMouseEnter={() => setHoveredCard(book.id)}
+            onMouseLeave={() => setHoveredCard(null)}
+          >
+            <div
+              className={`h-full flex flex-col rounded-2xl bg-gradient-to-br from-white to-slate-50 border transition-all duration-400 overflow-hidden relative ${
+                isHovered
+                  ? 'shadow-[0_20px_40px_rgba(99,102,241,0.15)] border-indigo-200 -translate-y-2 scale-[1.02]'
+                  : 'shadow-lg border-slate-200'
+              }`}
             >
-              {/* Book Cover */}
-              <Box sx={{ position: "relative", p: 1.5 }}>
+              {/* Status Top Border */}
+              <div
+                className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${statusGradients[book.read]} transition-opacity duration-300 ${
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+
+              {/* Book Cover Section */}
+              <div className="relative p-4">
                 {book.cover ? (
-                  <CardMedia
-                    component="img"
-                    image={book.cover}
-                    alt={`${book.title} cover`}
-                    className="book-cover"
-                    sx={{
-                      height: 180,
-                      width: "100%",
-                      borderRadius: 2,
-                      objectFit: "contain",
-                      boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-                      transition: "transform 0.3s ease",
-                      bgcolor: "rgba(0,0,0,0.05)",
-                    }}
-                  />
+                  <div className="relative rounded-xl overflow-hidden shadow-lg">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 transition-opacity duration-300 ${
+                        isHovered ? 'opacity-60' : 'opacity-0'
+                      }`}
+                    />
+                    <img
+                      src={book.cover}
+                      alt={`${book.title} cover`}
+                      className={`w-full h-56 object-cover transition-transform duration-400 ${
+                        isHovered ? 'scale-110' : 'scale-100'
+                      }`}
+                    />
+                  </div>
                 ) : (
-                  <Box
-                    className="book-cover"
-                    sx={{
-                      height: 180,
-                      width: "100%",
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      position: "relative",
-                      transition: "transform 0.3s ease",
-                      overflow: "hidden",
-                      "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: "linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        zIndex: 1,
-                      }}
-                    >
-                      <BookmarkIcon sx={{ fontSize: 40, color: "white", opacity: 0.8, mb: 0.5 }} />
-                      <Typography
-                        variant="caption"
-                        color="white"
-                        fontWeight={600}
-                        textAlign="center"
-                        sx={{ opacity: 0.9, fontSize: "0.75rem" }}
-                      >
-                        Brak okładki
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <div className="relative h-56 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden shadow-lg shadow-indigo-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50" />
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-r from-white/10 to-transparent transition-transform duration-600 ${
+                        isHovered ? 'translate-x-full' : '-translate-x-full'
+                      }`}
+                    />
+                    <div className="flex flex-col items-center z-10">
+                      <BookOpen className="w-12 h-12 text-white opacity-90 mb-2" />
+                      <span className="text-white font-bold text-sm tracking-wide">Brak okładki</span>
+                    </div>
+                  </div>
                 )}
 
-                {/* Action Buttons Overlay */}
-                <Box
-                  className="book-actions"
-                  sx={{
-                    position: "absolute",
-                    top: 12,
-                    right: 12,
-                    display: "flex",
-                    gap: 0.5,
-                    opacity: 0,
-                    transform: "translateY(-10px)",
-                    transition: "all 0.3s ease",
-                  }}
+                {/* Floating Action Buttons */}
+                <div
+                  className={`absolute top-6 right-6 flex flex-col gap-2 transition-all duration-300 ${
+                    isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-5'
+                  }`}
                 >
-                  <Tooltip title="Dodaj do ulubionych">
-                    <IconButton
-                      size="small"
-                      onClick={() => toggleFavorite(book.id)}
-                      sx={{
-                        bgcolor: "rgba(255, 255, 255, 0.9)",
-                        backdropFilter: "blur(10px)",
-                        "&:hover": { bgcolor: "white" },
-                      }}
-                    >
-                      {favoriteBooks.has(book.id) ? (
-                        <BookmarkIcon sx={{ color: "#ff6b6b", fontSize: 20 }} />
-                      ) : (
-                        <BookmarkBorderIcon sx={{ color: "#666", fontSize: 20 }} />
-                      )}
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Udostępnij">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleShare(book)}
-                      sx={{
-                        bgcolor: "rgba(255, 255, 255, 0.9)",
-                        backdropFilter: "blur(10px)",
-                        "&:hover": { bgcolor: "white" },
-                      }}
-                    >
-                      <ShareIcon sx={{ color: "#666", fontSize: 20 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
+                  <button
+                    onClick={() => toggleFavorite(book.id)}
+                    className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110 hover:rotate-12"
+                    title={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
+                  >
+                    <Bookmark
+                      className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-600'}`}
+                    />
+                  </button>
+                  <button
+                    onClick={() => handleShare(book)}
+                    className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
+                    title="Udostępnij"
+                  >
+                    <Share2 className="w-5 h-5 text-slate-600" />
+                  </button>
+                </div>
 
                 {/* Status Badge */}
-                <Chip
-                  label={BOOK_STATUS_LABELS[book.read]}
-                  color={statusColors[book.read]}
-                  size="small"
-                  sx={{
-                    position: "absolute",
-                    top: 12,
-                    left: 12,
-                    fontWeight: 600,
-                    fontSize: "0.7rem",
-                    height: 24,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  }}
-                />
-              </Box>
+                <div
+                  className={`absolute top-6 left-6 ${statusColors[book.read]} px-3 py-1 rounded-lg text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm`}
+                >
+                  {BOOK_STATUS_LABELS[book.read]}
+                </div>
+
+                {/* Favorite Badge */}
+                {isFavorite && (
+                  <div className="absolute bottom-4 left-6 bg-red-500/95 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-xs font-bold shadow-lg shadow-red-500/40">
+                    <Star className="w-3.5 h-3.5 fill-white" />
+                    Ulubione
+                  </div>
+                )}
+              </div>
 
               {/* Book Content */}
-              <CardContent sx={{ flex: 1, p: 2, pt: 1 }}>
+              <div className="flex-1 p-5 pt-3 flex flex-col">
                 {/* Title and Author */}
-                <Box mb={1.5}>
-                  <Typography
-                    variant="h6"
-                    fontWeight={700}
-                    gutterBottom
-                    sx={{
-                      lineClamp: 2,
-                      overflow: "hidden",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      color: "text.primary",
-                      fontSize: "1rem",
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {book.title}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary"
-                    sx={{ fontWeight: 500, fontSize: "0.85rem" }}
-                  >
-                    {book.author}
-                  </Typography>
-                </Box>
+                <div className="mb-4">
+                  <h3
+                    className="text-base font-bold text-slate-900 leading-snug mb-1 line-clamp-2 hover:text-indigo-600 transition-colors cursor-pointer"
+                    title={book.title}
+              >
+                {book.title}
+                  </h3>
+                  <p className="text-sm font-semibold text-slate-600">{book.author}</p>
+                </div>
 
                 {/* Progress Section */}
-                <Box mb={1.5}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.75rem" }}>
-                      Postęp
-                    </Typography>
-                    <Typography variant="caption" fontWeight={700} color="primary.main" sx={{ fontSize: "0.75rem" }}>
-                      {book.readPages} / {book.overallPages}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={Math.min(
-                      ((book.readPages ?? 0) / (book.overallPages ?? 1)) * 100,
-                      100,
-                    )}
-                    sx={{
-                      height: 6,
-                      borderRadius: 3,
-                      mb: 0.5,
-                      bgcolor: "rgba(0,0,0,0.1)",
-                      "& .MuiLinearProgress-bar": {
-                        background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                        borderRadius: 3,
-                      },
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: "0.7rem" }}>
-                    {Math.round(
-                      ((book.readPages ?? 0) / (book.overallPages ?? 1)) * 100,
-                    )}
-                    % ukończone
-                  </Typography>
-                </Box>
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Postęp</span>
+                    <div className="flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-lg">
+                      <span className="text-xs font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        {book.readPages}
+                      </span>
+                      <span className="text-xs text-slate-500 font-semibold">/</span>
+                      <span className="text-xs font-bold text-slate-600">{book.overallPages}</span>
+                    </div>
+                  </div>
+                  <div className="relative h-2 bg-indigo-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full transition-all duration-500 ${
+                        isHovered ? 'shadow-[0_0_12px_rgba(99,102,241,0.6)]' : ''
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                    <div
+                      className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-3 border-indigo-600 rounded-full shadow-md shadow-indigo-400 transition-all duration-300 ${
+                        isHovered ? 'opacity-100' : 'opacity-0'
+                      }`}
+                      style={{ left: `${progress}%`, transform: `translate(-50%, -50%)` }}
+                    />
+                  </div>
+                  <span className="text-xs text-slate-600 font-semibold mt-1 block">
+                    {Math.round(progress)}% ukończone
+                  </span>
+                </div>
 
                 {/* Rating Section */}
-                <Box mb={2}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.75rem" }}>
-                      Ocena
-                    </Typography>
-                    <Typography variant="caption" fontWeight={700} color="primary.main" sx={{ fontSize: "0.75rem" }}>
-                      {book.rating}/10
-                    </Typography>
-                  </Box>
-                  <Box display="flex" justifyContent="center">
-                    <Rating
-                      name={`book-rating-${book.id}`}
-                      value={book.rating}
-                      max={10}
-                      precision={0.5}
-                      size="small"
-                      sx={{ "& .MuiRating-icon": { fontSize: "1rem" } }}
-                      onChange={(_, newValue) =>
-                        handleBookUpdate(book.id, {
-                          ...book,
-                          rating: newValue ?? book.rating,
-                        })
-                      }
-                      icon={<StarIcon sx={{ color: "#FFD700" }} />}
-                      emptyIcon={<StarBorderIcon sx={{ color: "#E0E0E0" }} />}
-                    />
-                  </Box>
-                </Box>
+                <div className="mb-5">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Ocena</span>
+                    <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg">
+                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      <span className="text-xs font-extrabold text-amber-600">{book.rating}/10</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-center gap-0.5">
+                    {Array.from({ length: 10 }).map((_, i) => {
+                      const filled = i < Math.floor(book.rating);
+                      const half = i === Math.floor(book.rating) && book.rating % 1 >= 0.5;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => handleRatingChange(book.id, i + 1)}
+                          className="hover:scale-125 transition-transform duration-200"
+                        >
+                          <Star
+                            className={`w-4 h-4 ${
+                              filled || half ? 'text-amber-500 fill-amber-500' : 'text-slate-300'
+                            }`}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
                 {/* Action Buttons */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 0.5,
-                    mt: "auto",
-                  }}
-                >
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    startIcon={<DeleteIcon sx={{ fontSize: "1rem" }} />}
-                    onClick={() => handleBookDelete(book.id)}
-                    aria-label={`Usuń książkę ${book.title}`}
-                    sx={{
-                      flex: 1,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 2,
-                      py: 0.5,
-                      fontSize: "0.75rem",
-                    }}
+                <div className="flex gap-2 mt-auto">
+                  <button
+                    onClick={() => handleDelete(book.id)}
+                    className="flex-1 px-3 py-2 border-2 border-red-500 text-red-600 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-200 transition-all duration-200 flex items-center justify-center gap-1"
                   >
+                    <Trash2 className="w-4 h-4" />
                     Usuń
-                  </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<EditIcon sx={{ fontSize: "1rem" }} />}
-                    onClick={() =>
-                      handleBookModalOpen({ mode: "edit", bookId: book.id })
-                    }
-                    aria-label={`Edytuj książkę ${book.title}`}
-                    sx={{
-                      flex: 1,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 2,
-                      py: 0.5,
-                      fontSize: "0.75rem",
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      "&:hover": {
-                        background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                        transform: "translateY(-1px)",
-                      },
-                      transition: "all 0.2s ease",
-                    }}
+                  </button>
+                  <button
+                    onClick={() => handleEdit(book.id)}
+                    className="flex-1 px-3 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-300 transition-all duration-200 flex items-center justify-center gap-1"
                   >
+                    <Edit className="w-4 h-4" />
                     Edytuj
-                  </Button>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuOpen(e, book.id)}
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                      minWidth: 32,
-                      height: 32,
-                    }}
-                  >
-                    <MoreVertIcon sx={{ fontSize: "1rem" }} />
-                  </IconButton>
-                </Box>
-              </CardContent>
-
-              {/* Context Menu */}
-              <Menu
-                anchorEl={anchorEl[book.id]}
-                open={Boolean(anchorEl[book.id])}
-                onClose={() => handleMenuClose(book.id)}
-                PaperProps={{
-                  sx: {
-                    borderRadius: 2,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-                    border: "1px solid rgba(0,0,0,0.05)",
-                    minWidth: 160,
-                  },
-                }}
-              >
-                <MenuItem
-                  onClick={() => {
-                    handleMenuClose(book.id);
-                    handleStatusChange(book.id, book.read);
-                  }}
-                >
-                  <ListItemIcon>
-                    <BookmarkIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Zmień status</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleMenuClose(book.id);
-                    handleShare(book);
-                  }}
-                >
-                  <ListItemIcon>
-                    <ShareIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Udostępnij</ListItemText>
-                </MenuItem>
-                <Divider />
-                <MenuItem
-                  onClick={() => {
-                    handleMenuClose(book.id);
-                    handleBookDelete(book.id);
-                  }}
-                  sx={{ color: "error.main" }}
-                >
-                  <ListItemIcon>
-                    <DeleteIcon fontSize="small" color="error" />
-                  </ListItemIcon>
-                  <ListItemText>Usuń książkę</ListItemText>
-                </MenuItem>
-              </Menu>
-            </Card>
-          </Zoom>
-        </Grid>
-      ))}
-    </Grid>
+                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setOpenMenu(openMenu === book.id ? null : book.id)}
+                      className={`w-10 h-10 border-2 border-slate-300 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 flex items-center justify-center transition-all duration-200 ${
+                        openMenu === book.id ? 'rotate-90 bg-indigo-50 border-indigo-500' : ''
+                      }`}
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                    
+                    {/* Context Menu */}
+                    {openMenu === book.id && (
+                      <div className="absolute right-0 top-12 w-44 bg-white rounded-xl shadow-2xl border border-slate-200 py-1 z-50 animate-in fade-in zoom-in duration-200">
+                        <button 
+                          onClick={() => {
+                            const statuses: BookStatus[] = ['W trakcie', 'Przeczytana', 'Porzucona'];
+                            const currentIndex = statuses.indexOf(book.read);
+                            const nextIndex = (currentIndex + 1) % statuses.length;
+                            handleStatusChange(book.id, statuses[nextIndex]);
+                            setOpenMenu(null);
+                          }}
+                          className="w-full px-4 py-3 hover:bg-indigo-50 flex items-center gap-3 text-sm font-semibold text-slate-700 transition-colors"
+                        >
+                          <Bookmark className="w-4 h-4 text-indigo-600" />
+                          Zmień status
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleShare(book);
+                            setOpenMenu(null);
+                          }}
+                          className="w-full px-4 py-3 hover:bg-indigo-50 flex items-center gap-3 text-sm font-semibold text-slate-700 transition-colors"
+                        >
+                          <Share2 className="w-4 h-4 text-indigo-600" />
+                          Udostępnij
+                        </button>
+                        <div className="h-px bg-slate-200 my-1" />
+                        <button
+                          onClick={() => handleDelete(book.id)}
+                          className="w-full px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm font-semibold text-red-600 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Usuń książkę
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
   );
-});
-
-BookList.displayName = "BookList";
-
-export default BookList;
+}

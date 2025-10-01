@@ -59,9 +59,6 @@ const Navbar: React.FC = () => {
       position="sticky"
       elevation={0}
       sx={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        backdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
         display: { xs: "none", md: "block" },
       }}
     >
@@ -120,7 +117,7 @@ const Navbar: React.FC = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon sx={{ 
-                      color: "rgba(255, 255, 255, 0.7)",
+
                       fontSize: 20
                     }} />
                   </InputAdornment>
@@ -133,23 +130,6 @@ const Navbar: React.FC = () => {
                   transition: "all 0.2s ease",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
-                  },
-                  "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.5)",
-                    border: "1px solid rgba(255, 255, 255, 0.6)",
-                  },
-                  "&.Mui-focused": {
-                    bgcolor: "rgba(255, 255, 255, 0.6)",
-                    border: "1px solid rgba(255, 255, 255, 0.7)",
-                    boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.3)",
-                  },
-                  "& input": {
-                    color: "white",
-                    fontSize: "0.9rem",
-                    "&::placeholder": {
-                      color: "rgba(255, 255, 255, 0.8)",
-                      opacity: 1,
-                    },
                   },
                 },
               }}
