@@ -1,7 +1,10 @@
 import React from "react";
 import { GENRES } from "../../constants/genres";
-import type { Book } from "../../types/Book";
+import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
+import type { Book, BookStatus, BookFormData } from "../../types/Book";
 import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { bookFormSchema } from "../../schemas/bookSchema";
 import {
   Box,
   Button,
@@ -14,6 +17,7 @@ import {
   Autocomplete,
   Divider,
   Rating,
+  Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -31,7 +35,7 @@ import CloseIcon from "@mui/icons-material/Close";
 type Props = {
   mode: "add" | "edit";
   bookToEdit?: Book | null;
-  handleBookSubmit?: (data: Book) => void;
+  handleBookSubmit?: (data: BookFormData) => void;
   handleBookUpdate?: (bookId: string, newBook: Book) => void;
   handleBookModalOpen: (params: {
     mode: "add" | "edit";
@@ -49,10 +53,9 @@ const genreOptions = Object.entries(GENRES)
   }));
 
 const DEFAULT_VALUES = {
-  id: "",
   title: "",
   author: "",
-  read: "",
+  read: "W trakcie" as BookStatus,
   genre: "",
   readPages: 0,
   overallPages: 1,
@@ -68,18 +71,19 @@ const BookForm: React.FC<Props> = ({
   handleBookModalClose,
   isFormVisible,
 }) => {
-  const { control, handleSubmit, reset } = useForm<Book>({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+    resolver: zodResolver(bookFormSchema),
     defaultValues: mode === "edit" && bookToEdit ? bookToEdit : DEFAULT_VALUES,
   });
 
-  const onSubmit = (data: Book) => {
+  const onSubmit = (data: any) => {
     if (mode === "add") {
       const result = handleBookSubmit?.(data);
       if (result) {
         handleBookModalClose();
       }
     } else if (mode === "edit") {
-      const result = handleBookUpdate?.(bookToEdit?.id || "", data);
+      const result = handleBookUpdate?.(bookToEdit?.id || "", data as Book);
       if (result) {
         handleBookModalClose();
       }
@@ -120,6 +124,11 @@ const BookForm: React.FC<Props> = ({
           onSubmit={handleSubmit(onSubmit)}
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
         >
+          {Object.keys(errors).length > 0 && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              Proszę poprawić błędy w formularzu
+            </Alert>
+          )}
           <Controller
             name="title"
             control={control}
@@ -130,6 +139,8 @@ const BookForm: React.FC<Props> = ({
                 label="Tytuł"
                 variant="outlined"
                 fullWidth
+                error={!!errors.title}
+                helperText={errors.title?.message}
               />
             )}
           />
@@ -143,6 +154,8 @@ const BookForm: React.FC<Props> = ({
                 required
                 variant="outlined"
                 fullWidth
+                error={!!errors.author}
+                helperText={errors.author?.message}
               />
             )}
           />
@@ -157,13 +170,14 @@ const BookForm: React.FC<Props> = ({
                 label="Status"
                 variant="outlined"
                 fullWidth
+                error={!!errors.read}
+                helperText={errors.read?.message}
               >
-                <MenuItem value="" disabled>
-                  Wybierz status
-                </MenuItem>
-                <MenuItem value="W trakcie">W trakcie</MenuItem>
-                <MenuItem value="Przeczytana">Przeczytana</MenuItem>
-                <MenuItem value="Porzucona">Porzucona</MenuItem>
+                {BOOK_STATUSES.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {BOOK_STATUS_LABELS[status]}
+                  </MenuItem>
+                ))}
               </TextField>
             )}
           />
@@ -186,6 +200,8 @@ const BookForm: React.FC<Props> = ({
                     label="Gatunek"
                     variant="outlined"
                     fullWidth
+                    error={!!errors.genre}
+                    helperText={errors.genre?.message}
                   />
                 )}
               />
@@ -203,6 +219,9 @@ const BookForm: React.FC<Props> = ({
                   inputProps={{ min: 0, max: 5000 }}
                   variant="outlined"
                   fullWidth
+                  error={!!errors.readPages}
+                  helperText={errors.readPages?.message}
+                  onChange={(e) => field.onChange(e.target.value === '' ? 0 : Number(e.target.value))}
                 />
               )}
             />
@@ -218,6 +237,9 @@ const BookForm: React.FC<Props> = ({
                   inputProps={{ min: 1, max: 5000 }}
                   variant="outlined"
                   fullWidth
+                  error={!!errors.overallPages}
+                  helperText={errors.overallPages?.message}
+                  onChange={(e) => field.onChange(e.target.value === '' ? 1 : Number(e.target.value))}
                 />
               )}
             />
@@ -240,7 +262,7 @@ const BookForm: React.FC<Props> = ({
                   size="large"
                   name="star-rating"
                   max={10}
-                  value={field.value}
+                  value={Number(field.value)}
                   onChange={(_, value) => field.onChange(value ?? 0)}
                 />
               )}
@@ -256,6 +278,8 @@ const BookForm: React.FC<Props> = ({
                 variant="outlined"
                 fullWidth
                 inputProps={{ "data-testid": "cover-input" }}
+                error={!!errors.cover}
+                helperText={errors.cover?.message}
               />
             )}
           />
