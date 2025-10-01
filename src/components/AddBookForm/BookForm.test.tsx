@@ -20,8 +20,8 @@ const mockBookModalOpen = jest.fn();
 const mockBookModalClose = jest.fn();
 
 describe("BookForm", () => {
-  test.only("renders form fields", () => {
-    const { container } = render(
+  test("renders form fields", () => {
+    render(
       <BookForm
         handleBookSubmit={mockOnSubmit}
         mode="add"
