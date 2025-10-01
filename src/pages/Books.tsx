@@ -1,18 +1,30 @@
-import { useEffect, useMemo, useState } from "react";
-import BookForm from "../components/AddBookForm/BookForm";
-import BookList from "../components/BookList";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { 
+  BookList, 
+  BottomNav, 
+  ErrorDisplay, 
+  LoadingSpinner, 
+  FilterSortPanel,
+  StatisticsDashboard,
+  PageHeader,
+  BookForms,
+} from "../components";
 import { useBooks } from "../hooks/useBooks";
 import { useSearch } from "../hooks/useSearch";
-import BottomNav from "../components/BottomNav";
+import type { Book } from "../types/Book";
+import { Box, Container } from "@mui/material";
 
 const Books = () => {
   const {
     books,
     loading,
+    error,
+    booksStats,
     handleBookDelete,
     handleBookUpdate,
     handleStatusChange,
     handleBookSubmit,
+    refetch,
   } = useBooks();
 
   const [isEditing, setIsEditing] = useState<{
@@ -25,116 +37,162 @@ const Books = () => {
     bookId: null,
   });
 
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
   const searchContext = useSearch();
 
   useEffect(() => {
-    if (isEditing.status) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    // Check if document and body exist before manipulating styles
+    if (typeof document !== 'undefined' && document.body) {
+      if (isEditing.status) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
     }
 
     // Cleanup: restores scroll when the component is removed from the DOM
     return () => {
-      document.body.style.overflow = "";
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.style.overflow = "";
+      }
     };
   }, [isEditing.status]);
 
   // Filter books based on searchTerm
-  const filteredBooks = useMemo(() => {
+  const searchFilteredBooks = useMemo(() => {
     if (searchContext?.searchTerm) {
-      return books.filter((book) =>
+      return filteredBooks.filter((book) =>
         book.title
           .toLowerCase()
-          .includes(searchContext.searchTerm.toLowerCase()),
+          .includes(searchContext.searchTerm.toLowerCase()) ||
+        book.author
+          .toLowerCase()
+          .includes(searchContext.searchTerm.toLowerCase())
       );
     }
-    return books;
-  }, [books, searchContext?.searchTerm]);
+    return filteredBooks;
+  }, [filteredBooks, searchContext?.searchTerm]);
 
-  const handleBookModalOpen = ({
+  // Update filtered books when books change
+  useEffect(() => {
+    setFilteredBooks(books);
+  }, [books]);
+
+  // Calculate additional statistics
+  const additionalStats = useMemo(() => {
+    if (books.length === 0) return null;
+
+    const totalPages = books.reduce((sum, book) => sum + Number(book.overallPages || 0), 0);
+    const readPages = books.reduce((sum, book) => sum + Number(book.readPages || 0), 0);
+    
+    // Calculate average rating only from books with ratings > 0
+    const booksWithRatings = books.filter(book => book.rating > 0);
+    const averageRating = booksWithRatings.length > 0 
+      ? booksWithRatings.reduce((sum, book) => sum + Number(book.rating), 0) / booksWithRatings.length 
+      : 0;
+    
+    // Completion rate: percentage of books that are marked as "Przeczytana"
+    const completionRate = booksStats.total > 0 ? (booksStats.read / booksStats.total) * 100 : 0;
+    
+    // Progress rate: percentage of pages read across all books
+    const progressRate = totalPages > 0 ? (readPages / totalPages) * 100 : 0;
+
+    return {
+      totalPages,
+      readPages,
+      averageRating: Math.round(averageRating * 10) / 10,
+      completionRate: Math.round(completionRate),
+      progressRate: Math.round(progressRate),
+    };
+  }, [books, booksStats]);
+
+  const handleBookModalOpen = useCallback(({
     bookId,
     mode,
   }: {
     bookId: string | null;
     mode: "add" | "edit";
   }) => {
-    if (mode === "edit") {
-      console.log("Opening edit modal for book:", bookId);
-
       setIsEditing({
         mode: mode,
         status: true,
         bookId: bookId,
       });
-    } else {
-      console.log("Opening add modal");
-      setIsEditing({
-        mode: mode,
-        status: true,
-        bookId: null,
-      });
-    }
-  };
+  }, []);
 
-  const handleBookModalClose = () => {
-    console.log("Closing modal for book:");
+  const handleBookModalClose = useCallback(() => {
     setIsEditing((prev) => ({ ...prev, status: false }));
-  };
+  }, []);
 
-  console.log("Current editing state:", isEditing);
+  if (loading) {
+    return <LoadingSpinner message="Ładowanie książek..." fullScreen />;
+  }
 
   return (
-    <div className="flex flex-col rounded-lg bg-white">
-      {/* Add a button to toggle the form visibility */}
-      <button
-        className="m-4 hidden cursor-pointer rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none md:flex"
-        onClick={() => handleBookModalOpen({ mode: "add", bookId: null })}
-      >
-        {!isEditing.status && isEditing.mode === "add"
-          ? "Ukryj formularz"
-          : "Dodaj książkę"}
-      </button>
-
-      {/* Add a book form */}
-      {isEditing.status && isEditing.mode === "add" && (
-        <BookForm
-          mode="add"
-          handleBookSubmit={handleBookSubmit}
-          handleBookModalOpen={handleBookModalOpen}
-          handleBookModalClose={handleBookModalClose}
-          isFormVisible={isEditing.status}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        py: 2,
+      }}
+    >
+      <Container maxWidth="xl">
+        <ErrorDisplay error={error} onRetry={refetch} />
+        
+        {/* Page Header */}
+        <PageHeader
+          isFilterPanelOpen={isFilterPanelOpen}
+          onFilterToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+          onAddBook={() => handleBookModalOpen({ mode: "add", bookId: null })}
         />
-      )}
 
-      {/* Edit Book Form */}
-      {isEditing.status && isEditing.bookId && isEditing.mode === "edit" && (
-        <BookForm
-          mode="edit"
-          bookToEdit={
-            books.find((book) => book.id === isEditing.bookId) || null
-          }
+        {/* Statistics Dashboard */}
+        {booksStats.total > 0 && additionalStats && (
+          <StatisticsDashboard
+            booksStats={booksStats}
+            additionalStats={additionalStats}
+          />
+        )}
+
+        {/* Filter and Sort Panel */}
+        {books.length > 0 && (
+          <FilterSortPanel
+            books={books}
+            onFilterChange={setFilteredBooks}
+            isOpen={isFilterPanelOpen}
+            onToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+          />
+        )}
+
+        {/* Book Forms */}
+        <BookForms
+          isEditing={isEditing}
+          books={books}
           handleBookSubmit={handleBookSubmit}
           handleBookUpdate={handleBookUpdate}
           handleBookModalOpen={handleBookModalOpen}
           handleBookModalClose={handleBookModalClose}
-          isFormVisible={isEditing.status}
         />
-      )}
 
-      <BookList
-        loading={loading}
-        books={filteredBooks}
-        handleStatusChange={handleStatusChange}
-        handleBookUpdate={handleBookUpdate}
-        handleBookDelete={handleBookDelete}
-        handleBookModalOpen={handleBookModalOpen}
-        handleBookModalClose={handleBookModalClose}
-      />
+        {/* Books List */}
+        <Box>
+          <BookList
+            loading={loading}
+            books={searchFilteredBooks}
+            handleStatusChange={handleStatusChange}
+            handleBookUpdate={handleBookUpdate}
+            handleBookDelete={handleBookDelete}
+            handleBookModalOpen={handleBookModalOpen}
+            handleBookModalClose={handleBookModalClose}
+          />
+        </Box>
 
-      {/* Fixed add book button */}
-      <BottomNav handleBookModalOpen={handleBookModalOpen} />
-    </div>
+        {/* Fixed add book button */}
+        <BottomNav handleBookModalOpen={handleBookModalOpen} />
+      </Container>
+    </Box>
   );
 };
 

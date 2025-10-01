@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import type { Book } from "../types/Book";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import type { Book, BookStatus } from "../types/Book";
+import type { ErrorType } from "../types/Error";
+import { getNextBookStatus } from "../constants/bookStatus";
 
 import {
   getUserBooksData,
@@ -9,111 +11,138 @@ import {
 } from "../services/booksService";
 import { useUser } from "../hooks/useUser";
 
+/**
+ * Custom hook for managing books data and operations
+ * 
+ * @returns Object containing books data, loading state, error state, statistics, and CRUD operations
+ * @example
+ * ```tsx
+ * const { books, loading, error, booksStats, handleBookSubmit } = useBooks();
+ * ```
+ */
 export const useBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<ErrorType | null>(null);
   const userContext = useUser();
   const userId = userContext.user?.uid;
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        if (userId) {
-          const userBooks = await getUserBooksData(userId);
-          setBooks(userBooks);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Failed to fetch books:", error);
-      }
-    };
-    fetchBooks();
+  const fetchBooks = useCallback(async () => {
+    if (!userId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const userBooks = await getUserBooksData(userId);
+      setBooks(userBooks);
+    } catch (error) {
+      console.error("Failed to fetch books:", error);
+      setError(error as ErrorType);
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
 
-  const handleBookDelete = (bookId: string) => {
-    const bookToDelete = books.find((book) => book.id === bookId);
-    if (bookToDelete) {
-      deleteBook(bookToDelete.id)
-        .then(() => {
-          const updatedBooks = books.filter((book) => book.id !== bookId);
-          setBooks(updatedBooks);
-        })
-        .catch((error) => {
-          console.error("Failed to delete book:", error);
-        });
-    }
-  };
+  useEffect(() => {
+    fetchBooks();
+  }, [fetchBooks]);
 
-  const handleBookUpdate = async (
+  const handleBookDelete = useCallback(async (bookId: string) => {
+    try {
+      setError(null);
+      await deleteBook(bookId);
+      setBooks(prevBooks => prevBooks.filter((book) => book.id !== bookId));
+    } catch (error) {
+      console.error("Failed to delete book:", error);
+      setError(error as ErrorType);
+    }
+  }, []);
+
+  const handleBookUpdate = useCallback(async (
     bookId: string,
     updatedData: Partial<Book>,
   ) => {
-    const bookToEdit = books.find((book) => book.id === bookId);
-    if (bookToEdit) {
-      const updatedBooks = books.map((book) =>
-        book.id === bookId ? { ...book, ...updatedData } : book,
-      );
+    try {
+      setError(null);
       const result = await updateBook(bookId, updatedData);
-      setBooks(updatedBooks);
+      setBooks(prevBooks => 
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, ...updatedData } : book,
+        )
+      );
       return result;
+    } catch (error) {
+      console.error("Failed to update book:", error);
+      setError(error as ErrorType);
+      return false;
     }
-  };
+  }, []);
 
-  const handleStatusChange = async (bookId: string, newStatus: string) => {
-    const statuses = ["W trakcie", "Przeczytana", "Porzucona"];
-    const nextStatus =
-      statuses[(statuses.indexOf(newStatus) + 1) % statuses.length];
+  const handleStatusChange = useCallback(async (bookId: string, currentStatus: BookStatus) => {
+    try {
+      setError(null);
+      const nextStatus = getNextBookStatus(currentStatus);
+      await updateBook(bookId, { read: nextStatus });
+      setBooks(prevBooks => 
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, read: nextStatus } : book,
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update book status:", error);
+      setError(error as ErrorType);
+    }
+  }, []);
 
-    const updatedBooks = books.map((book) =>
-      book.id === bookId ? { ...book, read: nextStatus } : book,
-    );
-    await updateBook(bookId, { read: nextStatus });
-    setBooks(updatedBooks);
-  };
+  const handleBookSubmit = useCallback(async (book: import("../types/Book").BookFormData) => {
+    if (!userId) {
+      setError({ code: "VALIDATION_ERROR", message: "User not authenticated" });
+      return false;
+    }
 
-  const handleBookSubmit = async (book: Book) => {
-    const createdAt = new Date().toISOString();
-    const newBook: Omit<Book, "id"> = {
-      title: book.title,
-      author: book.author,
-      read: book.read,
-      overallPages: book.overallPages,
-      readPages: book.readPages,
-      cover: book.cover,
-      genre: book.genre,
-      rating: book.rating,
-    };
-    if (
-      newBook.title &&
-      newBook.author &&
-      newBook.read &&
-      newBook.overallPages
-    ) {
-      if (userId) {
-        const newBookId = await addBook({
-          ...newBook,
-          userId: userId,
-          createdAt: createdAt,
-        });
+    try {
+      setError(null);
+      const createdAt = new Date().toISOString();
+      const newBookId = await addBook({
+        ...book,
+        userId: userId,
+        createdAt: createdAt,
+      });
 
-        if (newBookId) {
-          setBooks([
-            { ...newBook, id: newBookId, createdAt: createdAt },
-            ...books,
-          ]);
-        }
+      if (newBookId) {
+        setBooks(prevBooks => [
+          { ...book, id: newBookId, createdAt: createdAt },
+          ...prevBooks,
+        ]);
         return true;
       }
+      return false;
+    } catch (error) {
+      console.error("Failed to add book:", error);
+      setError(error as ErrorType);
+      return false;
     }
-    // e.target.reset();
-  };
+  }, [userId]);
+
+  // Memoized computed values
+  const booksStats = useMemo(() => {
+    const total = books.length;
+    const read = books.filter(book => book.read === "Przeczytana").length;
+    const inProgress = books.filter(book => book.read === "W trakcie").length;
+    const dropped = books.filter(book => book.read === "Porzucona").length;
+    
+    return { total, read, inProgress, dropped };
+  }, [books]);
 
   return {
     books,
     loading,
+    error,
+    booksStats,
     handleBookDelete,
     handleBookUpdate,
     handleStatusChange,
     handleBookSubmit,
+    refetch: fetchBooks,
   };
 };
