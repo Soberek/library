@@ -41,8 +41,10 @@ const StatisticsDashboard: React.FC<StatisticsDashboardProps> = ({
       <Box sx={{ mb: 4 }}>
         <StatisticsHeader />
         
-        {/* Main Statistics - Always Visible */}
-        <StatisticsGrid booksStats={booksStats} additionalStats={additionalStats} />
+        {/* Main Statistics - Hidden by default */}
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+          <StatisticsGrid booksStats={booksStats} additionalStats={additionalStats} />
+        </Collapse>
         
         {/* Collapsible Section */}
         <Box sx={{ mt: 2 }}>
@@ -87,7 +89,7 @@ const StatisticsDashboard: React.FC<StatisticsDashboardProps> = ({
                   textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                 }}
               >
-                Szczegółowe statystyki
+                Statystyki
               </Typography>
             </Box>
             <IconButton
