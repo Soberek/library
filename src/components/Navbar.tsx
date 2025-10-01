@@ -112,7 +112,7 @@ const Navbar: React.FC = () => {
             <TextField
               value={searchContext?.searchTerm || ""}
               onChange={(e) => searchContext?.setSearchTerm(e.target.value)}
-              placeholder="Szukaj książek po tytule lub autorze..."
+              placeholder="Szukaj książek..."
               variant="outlined"
               size="small"
               fullWidth
@@ -120,42 +120,35 @@ const Navbar: React.FC = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon sx={{ 
-                      color: "rgba(255, 255, 255, 0.8)",
-                      fontSize: 20,
-                      transition: "all 0.2s ease"
+                      color: "rgba(255, 255, 255, 0.7)",
+                      fontSize: 20
                     }} />
                   </InputAdornment>
                 ),
                 sx: {
-                  bgcolor: "rgba(255, 255, 255, 0.12)",
-                  borderRadius: 4,
-                  backdropFilter: "blur(20px)",
-                  border: "1px solid rgba(255, 255, 255, 0.25)",
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: 2,
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  transition: "all 0.2s ease",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
                   "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.18)",
-                    border: "1px solid rgba(255, 255, 255, 0.35)",
-                    boxShadow: "0 6px 25px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
-                    transform: "translateY(-1px)",
+                    bgcolor: "rgba(255, 255, 255, 0.15)",
+                    border: "1px solid rgba(255, 255, 255, 0.3)",
                   },
                   "&.Mui-focused": {
-                    bgcolor: "rgba(255, 255, 255, 0.22)",
+                    bgcolor: "rgba(255, 255, 255, 0.2)",
                     border: "1px solid rgba(255, 255, 255, 0.4)",
-                    boxShadow: "0 8px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
-                    transform: "translateY(-1px)",
+                    boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.1)",
                   },
                   "& input": {
                     color: "white",
-                    fontWeight: 500,
-                    fontSize: "0.95rem",
+                    fontSize: "0.9rem",
                     "&::placeholder": {
-                      color: "rgba(255, 255, 255, 0.75)",
+                      color: "rgba(255, 255, 255, 0.6)",
                       opacity: 1,
-                      fontWeight: 400,
                     },
                   },
                 },
