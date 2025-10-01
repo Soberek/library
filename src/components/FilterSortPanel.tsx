@@ -269,7 +269,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   value={filters.sortBy}
                   label="Sortuj według"
                   onChange={(e) =>
-                    setFilters(prev => ({ ...prev, sortBy: e.target.value as "title" | "author" | "rating" | "createdAt" }))
+                    setFilters(prev => ({ ...prev, sortBy: e.target.value as "title" | "author" | "rating" | "pages" | "dateAdded" }))
                   }
                 >
                   <MenuItem value="dateAdded">Data dodania</MenuItem>

@@ -1,6 +1,6 @@
 import React from "react";
 import { BookForm } from ".";
-import type { Book } from "../types/Book";
+import type { Book, BookFormData } from "../types/Book";
 
 interface BookFormsProps {
   isEditing: {
