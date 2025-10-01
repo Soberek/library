@@ -27,7 +27,6 @@ interface BookListProps {
   handleBookUpdate: (bookId: string, updatedBook: Partial<Book>) => void;
   handleBookDelete: (bookId: string) => void;
   handleBookModalOpen: (params: { mode: 'add' | 'edit'; bookId: string | null }) => void;
-  handleBookModalClose: () => void;
 }
 
 export default function BookList({
@@ -37,7 +36,6 @@ export default function BookList({
   handleBookUpdate,
   handleBookDelete,
   handleBookModalOpen,
-  handleBookModalClose,
 }: BookListProps) {
   const [favoriteBooks, setFavoriteBooks] = useState<Set<string>>(new Set());
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
