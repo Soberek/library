@@ -80,14 +80,17 @@ export const useBooks = () => {
 
   const handleStatusChange = useCallback(async (bookId: string, currentStatus: BookStatus) => {
     try {
+      console.log('handleStatusChange called:', bookId, currentStatus);
       setError(null);
       const nextStatus = getNextBookStatus(currentStatus);
+      console.log('Next status will be:', nextStatus);
       await updateBook(bookId, { read: nextStatus });
       setBooks(prevBooks => 
         prevBooks.map((book) =>
           book.id === bookId ? { ...book, read: nextStatus } : book,
         )
       );
+      console.log('Status updated successfully');
     } catch (error) {
       console.error("Failed to update book status:", error);
       setError(error as ErrorType);

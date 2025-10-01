@@ -211,10 +211,16 @@ export default function BookList({
 
                 {/* Status Badge */}
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Status chip clicked:', book.id, 'Current status:', book.read);
                     handleStatusChange(book.id, book.read);
                   }}
-                  className={`absolute top-6 left-6 ${statusColors[book.read]} px-3 py-1 rounded-lg text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm hover:scale-105 transition-all duration-200 cursor-pointer`}
+                  onMouseEnter={() => console.log('Status chip hovered:', book.id)}
+                  onMouseLeave={() => console.log('Status chip mouse left:', book.id)}
+                  className={`absolute top-6 left-6 ${statusColors[book.read]} px-3 py-1 rounded-lg text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm hover:scale-105 transition-all duration-200 cursor-pointer z-50`}
+                  style={{ zIndex: 999 }}
                   title="Kliknij, aby zmienić status"
                 >
                   {BOOK_STATUS_LABELS[book.read]}
