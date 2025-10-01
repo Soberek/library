@@ -3,15 +3,14 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { UserProvider } from "./providers/UserContext.tsx";
 
-import { ThemeProvider } from "@mui/material";
 import { SearchProvider } from "./providers/SearchProvider.tsx";
-import theme from "./providers/ThemeProvider.tsx";
+import { ThemeProvider } from "./theme";
 import RouterProviderWrapper from "./providers/RouterProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <UserProvider>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider>
         <SearchProvider>
           <RouterProviderWrapper />
         </SearchProvider>

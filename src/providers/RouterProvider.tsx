@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NotFound from "../pages/NotFound";
-import ProtectedRoute from "../components/ProtectedRoute";
+import { ProtectedRoute } from "../components";
 import App from "../App";
 import SignUp from "../pages/SignUp";
 import SignIn from "../pages/SignIn";

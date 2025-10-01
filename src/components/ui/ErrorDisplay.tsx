@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, AlertTitle, Button, Box } from "@mui/material";
-import type { ErrorType } from "../types/Error";
-import { ERROR_MESSAGES } from "../constants/validation";
+import type { ErrorType } from "../../types/Error";
+import { ERROR_MESSAGES } from "../../constants/validation";
 
 /**
  * Props for the ErrorDisplay component

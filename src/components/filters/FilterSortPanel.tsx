@@ -19,9 +19,9 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import ClearIcon from "@mui/icons-material/Clear";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../constants/bookStatus";
-import { GENRES } from "../constants/genres";
-import type { Book, BookStatus } from "../types/Book";
+import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
+import { GENRES } from "../../constants/genres";
+import type { Book, BookStatus } from "../../types/Book";
 
 interface FilterSortPanelProps {
   books: Book[];
@@ -231,7 +231,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   }
                 >
                   <MenuItem value="all">Wszystkie</MenuItem>
-                  {BOOK_STATUSES.map((status) => (
+                  {BOOK_STATUSES.map((status: BookStatus) => (
                     <MenuItem key={status} value={status}>
                       {BOOK_STATUS_LABELS[status]}
                     </MenuItem>
@@ -252,7 +252,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   }
                 >
                   <MenuItem value="all">Wszystkie</MenuItem>
-                  {genreOptions.map((option) => (
+                  {genreOptions.map((option: { value: string; label: string }) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>

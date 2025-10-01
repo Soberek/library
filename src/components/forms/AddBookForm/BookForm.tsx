@@ -1,10 +1,10 @@
 import React from "react";
-import { GENRES } from "../../constants/genres";
-import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
-import type { Book, BookStatus, BookFormData } from "../../types/Book";
+import { GENRES } from "../../../constants/genres";
+import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../../constants/bookStatus";
+import type { Book, BookStatus, BookFormData } from "../../../types/Book";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { bookFormSchema } from "../../schemas/bookSchema";
+import { bookFormSchema } from "../../../schemas/bookSchema";
 import {
   Box,
   Button,
@@ -173,7 +173,7 @@ const BookForm: React.FC<Props> = ({
                 error={!!errors.read}
                 helperText={errors.read?.message}
               >
-                {BOOK_STATUSES.map((status) => (
+                {BOOK_STATUSES.map((status: BookStatus) => (
                   <MenuItem key={status} value={status}>
                     {BOOK_STATUS_LABELS[status]}
                   </MenuItem>
@@ -187,7 +187,7 @@ const BookForm: React.FC<Props> = ({
             render={({ field }) => (
               <Autocomplete
                 options={genreOptions}
-                getOptionLabel={(option) => option.label}
+                getOptionLabel={(option: { value: string; label: string }) => option.label}
                 onChange={(_, value) => field.onChange(value?.value)}
                 value={
                   genreOptions.find((option) => option.value === field.value) ||

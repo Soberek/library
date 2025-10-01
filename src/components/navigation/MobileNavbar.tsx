@@ -29,11 +29,11 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import { useUser } from "../hooks/useUser";
-import { useBooks } from "../hooks/useBooks";
-import { useSearch } from "../hooks/useSearch";
+import { useUser } from "../../hooks/useUser";
+import { useBooks } from "../../hooks/useBooks";
+import { useSearch } from "../../hooks/useSearch";
 import { signOut } from "firebase/auth";
-import { auth } from "../config/firebaseConfig";
+import { auth } from "../../config/firebaseConfig";
 import { Link, useNavigate } from "react-router-dom";
 
 

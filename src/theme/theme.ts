@@ -151,7 +151,6 @@ const theme = createTheme({
         root: {
           "& .MuiOutlinedInput-root": {
             borderRadius: 12,
-
             transition: "all 0.2s ease",
             "&:hover": {
               "& .MuiOutlinedInput-notchedOutline": {
