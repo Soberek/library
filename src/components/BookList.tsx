@@ -212,10 +212,7 @@ export default function BookList({
                 {/* Status Badge */}
                 <button
                   onClick={() => {
-                    const statuses: BookStatus[] = ['W trakcie', 'Przeczytana', 'Porzucona'];
-                    const currentIndex = statuses.indexOf(book.read);
-                    const nextIndex = (currentIndex + 1) % statuses.length;
-                    handleStatusChange(book.id, statuses[nextIndex]);
+                    handleStatusChange(book.id, book.read);
                   }}
                   className={`absolute top-6 left-6 ${statusColors[book.read]} px-3 py-1 rounded-lg text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm hover:scale-105 transition-all duration-200 cursor-pointer`}
                   title="Kliknij, aby zmienić status"
@@ -337,10 +334,7 @@ export default function BookList({
                       <div className="absolute right-0 top-12 w-44 bg-white rounded-xl shadow-2xl border border-slate-200 py-1 z-50 animate-in fade-in zoom-in duration-200">
                         <button 
                           onClick={() => {
-                            const statuses: BookStatus[] = ['W trakcie', 'Przeczytana', 'Porzucona'];
-                            const currentIndex = statuses.indexOf(book.read);
-                            const nextIndex = (currentIndex + 1) % statuses.length;
-                            handleStatusChange(book.id, statuses[nextIndex]);
+                            handleStatusChange(book.id, book.read);
                             setOpenMenu(null);
                           }}
                           className="w-full px-4 py-3 hover:bg-indigo-50 flex items-center gap-3 text-sm font-semibold text-slate-700 transition-colors"
