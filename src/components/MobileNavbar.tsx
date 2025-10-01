@@ -18,7 +18,6 @@ import {
   InputAdornment,
   Fade,
   Slide,
-  Tooltip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
@@ -30,7 +29,6 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import CloseIcon from "@mui/icons-material/Close";
 import { useUser } from "../hooks/useUser";
 import { useBooks } from "../hooks/useBooks";
 import { useSearch } from "../hooks/useSearch";
@@ -169,44 +167,35 @@ const MobileNavbar = () => {
         sx={{ display: { md: "none" } }}
         PaperProps={{
           sx: {
-            width: 320,
+            width: 340,
             background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-            boxShadow: "0 0 40px rgba(0,0,0,0.15)",
-            borderLeft: "1px solid rgba(0,0,0,0.05)",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+            borderLeft: "none",
+            backdropFilter: "blur(20px)",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%)",
+              pointerEvents: "none",
+              zIndex: 0,
+            },
           },
         }}
       >
         <Box
           role="presentation"
-          sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          sx={{ 
+            height: "100%", 
+            display: "flex", 
+            flexDirection: "column",
+            position: "relative",
+            zIndex: 1,
+          }}
         >
-          {/* Header with Close Button */}
-          <Box
-            sx={{
-              p: 2,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-            }}
-          >
-            <Typography variant="h6" fontWeight="700" sx={{ opacity: 0.9 }}>
-              Menu
-            </Typography>
-            <Tooltip title="Zamknij">
-              <IconButton
-                onClick={handleDrawerClose}
-                sx={{
-                  color: "white",
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
 
           {/* User Profile Section */}
           <Fade in timeout={600}>
@@ -217,6 +206,7 @@ const MobileNavbar = () => {
                 color: "white",
                 position: "relative",
                 overflow: "hidden",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
                 "&::before": {
                   content: '""',
                   position: "absolute",
@@ -227,56 +217,91 @@ const MobileNavbar = () => {
                   background: "linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
                   pointerEvents: "none",
                 },
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: "1px",
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)",
+                },
               }}
             >
-              <Box display="flex" alignItems="center" gap={2} mb={2} position="relative" zIndex={1}>
+              <Box display="flex" alignItems="center" gap={2.5} mb={2.5} position="relative" zIndex={1}>
                 <Avatar
                   sx={{
                     bgcolor: "rgba(255, 255, 255, 0.25)",
                     border: "3px solid rgba(255, 255, 255, 0.3)",
-                    width: 60,
-                    height: 60,
-                    fontSize: "1.4rem",
+                    width: 65,
+                    height: 65,
+                    fontSize: "1.5rem",
                     fontWeight: 700,
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1)",
+                    backdropFilter: "blur(10px)",
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: -2,
+                      left: -2,
+                      right: -2,
+                      bottom: -2,
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
+                      borderRadius: "50%",
+                      zIndex: -1,
+                    },
                   }}
                 >
                   {user.user?.email?.charAt(0).toUpperCase() ?? "U"}
                 </Avatar>
                 <Box>
-                  <Typography variant="h6" fontWeight="700" sx={{ mb: 0.5 }}>
+                  <Typography variant="h6" fontWeight="700" sx={{ mb: 0.5, textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
                     {user.user?.email}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500, textShadow: "0 1px 2px rgba(0,0,0,0.2)" }}>
                     Czytelnik
                   </Typography>
                 </Box>
               </Box>
 
               {/* Enhanced Stats */}
-              <Box display="flex" gap={1} flexWrap="wrap" position="relative" zIndex={1}>
+              <Box display="flex" gap={1.5} flexWrap="wrap" position="relative" zIndex={1}>
                 <Chip
-                  icon={<BookmarkIcon sx={{ fontSize: 16 }} />}
+                  icon={<BookmarkIcon sx={{ fontSize: 18 }} />}
                   label={`${booksStats.total} książek`}
                   size="small"
                   sx={{
                     bgcolor: "rgba(255, 255, 255, 0.2)",
                     color: "white",
                     border: "1px solid rgba(255, 255, 255, 0.3)",
-                    "& .MuiChip-label": { fontWeight: 600, fontSize: "0.8rem" },
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    "& .MuiChip-label": { fontWeight: 600, fontSize: "0.85rem" },
                     "& .MuiChip-icon": { color: "white" },
+                    "&:hover": {
+                      bgcolor: "rgba(255, 255, 255, 0.25)",
+                      transform: "translateY(-1px)",
+                    },
+                    transition: "all 0.2s ease",
                   }}
                 />
                 <Chip
-                  icon={<TrendingUpIcon sx={{ fontSize: 16 }} />}
+                  icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                   label={`${booksStats.read} przeczytanych`}
                   size="small"
                   sx={{
                     bgcolor: "rgba(34, 197, 94, 0.3)",
                     color: "white",
                     border: "1px solid rgba(34, 197, 94, 0.4)",
-                    "& .MuiChip-label": { fontWeight: 600, fontSize: "0.8rem" },
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 2px 8px rgba(34, 197, 94, 0.2)",
+                    "& .MuiChip-label": { fontWeight: 600, fontSize: "0.85rem" },
                     "& .MuiChip-icon": { color: "white" },
+                    "&:hover": {
+                      bgcolor: "rgba(34, 197, 94, 0.4)",
+                      transform: "translateY(-1px)",
+                    },
+                    transition: "all 0.2s ease",
                   }}
                 />
               </Box>
@@ -284,7 +309,12 @@ const MobileNavbar = () => {
           </Fade>
 
           {/* Navigation Menu */}
-          <Box sx={{ flex: 1, py: 2 }}>
+          <Box sx={{ 
+            flex: 1, 
+            py: 2,
+            background: "linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%)",
+            backdropFilter: "blur(10px)",
+          }}>
             <Slide direction="left" in timeout={800}>
               <List sx={{ px: 1 }}>
                 <ListItem disablePadding>
@@ -367,7 +397,14 @@ const MobileNavbar = () => {
               </List>
             </Slide>
 
-            <Divider sx={{ mx: 2, my: 2, opacity: 0.3 }} />
+            <Divider sx={{ 
+              mx: 2, 
+              my: 2, 
+              opacity: 0.2,
+              "&::before, &::after": {
+                borderColor: "rgba(102, 126, 234, 0.1)",
+              },
+            }} />
 
             <Slide direction="left" in timeout={1000}>
               <List sx={{ px: 1 }}>
