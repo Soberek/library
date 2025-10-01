@@ -59,9 +59,6 @@ const Navbar: React.FC = () => {
       position="sticky"
       elevation={0}
       sx={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        backdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
         display: { xs: "none", md: "block" },
       }}
     >
@@ -112,36 +109,27 @@ const Navbar: React.FC = () => {
             <TextField
               value={searchContext?.searchTerm || ""}
               onChange={(e) => searchContext?.setSearchTerm(e.target.value)}
-              placeholder="Szukaj książek po tytule lub autorze..."
+              placeholder="Szukaj książek..."
               variant="outlined"
               size="small"
               fullWidth
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
+                    <SearchIcon sx={{ 
+
+                      fontSize: 20
+                    }} />
                   </InputAdornment>
                 ),
                 sx: {
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: 3,
+                  bgcolor: "rgba(255, 255, 255, 0.4)",
+                  borderRadius: 2,
                   backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  border: "1px solid rgba(255, 255, 255, 0.5)",
+                  transition: "all 0.2s ease",
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
-                  },
-                  "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.15)",
-                  },
-                  "&.Mui-focused": {
-                    bgcolor: "rgba(255, 255, 255, 0.2)",
-                  },
-                  "& input": {
-                    color: "white",
-                    "&::placeholder": {
-                      color: "rgba(255, 255, 255, 0.7)",
-                      opacity: 1,
-                    },
                   },
                 },
               }}
