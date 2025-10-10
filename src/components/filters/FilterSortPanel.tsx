@@ -58,37 +58,48 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
   const [favoriteBooks] = useState<Set<string>>(new Set());
 
-
   const applyFilters = React.useCallback(() => {
     let filtered = [...books];
 
     // Status filter
     if (filters.status !== "all") {
-      filtered = filtered.filter(book => book.read === filters.status);
+      filtered = filtered.filter((book) => book.read === filters.status);
     }
 
     // Genre filter
     if (filters.genre !== "all") {
-      filtered = filtered.filter(book => book.genre === filters.genre);
+      filtered = filtered.filter((book) => book.genre === filters.genre);
     }
 
     // Rating filter
     filtered = filtered.filter(
-      book => book.rating >= filters.ratingRange[0] && book.rating <= filters.ratingRange[1]
+      (book) =>
+        book.rating >= filters.ratingRange[0] &&
+        book.rating <= filters.ratingRange[1],
     );
 
     // Pages filter
     filtered = filtered.filter(
-      book => book.overallPages >= filters.pagesRange[0] && book.overallPages <= filters.pagesRange[1]
+      (book) =>
+        book.overallPages >= filters.pagesRange[0] &&
+        book.overallPages <= filters.pagesRange[1],
     );
 
     // Favorites filter
     if (filters.showOnlyFavorites) {
-      filtered = filtered.filter(book => favoriteBooks.has(book.id));
+      filtered = filtered.filter((book) => favoriteBooks.has(book.id));
     }
 
-    // Sorting
+    // Sorting: primary by status (BOOK_STATUSES order so "W trakcie" is first),
+    // secondary by selected sort field and order.
     filtered.sort((a, b) => {
+      // Primary: status priority
+      const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+      const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+
+      if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+
+      // Secondary: selected sort field
       let aValue: string | number, bValue: string | number;
 
       switch (filters.sortBy) {
@@ -115,6 +126,8 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
         default:
           return 0;
       }
+
+      if (aValue === bValue) return 0;
 
       if (filters.sortOrder === "asc") {
         return aValue > bValue ? 1 : -1;
@@ -227,7 +240,10 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   value={filters.status}
                   label="Status"
                   onChange={(e) =>
-                    setFilters(prev => ({ ...prev, status: e.target.value as BookStatus | "all" }))
+                    setFilters((prev) => ({
+                      ...prev,
+                      status: e.target.value as BookStatus | "all",
+                    }))
                   }
                 >
                   <MenuItem value="all">Wszystkie</MenuItem>
@@ -248,15 +264,17 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   value={filters.genre}
                   label="Gatunek"
                   onChange={(e) =>
-                    setFilters(prev => ({ ...prev, genre: e.target.value }))
+                    setFilters((prev) => ({ ...prev, genre: e.target.value }))
                   }
                 >
                   <MenuItem value="all">Wszystkie</MenuItem>
-                  {genreOptions.map((option: { value: string; label: string }) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
+                  {genreOptions.map(
+                    (option: { value: string; label: string }) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ),
+                  )}
                 </Select>
               </FormControl>
             </Grid>
@@ -269,7 +287,15 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   value={filters.sortBy}
                   label="Sortuj według"
                   onChange={(e) =>
-                    setFilters(prev => ({ ...prev, sortBy: e.target.value as "title" | "author" | "rating" | "pages" | "dateAdded" }))
+                    setFilters((prev) => ({
+                      ...prev,
+                      sortBy: e.target.value as
+                        | "title"
+                        | "author"
+                        | "rating"
+                        | "pages"
+                        | "dateAdded",
+                    }))
                   }
                 >
                   <MenuItem value="dateAdded">Data dodania</MenuItem>
@@ -289,7 +315,10 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   value={filters.sortOrder}
                   label="Kolejność"
                   onChange={(e) =>
-                    setFilters(prev => ({ ...prev, sortOrder: e.target.value as "asc" | "desc" }))
+                    setFilters((prev) => ({
+                      ...prev,
+                      sortOrder: e.target.value as "asc" | "desc",
+                    }))
                   }
                 >
                   <MenuItem value="desc">Malejąco</MenuItem>
@@ -306,7 +335,10 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
               <Slider
                 value={filters.ratingRange}
                 onChange={(_, newValue) =>
-                  setFilters(prev => ({ ...prev, ratingRange: newValue as [number, number] }))
+                  setFilters((prev) => ({
+                    ...prev,
+                    ratingRange: newValue as [number, number],
+                  }))
                 }
                 valueLabelDisplay="auto"
                 min={0}
@@ -328,7 +360,10 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
               <Slider
                 value={filters.pagesRange}
                 onChange={(_, newValue) =>
-                  setFilters(prev => ({ ...prev, pagesRange: newValue as [number, number] }))
+                  setFilters((prev) => ({
+                    ...prev,
+                    pagesRange: newValue as [number, number],
+                  }))
                 }
                 valueLabelDisplay="auto"
                 min={0}
@@ -349,7 +384,10 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   <Switch
                     checked={filters.showOnlyFavorites}
                     onChange={(e) =>
-                      setFilters(prev => ({ ...prev, showOnlyFavorites: e.target.checked }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        showOnlyFavorites: e.target.checked,
+                      }))
                     }
                   />
                 }
