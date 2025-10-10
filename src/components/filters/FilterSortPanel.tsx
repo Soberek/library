@@ -87,8 +87,16 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
       filtered = filtered.filter(book => favoriteBooks.has(book.id));
     }
 
-    // Sorting
+    // Sorting: primary by status (BOOK_STATUSES order so "W trakcie" is first),
+    // secondary by selected sort field and order.
     filtered.sort((a, b) => {
+      // Primary: status priority
+  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+
+      if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+
+      // Secondary: selected sort field
       let aValue: string | number, bValue: string | number;
 
       switch (filters.sortBy) {
@@ -115,6 +123,8 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
         default:
           return 0;
       }
+
+      if (aValue === bValue) return 0;
 
       if (filters.sortOrder === "asc") {
         return aValue > bValue ? 1 : -1;
