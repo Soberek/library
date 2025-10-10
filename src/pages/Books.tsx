@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { 
-  BookList, 
-  BottomNav, 
-  ErrorDisplay, 
-  LoadingSpinner, 
+import { BOOK_STATUSES } from "../constants/bookStatus";
+import {
+  BookList,
+  BottomNav,
+  ErrorDisplay,
+  LoadingSpinner,
   FilterSortPanel,
   StatisticsDashboard,
   PageHeader,
@@ -44,7 +45,7 @@ const Books = () => {
 
   useEffect(() => {
     // Check if document and body exist before manipulating styles
-    if (typeof document !== 'undefined' && document.body) {
+    if (typeof document !== "undefined" && document.body) {
       if (isEditing.status) {
         document.body.style.overflow = "hidden";
       } else {
@@ -54,7 +55,7 @@ const Books = () => {
 
     // Cleanup: restores scroll when the component is removed from the DOM
     return () => {
-      if (typeof document !== 'undefined' && document.body) {
+      if (typeof document !== "undefined" && document.body) {
         document.body.style.overflow = "";
       }
     };
@@ -63,13 +64,14 @@ const Books = () => {
   // Filter books based on searchTerm
   const searchFilteredBooks = useMemo(() => {
     if (searchContext?.searchTerm) {
-      return filteredBooks.filter((book) =>
-        book.title
-          .toLowerCase()
-          .includes(searchContext.searchTerm.toLowerCase()) ||
-        book.author
-          .toLowerCase()
-          .includes(searchContext.searchTerm.toLowerCase())
+      return filteredBooks.filter(
+        (book) =>
+          book.title
+            .toLowerCase()
+            .includes(searchContext.searchTerm.toLowerCase()) ||
+          book.author
+            .toLowerCase()
+            .includes(searchContext.searchTerm.toLowerCase()),
       );
     }
     return filteredBooks;
@@ -77,25 +79,48 @@ const Books = () => {
 
   // Update filtered books when books change
   useEffect(() => {
-    setFilteredBooks(books);
+    // Ensure default ordering: status priority (BOOK_STATUSES order) then newest first
+    const sorted = [...books].sort((a, b) => {
+      const aStatus = BOOK_STATUSES.indexOf(
+        a.read as import("../types/Book").BookStatus,
+      );
+      const bStatus = BOOK_STATUSES.indexOf(
+        b.read as import("../types/Book").BookStatus,
+      );
+      if (aStatus !== bStatus) return aStatus - bStatus;
+      // newest first
+      const aTime = new Date(a.createdAt || 0).getTime();
+      const bTime = new Date(b.createdAt || 0).getTime();
+      return bTime - aTime;
+    });
+    setFilteredBooks(sorted);
   }, [books]);
 
   // Calculate additional statistics
   const additionalStats = useMemo(() => {
     if (books.length === 0) return null;
 
-    const totalPages = books.reduce((sum, book) => sum + Number(book.overallPages || 0), 0);
-    const readPages = books.reduce((sum, book) => sum + Number(book.readPages || 0), 0);
-    
+    const totalPages = books.reduce(
+      (sum, book) => sum + Number(book.overallPages || 0),
+      0,
+    );
+    const readPages = books.reduce(
+      (sum, book) => sum + Number(book.readPages || 0),
+      0,
+    );
+
     // Calculate average rating only from books with ratings > 0
-    const booksWithRatings = books.filter(book => book.rating > 0);
-    const averageRating = booksWithRatings.length > 0 
-      ? booksWithRatings.reduce((sum, book) => sum + Number(book.rating), 0) / booksWithRatings.length 
-      : 0;
-    
+    const booksWithRatings = books.filter((book) => book.rating > 0);
+    const averageRating =
+      booksWithRatings.length > 0
+        ? booksWithRatings.reduce((sum, book) => sum + Number(book.rating), 0) /
+          booksWithRatings.length
+        : 0;
+
     // Completion rate: percentage of books that are marked as "Przeczytana"
-    const completionRate = booksStats.total > 0 ? (booksStats.read / booksStats.total) * 100 : 0;
-    
+    const completionRate =
+      booksStats.total > 0 ? (booksStats.read / booksStats.total) * 100 : 0;
+
     // Progress rate: percentage of pages read across all books
     const progressRate = totalPages > 0 ? (readPages / totalPages) * 100 : 0;
 
@@ -108,19 +133,16 @@ const Books = () => {
     };
   }, [books, booksStats]);
 
-  const handleBookModalOpen = useCallback(({
-    bookId,
-    mode,
-  }: {
-    bookId: string | null;
-    mode: "add" | "edit";
-  }) => {
+  const handleBookModalOpen = useCallback(
+    ({ bookId, mode }: { bookId: string | null; mode: "add" | "edit" }) => {
       setIsEditing({
         mode: mode,
         status: true,
         bookId: bookId,
       });
-  }, []);
+    },
+    [],
+  );
 
   const handleBookModalClose = useCallback(() => {
     setIsEditing((prev) => ({ ...prev, status: false }));
@@ -140,7 +162,7 @@ const Books = () => {
     >
       <Container maxWidth="xl">
         <ErrorDisplay error={error} onRetry={refetch} />
-        
+
         {/* Page Header */}
         <PageHeader
           isFilterPanelOpen={isFilterPanelOpen}
