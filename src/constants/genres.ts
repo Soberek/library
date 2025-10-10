@@ -16,6 +16,7 @@ export const GENRES: { [key: string]: string } = {
   thriller: "thriller",
   powiesc_gotycka: "powieść gotycka",
   powiesc_psychologiczna: "powieść psychologiczna",
+  naukowa: "naukowa",
   // nowela: "nowela",
   opowiadanie: "opowiadanie",
   bajka: "bajka",
