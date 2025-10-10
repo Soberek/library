@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BookOpen } from 'lucide-react';
 import type { Book, BookStatus } from '../../types/Book';
+import { BOOK_STATUSES } from '../../constants/bookStatus';
 import BookCard from './BookCard';
 
 interface BookListProps {
@@ -104,6 +105,12 @@ export default function BookList({
   }
 
   const sortedBooks = [...books].sort((a, b) => {
+    // Primary: status priority based on BOOK_STATUSES ordering
+    const aStatus = BOOK_STATUSES.indexOf(a.read as BookStatus);
+    const bStatus = BOOK_STATUSES.indexOf(b.read as BookStatus);
+    if (aStatus !== bStatus) return aStatus - bStatus;
+
+    // Secondary: newest first
     const dateA = new Date(a.createdAt ?? 0).getTime();
     const dateB = new Date(b.createdAt ?? 0).getTime();
     return dateB - dateA;
