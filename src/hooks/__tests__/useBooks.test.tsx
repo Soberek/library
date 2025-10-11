@@ -1,15 +1,13 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useBooks } from "../useBooks";
-import * as booksService from "../../services/booksService";
-import { useUser } from "../useUser";
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useBooks } from '../useBooks';
+import * as booksService from '../../services/booksService';
+import { useUser } from '../useUser';
 
 // Mock the dependencies
-jest.mock("../useUser");
-jest.mock("../../services/booksService");
+jest.mock('../useUser');
+jest.mock('../../services/booksService');
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
-const mockBooksService = booksService as jest.Mocked<typeof booksService>;
-
 const mockBooksWithFavorites = [
   {
     id: '1',
@@ -36,28 +34,28 @@ jest.mock('../../services/booksService', () => ({
 
 const mockBooks = [
   {
-    id: "1",
-    title: "Test Book",
-    author: "Test Author",
-    read: "W trakcie" as const,
+    id: '1',
+    title: 'Test Book',
+    author: 'Test Author',
+    read: 'W trakcie' as const,
     overallPages: 100,
     readPages: 50,
-    cover: "https://example.com/cover.jpg",
-    genre: "Fiction",
+    cover: 'https://example.com/cover.jpg',
+    genre: 'Fiction',
     rating: 8,
-    createdAt: "2023-01-01T00:00:00.000Z",
+    createdAt: '2023-01-01T00:00:00.000Z',
   },
 ];
 
-describe("useBooks", () => {
+describe('useBooks', () => {
   const mockUser = { 
-    uid: "test-user-id",
-    email: "test@example.com",
+    uid: 'test-user-id',
+    email: 'test@example.com',
     emailVerified: true,
     isAnonymous: false,
     metadata: {},
     providerData: [],
-    refreshToken: "",
+    refreshToken: '',
     tenantId: null,
     delete: jest.fn(),
     getIdToken: jest.fn(),
@@ -67,7 +65,7 @@ describe("useBooks", () => {
     displayName: null,
     phoneNumber: null,
     photoURL: null,
-    providerId: "firebase",
+    providerId: 'firebase',
   };
 
   beforeEach(() => {
@@ -84,7 +82,7 @@ describe("useBooks", () => {
     jest.clearAllMocks();
   });
 
-  it("should fetch books on mount", async () => {
+  it('should fetch books on mount', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
 
     const { result } = renderHook(() => useBooks());
@@ -96,12 +94,12 @@ describe("useBooks", () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    expect(booksService.getUserBooksData).toHaveBeenCalledWith("test-user-id");
+    expect(booksService.getUserBooksData).toHaveBeenCalledWith('test-user-id');
     expect(result.current.books).toEqual(mockBooks);
     expect(result.current.loading).toBe(false);
   });
 
-  it("should handle book deletion", async () => {
+  it('should handle book deletion', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
     (booksService.deleteBook as jest.Mock).mockResolvedValue(true);
 
@@ -112,14 +110,14 @@ describe("useBooks", () => {
     });
 
     await act(async () => {
-      await result.current.handleBookDelete("1");
+      await result.current.handleBookDelete('1');
     });
 
-    expect(booksService.deleteBook).toHaveBeenCalledWith("1");
+    expect(booksService.deleteBook).toHaveBeenCalledWith('1');
     expect(result.current.books).toEqual([]);
   });
 
-  it("should handle book status change", async () => {
+  it('should handle book status change', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
     (booksService.updateBook as jest.Mock).mockResolvedValue(true);
 
@@ -130,18 +128,18 @@ describe("useBooks", () => {
     });
 
     await act(async () => {
-      await result.current.handleStatusChange("1", "W trakcie");
+      await result.current.handleStatusChange('1', 'W trakcie');
     });
 
-    expect(booksService.updateBook).toHaveBeenCalledWith("1", { read: "Przeczytana" });
-    expect(result.current.books[0].read).toBe("Przeczytana");
+    expect(booksService.updateBook).toHaveBeenCalledWith('1', { read: 'Przeczytana' });
+    expect(result.current.books[0].read).toBe('Przeczytana');
   });
 
-  it("should calculate books statistics correctly", async () => {
+  it('should calculate books statistics correctly', async () => {
     const booksWithDifferentStatuses = [
-      { ...mockBooks[0], id: "1", read: "Przeczytana" as const },
-      { ...mockBooks[0], id: "2", read: "W trakcie" as const },
-      { ...mockBooks[0], id: "3", read: "Porzucona" as const },
+      { ...mockBooks[0], id: '1', read: 'Przeczytana' as const },
+      { ...mockBooks[0], id: '2', read: 'W trakcie' as const },
+      { ...mockBooks[0], id: '3', read: 'Porzucona' as const },
     ];
 
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(booksWithDifferentStatuses);
@@ -160,8 +158,8 @@ describe("useBooks", () => {
     });
   });
 
-  it("should handle errors gracefully", async () => {
-    const error = new Error("Network error");
+  it('should handle errors gracefully', async () => {
+    const error = new Error('Network error');
     (booksService.getUserBooksData as jest.Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useBooks());
