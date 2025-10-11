@@ -28,7 +28,7 @@ export interface AppState {
 }
 
 // Store mit Actions
-interface FilterStore extends AppState {
+export interface FilterStore extends AppState {
   // Actions
   setFilter: (field: keyof FilterState, value: unknown) => void;
   setTab: (tab: TabType) => void;
