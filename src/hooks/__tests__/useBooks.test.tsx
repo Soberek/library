@@ -1,13 +1,15 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useBooks } from '../useBooks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useBooksQuery } from '../useBooksQuery';
 import * as booksService from '../../services/booksService';
-import { useUser } from '../useUser';
+import { useAuth } from '../useAuth';
+import type { Book } from '../../types/Book';
 
 // Mock the dependencies
-jest.mock('../useUser');
+jest.mock('../useAuth');
 jest.mock('../../services/booksService');
 
-const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockBooksWithFavorites = [
   {
     id: '1',
@@ -21,7 +23,18 @@ const mockBooksWithFavorites = [
     isFavorite: true,
     createdAt: '2023-01-01T00:00:00Z',
   },
-  // Add more as needed
+  {
+    id: '2',
+    title: 'Another Test Book',
+    author: 'Another Author',
+    genre: 'fantasy',
+    read: 'Przeczytana' as const,
+    rating: 9,
+    overallPages: 400,
+    readPages: 400,
+    isFavorite: false,
+    createdAt: '2023-02-01T00:00:00Z',
+  },
 ];
 
 // At top of file, mock the service
@@ -47,8 +60,28 @@ const mockBooks = [
   },
 ];
 
-describe('useBooks', () => {
-  const mockUser = { 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+    mutations: {
+      // Threshold for "optimistic" vs "eager" updates
+      // https://tanstack.com/query/v5/docs/react/guides/testing#turn-off-retries
+      // We're setting it to 0 to disable optimistic updates for tests
+      // and avoid race conditions.
+      // See also: https://github.com/TanStack/query/issues/1353
+      retryDelay: 0,
+    },
+  },
+});
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
+describe('useBooksQuery', () => {
+  const mockUser = {
     uid: 'test-user-id',
     email: 'test@example.com',
     emailVerified: true,
@@ -69,7 +102,7 @@ describe('useBooks', () => {
   };
 
   beforeEach(() => {
-    mockUseUser.mockReturnValue({
+    mockUseAuth.mockReturnValue({
       user: mockUser,
       loading: false,
     });
@@ -80,12 +113,13 @@ describe('useBooks', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
   });
 
   it('should fetch books on mount', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
 
-    const { result } = renderHook(() => useBooks());
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(result.current.books).toEqual([]);
@@ -95,15 +129,19 @@ describe('useBooks', () => {
     });
 
     expect(booksService.getUserBooksData).toHaveBeenCalledWith('test-user-id');
-    expect(result.current.books).toEqual(mockBooks);
+    await waitFor(() => expect(result.current.books).toEqual(mockBooks));
     expect(result.current.loading).toBe(false);
   });
 
   it('should handle book deletion', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
-    (booksService.deleteBook as jest.Mock).mockResolvedValue(true);
+    (booksService.deleteBook as jest.Mock).mockImplementation(async (_: string) => {
+      // Update mock to return empty array after deletion
+      (booksService.getUserBooksData as jest.Mock).mockResolvedValue([]);
+      return Promise.resolve(true);
+    });
 
-    const { result } = renderHook(() => useBooks());
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
 
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -114,14 +152,21 @@ describe('useBooks', () => {
     });
 
     expect(booksService.deleteBook).toHaveBeenCalledWith('1');
-    expect(result.current.books).toEqual([]);
+    await waitFor(() => expect(result.current.books).toEqual([]));
   });
 
   it('should handle book status change', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
-    (booksService.updateBook as jest.Mock).mockResolvedValue(true);
+    (booksService.updateBook as jest.Mock).mockImplementation(async (bookId: string, updatedBook: Partial<Book>) => {
+      // Update mock to return updated data
+      const updatedBooks = mockBooks.map(book => 
+        book.id === bookId ? { ...book, ...updatedBook } : book
+      );
+      (booksService.getUserBooksData as jest.Mock).mockResolvedValue(updatedBooks);
+      return Promise.resolve(true);
+    });
 
-    const { result } = renderHook(() => useBooks());
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
 
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -132,7 +177,7 @@ describe('useBooks', () => {
     });
 
     expect(booksService.updateBook).toHaveBeenCalledWith('1', { read: 'Przeczytana' });
-    expect(result.current.books[0].read).toBe('Przeczytana');
+    await waitFor(() => expect(result.current.books[0].read).toBe('Przeczytana'));
   });
 
   it('should calculate books statistics correctly', async () => {
@@ -144,36 +189,45 @@ describe('useBooks', () => {
 
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(booksWithDifferentStatuses);
 
-    const { result } = renderHook(() => useBooks());
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
 
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    expect(result.current.booksStats).toEqual({
+    await waitFor(() => expect(result.current.booksStats).toEqual({
       total: 3,
       read: 1,
       inProgress: 1,
       dropped: 1,
-    });
+    }));
   });
 
   it('should handle errors gracefully', async () => {
     const error = new Error('Network error');
     (booksService.getUserBooksData as jest.Mock).mockRejectedValue(error);
 
-    const { result } = renderHook(() => useBooks());
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
 
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    expect(result.current.error).toBeDefined();
+    await waitFor(() => expect(result.current.error).toBeDefined());
     expect(result.current.loading).toBe(false);
   });
 
   it('toggles favorite status correctly', async () => {
-    const { result } = renderHook(() => useBooks());
+    (booksService.updateBook as jest.Mock).mockImplementation(async (bookId: string, updatedBook: Partial<Book>) => {
+      // Update mock to return updated data
+      const updatedBooks = mockBooksWithFavorites.map(book => 
+        book.id === bookId ? { ...book, ...updatedBook } : book
+      );
+      (booksService.getUserBooksData as jest.Mock).mockResolvedValue(updatedBooks);
+      return Promise.resolve(true);
+    });
+
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     const bookId = result.current.books[0].id;
@@ -184,18 +238,47 @@ describe('useBooks', () => {
     });
 
     expect(booksService.updateBook).toHaveBeenCalledWith(bookId, { isFavorite: !currentFavorite });
-    const updatedBooks = result.current.books;
-    const updatedBook = updatedBooks.find(b => b.id === bookId);
-    expect(updatedBook?.isFavorite).toBe(!currentFavorite);
+    await waitFor(() => {
+      const updatedBook = result.current.books.find((b: Book) => b.id === bookId);
+      expect(updatedBook?.isFavorite).toBe(!currentFavorite);
+    });
   });
 
   it('fetches books with isFavorite field', async () => {
     (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooksWithFavorites);
 
-    const { result } = renderHook(() => useBooks());
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.books[0].isFavorite).toBeDefined();
     expect(result.current.books[0].isFavorite).toBe(true);
+  });
+
+  it('should handle book rating change', async () => {
+    (booksService.getUserBooksData as jest.Mock).mockResolvedValue(mockBooks);
+    (booksService.updateBook as jest.Mock).mockImplementation(async (bookId: string, updatedBook: Partial<Book>) => {
+      // Update mock to return updated data
+      const updatedBooks = mockBooks.map(book => 
+        book.id === bookId ? { ...book, ...updatedBook } : book
+      );
+      (booksService.getUserBooksData as jest.Mock).mockResolvedValue(updatedBooks);
+      return Promise.resolve(true);
+    });
+
+    const { result } = renderHook(() => useBooksQuery(), { wrapper });
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    const bookId = mockBooks[0].id;
+    const newRating = 5;
+
+    await act(async () => {
+      await result.current.handleRatingChange(bookId, newRating);
+    });
+
+    expect(booksService.updateBook).toHaveBeenCalledWith(bookId, { rating: newRating });
+    await waitFor(() => expect(result.current.books[0].rating).toBe(newRating));
   });
 });
