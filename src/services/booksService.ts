@@ -63,59 +63,44 @@ const getUserBooksDataPaginated = async (
 
     const booksCollection = collection(db, 'books');
     
-    // Start with a simple query that doesn't require special indexes
+    // Note: sortField and sortDirection parameters are currently not used
+    // to avoid Firebase index requirements. To enable sorting, create the
+    // required composite index in Firebase Console.
+    // Future enhancement: Use sortField and sortDirection once indexes are created
+    console.log(`Pagination request - sortField: ${sortField}, sortDirection: ${sortDirection} (currently ignored to avoid index requirements)`);
+    
+    // Use a simple query without orderBy to avoid index requirements
+    // This means books will be in document ID order, not by createdAt or other fields
     let q = query(
       booksCollection,
       where('userId', '==', userId),
       limit(pageSize + 1)
     );
     
-    // Add sorting if specified
-    try {
-      if (sortField === 'createdAt') {
-        // For createdAt field, we know the index exists by default
-        q = query(
-          booksCollection,
-          where('userId', '==', userId),
-          orderBy(sortField, sortDirection),
-          limit(pageSize + 1)
-        );
-      } else {
-        // For other fields, try to use them but be ready to fall back
-        q = query(
-          booksCollection,
-          where('userId', '==', userId),
-          orderBy(sortField, sortDirection),
-          limit(pageSize + 1)
-        );
-      }
-      
-      // If we have a last document, start after it for pagination
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc));
-      }
-    } catch (error) {
-      console.error(`Error creating query with field ${sortField}:`, error);
-      // Fallback to basic query without sorting
-      q = query(
-        booksCollection,
-        where('userId', '==', userId),
-        limit(pageSize + 1)
-      );
-      
-      // If we have a last document, we can't use it with a different query structure
-      // So we'll just skip pagination in this case
+    // If we have a last document, add pagination
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
     }
+    
+    // Log that we're using a simple query
+    console.log(`Using simple paginated query (no ordering) for user ${userId}, pageSize: ${pageSize}, hasLastDoc: ${!!lastDoc}`);
 
     // Execute the query with error handling
     let booksList;
     try {
       booksList = await getDocs(q);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error executing paginated query:', error);
       
-      // If the error is related to indexes, try a simpler query
-      if (error instanceof Error && error.toString().includes('index')) {
+      // Check if the error is related to indexes or failed preconditions
+      const errorString = error?.toString() || '';
+      const errorCode = error?.code || '';
+      const isIndexError = error instanceof Error && 
+        (errorString.includes('index') || 
+         errorString.includes('failed-precondition') ||
+         errorCode === 'failed-precondition');
+      
+      if (isIndexError) {
         console.log('Index error detected, falling back to simple query');
         
         // Create a simple query, but maintain pagination if we have lastDoc
@@ -130,12 +115,19 @@ const getUserBooksDataPaginated = async (
           };
         }
         
+        // Try the simplest possible query without ordering
         q = query(
           booksCollection,
           where('userId', '==', userId),
           limit(pageSize + 1)
         );
-        booksList = await getDocs(q);
+        
+        try {
+          booksList = await getDocs(q);
+        } catch (fallbackError) {
+          console.error('Even fallback query failed:', fallbackError);
+          throw createFirebaseError('Wystąpił błąd podczas pobierania książek. Spróbuj ponownie.');
+        }
       } else {
         throw error; // Re-throw if it's not an index issue
       }
