@@ -1,7 +1,7 @@
-import React from "react";
-import { Alert, AlertTitle, Button, Box } from "@mui/material";
-import type { ErrorType } from "../../types/Error";
-import { ERROR_MESSAGES } from "../../constants/validation";
+import React from 'react';
+import { Alert, AlertTitle, Button, Box } from '@mui/material';
+import type { ErrorType } from '../../types/Error';
+import { ERROR_MESSAGES } from '../../constants/validation';
 
 /**
  * Props for the ErrorDisplay component
@@ -14,7 +14,7 @@ interface ErrorDisplayProps {
   /** Optional callback function to dismiss the error */
   onDismiss?: () => void;
   /** The severity level of the error display */
-  severity?: "error" | "warning" | "info";
+  severity?: 'error' | 'warning' | 'info';
 }
 
 /**
@@ -24,17 +24,17 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   error,
   onRetry,
   onDismiss,
-  severity = "error",
+  severity = 'error',
 }) => {
   if (!error) return null;
 
   const getErrorMessage = (error: ErrorType): string => {
     switch (error.code) {
-      case "VALIDATION_ERROR":
+      case 'VALIDATION_ERROR':
         return error.message;
-      case "FIREBASE_ERROR":
+      case 'FIREBASE_ERROR':
         return error.message || ERROR_MESSAGES.FIREBASE_ERROR;
-      case "NETWORK_ERROR":
+      case 'NETWORK_ERROR':
         return error.message || ERROR_MESSAGES.NETWORK_ERROR;
       default:
         return ERROR_MESSAGES.UNKNOWN_ERROR;
@@ -46,7 +46,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       <Alert
         severity={severity}
         action={
-          <Box sx={{ display: "flex", gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             {onRetry && (
               <Button
                 color="inherit"
@@ -71,7 +71,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         }
       >
         <AlertTitle>
-          {error.code === "VALIDATION_ERROR" ? "Błąd walidacji" : "Wystąpił błąd"}
+          {error.code === 'VALIDATION_ERROR' ? 'Błąd walidacji' : 'Wystąpił błąd'}
         </AlertTitle>
         {getErrorMessage(error)}
       </Alert>
