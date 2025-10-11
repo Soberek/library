@@ -80,11 +80,11 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
           sortDirection
         );
       } catch (error) {
-        console.error('Error fetching paginated books:', error);
+        console.error('Błąd pobierania paginowanych książek:', error);
         
         // If there's an error with the specified sort field, try with default sort
         if (sortField !== 'createdAt' && error instanceof Error && error.toString().includes('index')) {
-          console.log('Falling back to default sort field');
+          console.log('Przełączanie na domyślne pole sortowania');
           setSortField('createdAt');
           try {
             return await booksService.getUserBooksDataPaginated(
@@ -107,7 +107,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
             (error.toString().includes('permission') || 
              error.toString().includes('exist') ||
              error.toString().includes('unavailable'))) {
-          console.log('Switching to non-paginated mode due to persistent error');
+          console.log('Przełączanie na tryb niepaginowany z powodu trwałego błędu');
           setUseFallback(true);
         }
         
@@ -118,6 +118,8 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.lastDoc : undefined,
     enabled: !!user && !userLoading && usePagination && !useFallback,
     retry: 1, // Limit retries to avoid excessive error logs
+    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh for 5 minutes
+    refetchOnWindowFocus: false, // Don't auto-refetch when window regains focus
   });
 
   // Legacy non-paginated query (for backward compatibility or fallback)
@@ -125,21 +127,15 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     queryKey: booksKeys.list(user?.uid || ''),
     queryFn: () => booksService.getUserBooksData(user!.uid),
     enabled: !!user && !userLoading && (!usePagination || useFallback),
+    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh for 5 minutes
+    refetchOnWindowFocus: false, // Don't auto-refetch when window regains focus
   });
 
-  // Combine all books from paginated results with deduplication
+  // Combine all books from paginated results
+  // React Query already handles deduplication, so we just flatten the pages
   const paginatedBooks = useMemo(() => {
     if (!infiniteQuery.data) return [];
-    
-    // Flatten all pages
-    const allBooks = infiniteQuery.data.pages.flatMap(page => page.items);
-    
-    // Deduplicate by id to avoid duplicate keys in React
-    const uniqueBooks = Array.from(
-      new Map(allBooks.map(book => [book.id, book])).values()
-    );
-    
-    return uniqueBooks;
+    return infiniteQuery.data.pages.flatMap(page => page.items);
   }, [infiniteQuery.data]);
 
   // Use either paginated or legacy books
@@ -157,7 +153,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   if (error && error.toString().includes('index')) {
     error = new Error('Wystąpił błąd z indeksem Firebase. Proszę skontaktować się z administratorem.');
   } else if (error) {
-    error = new Error('Wystąpił błąd. Spróbuj ponownie.');
+    error = new Error('Błąd pobierania paginowanych książek.');
   }
 
   // Pagination status
@@ -175,16 +171,12 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       const bookToAdd = { ...newBook, userId: user.uid, createdAt: new Date().toISOString() };
       return booksService.addBook(bookToAdd);
     },
-    onSuccess: () => {
-      if (usePagination) {
-        queryClient.invalidateQueries({ 
-          queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
-        });
-      } else {
-        queryClient.invalidateQueries({ 
-          queryKey: booksKeys.list(user?.uid || '') 
-        });
-      }
+    onSettled: () => {
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -193,7 +185,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     mutationFn: ({ bookId, updatedBook }: { bookId: string; updatedBook: Partial<Book> }) =>
       booksService.updateBook(bookId, updatedBook),
     onMutate: async ({ bookId, updatedBook }) => {
-      if (usePagination) {
+      if (usePagination && !useFallback) {
         // Optimistic update for paginated data
         await queryClient.cancelQueries({ 
           queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
@@ -234,12 +226,13 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onError: (_err, _variables, context) => {
-      if (usePagination && context?.previousData) {
+      // Rollback to previous state on error
+      if (usePagination && !useFallback && context?.previousData) {
         queryClient.setQueryData(
           booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
           context.previousData
         );
-      } else if (!usePagination && context?.previousBooks) {
+      } else if ((!usePagination || useFallback) && context?.previousBooks) {
         queryClient.setQueryData(
           booksKeys.list(user?.uid || ''),
           context.previousBooks
@@ -247,7 +240,11 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -255,7 +252,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   const deleteBookMutation = useMutation({
     mutationFn: (bookId: string) => booksService.deleteBook(bookId),
     onMutate: async (bookId) => {
-      if (usePagination) {
+      if (usePagination && !useFallback) {
         // Optimistic update for paginated data
         await queryClient.cancelQueries({ 
           queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
@@ -294,12 +291,13 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onError: (_err, _variables, context) => {
-      if (usePagination && context?.previousData) {
+      // Rollback to previous state on error
+      if (usePagination && !useFallback && context?.previousData) {
         queryClient.setQueryData(
           booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
           context.previousData
         );
-      } else if (!usePagination && context?.previousBooks) {
+      } else if ((!usePagination || useFallback) && context?.previousBooks) {
         queryClient.setQueryData(
           booksKeys.list(user?.uid || ''),
           context.previousBooks
@@ -307,7 +305,11 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -316,7 +318,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     mutationFn: ({ bookId, currentFavorite }: { bookId: string; currentFavorite: boolean }) =>
       booksService.updateBook(bookId, { isFavorite: !currentFavorite }),
     onMutate: async ({ bookId, currentFavorite }) => {
-      if (usePagination) {
+      if (usePagination && !useFallback) {
         // Optimistic update for paginated data
         await queryClient.cancelQueries({ 
           queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
@@ -357,12 +359,13 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onError: (_err, _variables, context) => {
-      if (usePagination && context?.previousData) {
+      // Rollback to previous state on error
+      if (usePagination && !useFallback && context?.previousData) {
         queryClient.setQueryData(
           booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
           context.previousData
         );
-      } else if (!usePagination && context?.previousBooks) {
+      } else if ((!usePagination || useFallback) && context?.previousBooks) {
         queryClient.setQueryData(
           booksKeys.list(user?.uid || ''),
           context.previousBooks
@@ -370,7 +373,11 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
