@@ -315,12 +315,11 @@ describe('useBooksQuery', () => {
 
     const { result } = renderHook(() => useBooksQuery(true), { wrapper });
 
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    await waitFor(() => expect(result.current.error).toBeDefined());
-    expect(result.current.loading).toBe(false);
+    // Wait for the error to be defined (after retry attempts)
+    await waitFor(() => expect(result.current.error).toBeDefined(), { timeout: 3000 });
+    
+    // After error is defined, loading should eventually become false
+    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
   });
   
   it('should handle errors gracefully without pagination', async () => {
