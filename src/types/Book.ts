@@ -11,6 +11,7 @@ export interface Book {
   genre: string;
   rating: number;
   createdAt?: string;
+  isFavorite?: boolean;
 }
 
 export type BookFormData = Omit<Book, "id" | "createdAt">;
