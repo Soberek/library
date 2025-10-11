@@ -1,17 +1,17 @@
-import React from "react";
-import { BookForm } from ".";
-import type { Book, BookFormData } from "../../types/Book";
+import React from 'react';
+import { BookForm } from '.';
+import type { Book, BookFormData } from '../../types/Book';
 
 interface BookFormsProps {
   isEditing: {
     status: boolean;
-    mode: "add" | "edit";
+    mode: 'add' | 'edit';
     bookId: string | null;
   };
   books: Book[];
   handleBookSubmit: (book: BookFormData) => void;
   handleBookUpdate: (bookId: string, updatedData: Partial<Book>) => void;
-  handleBookModalOpen: (params: { mode: "add" | "edit"; bookId: string | null }) => void;
+  handleBookModalOpen: (params: { mode: 'add' | 'edit'; bookId: string | null }) => void;
   handleBookModalClose: () => void;
 }
 
@@ -26,7 +26,7 @@ const BookForms: React.FC<BookFormsProps> = ({
   return (
     <>
       {/* Add Book Form */}
-      {isEditing.status && isEditing.mode === "add" && (
+      {isEditing.status && isEditing.mode === 'add' && (
         <BookForm
           mode="add"
           handleBookSubmit={handleBookSubmit}
@@ -37,7 +37,7 @@ const BookForms: React.FC<BookFormsProps> = ({
       )}
 
       {/* Edit Book Form */}
-      {isEditing.status && isEditing.bookId && isEditing.mode === "edit" && (
+      {isEditing.status && isEditing.bookId && isEditing.mode === 'edit' && (
         <BookForm
           mode="edit"
           bookToEdit={
