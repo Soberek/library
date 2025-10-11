@@ -99,16 +99,18 @@ export const useBooks = () => {
   }, []);
 
   const handleToggleFavorite = useCallback(async (bookId: string, currentFavorite: boolean) => {
+    console.log('handleToggleFavorite called for', bookId, 'toggling to', !currentFavorite);
     try {
       setError(null);
       await updateBook(bookId, { isFavorite: !currentFavorite });
+      console.log('Firebase update successful for', bookId);
       setBooks(prevBooks => 
         prevBooks.map((book) =>
           book.id === bookId ? { ...book, isFavorite: !currentFavorite } : book
         )
       );
     } catch (error) {
-      console.error("Failed to toggle favorite:", error);
+      console.error('Toggle favorite failed:', error);
       setError(error as ErrorType);
     }
   }, []);
