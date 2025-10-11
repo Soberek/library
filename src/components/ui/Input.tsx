@@ -1,5 +1,5 @@
 type Props = {
-  type?: "text" | "number" | "email" | "password";
+  type?: 'text' | 'number' | 'email' | 'password';
   value?: string;
   name?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const Input: React.FC<Props> = ({
-  type = "text",
+  type = 'text',
   value,
   name,
   onChange,
@@ -24,7 +24,7 @@ const Input: React.FC<Props> = ({
   placeholder,
   disabled = false,
   required = false,
-  className = "",
+  className = '',
   dataTestId,
 }) => {
   return (
