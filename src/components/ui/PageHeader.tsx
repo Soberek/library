@@ -65,7 +65,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           transition: 'all 0.3s ease',
         }}
       >
-        {isMobile ? 'Dodaj' : 'Dodaj książkę'}
+        Dodaj książkę
       </Button>
 
       {/* View Mode Toggle */}
@@ -100,7 +100,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       >
         <ToggleButton value="cards">
           <GridViewIcon fontSize="small" sx={{ mr: { xs: 0, sm: 0.5 } }} />
-          {!isMobile && 'Karty'}
+          {!isMobile && 'Siatka'}
         </ToggleButton>
         <ToggleButton value="table">
           <ViewListIcon fontSize="small" sx={{ mr: { xs: 0, sm: 0.5 } }} />

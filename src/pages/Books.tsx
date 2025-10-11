@@ -26,7 +26,10 @@ const Books: React.FC = () => {
     handleStatusChange, 
     handleToggleFavorite,
     handleRatingChange,
-  } = useBooksQuery();
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useBooksQuery(true);
   
   const filteredBooks = useBookFilters(books);
   
@@ -65,7 +68,8 @@ const Books: React.FC = () => {
     setIsFilterPanelOpen((prev) => !prev);
   }, []);
 
-  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+  // Error handling
+  if (error) return <Typography color="error">Błąd: {error.message}</Typography>;
 
   return (
     <Box 
@@ -155,6 +159,9 @@ const Books: React.FC = () => {
             onStatusChange={handleStatusChange}
             onToggleFavorite={handleToggleFavorite}
             onRatingChange={handleRatingChange}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
           />
         )}
       </Box>

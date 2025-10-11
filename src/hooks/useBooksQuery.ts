@@ -1,8 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import * as booksService from '../services/booksService';
 import type { Book, BookStatus } from '../types/Book';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import type { PaginatedResult } from '../services/booksService';
+import { QueryDocumentSnapshot, type DocumentData } from 'firebase/firestore';
 
 interface BooksStats {
   total: number;
@@ -24,6 +26,8 @@ export const booksKeys = {
   all: ['books'] as const,
   lists: () => [...booksKeys.all, 'list'] as const,
   list: (userId: string) => [...booksKeys.lists(), userId] as const,
+  paginatedList: (userId: string, sortField: string, sortDirection: 'asc' | 'desc') => 
+    [...booksKeys.lists(), userId, 'paginated', sortField, sortDirection] as const,
   details: () => [...booksKeys.all, 'detail'] as const,
   detail: (id: string) => [...booksKeys.details(), id] as const,
 };
@@ -50,20 +54,112 @@ const calculateStats = (books: Book[]): { booksStats: BooksStats; additionalStat
 };
 
 // Hook für Books Query
-export const useBooksQuery = () => {
+export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   const { user, loading: userLoading } = useAuth();
   const queryClient = useQueryClient();
+  const [sortField, setSortField] = useState<string>('createdAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  // Books Query
-  const {
-    data: books = [],
-    isLoading,
-    error,
-  } = useQuery({
+  // State to track if we should fall back to non-paginated query
+  const [useFallback, setUseFallback] = useState(false);
+
+  // Paginated Books Query
+  const infiniteQuery = useInfiniteQuery({
+    queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+    queryFn: async ({ pageParam }) => {
+      if (useFallback) {
+        throw new Error('Using fallback query instead');
+      }
+      
+      try {
+        return await booksService.getUserBooksDataPaginated(
+          user!.uid,
+          pageSize,
+          pageParam as QueryDocumentSnapshot<DocumentData> | null,
+          sortField,
+          sortDirection
+        );
+      } catch (error) {
+        console.error('Błąd pobierania paginowanych książek:', error);
+        
+        // If there's an error with the specified sort field, try with default sort
+        if (sortField !== 'createdAt' && error instanceof Error && error.toString().includes('index')) {
+          console.log('Przełączanie na domyślne pole sortowania');
+          setSortField('createdAt');
+          try {
+            return await booksService.getUserBooksDataPaginated(
+              user!.uid,
+              pageSize,
+              pageParam as QueryDocumentSnapshot<DocumentData> | null,
+              'createdAt',
+              sortDirection
+            );
+          } catch (innerError) {
+            console.error('Error with fallback sort field:', innerError);
+            // If even the fallback fails, switch to non-paginated mode
+            setUseFallback(true);
+            throw innerError;
+          }
+        }
+        
+        // For persistent errors, switch to non-paginated mode
+        if (error instanceof Error && 
+            (error.toString().includes('permission') || 
+             error.toString().includes('exist') ||
+             error.toString().includes('unavailable'))) {
+          console.log('Przełączanie na tryb niepaginowany z powodu trwałego błędu');
+          setUseFallback(true);
+        }
+        
+        throw error;
+      }
+    },
+    initialPageParam: null as QueryDocumentSnapshot<DocumentData> | null,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.lastDoc : undefined,
+    enabled: !!user && !userLoading && usePagination && !useFallback,
+    retry: 1, // Limit retries to avoid excessive error logs
+    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh for 5 minutes
+    refetchOnWindowFocus: false, // Don't auto-refetch when window regains focus
+  });
+
+  // Legacy non-paginated query (for backward compatibility or fallback)
+  const legacyQuery = useQuery({
     queryKey: booksKeys.list(user?.uid || ''),
     queryFn: () => booksService.getUserBooksData(user!.uid),
-    enabled: !!user && !userLoading,
+    enabled: !!user && !userLoading && (!usePagination || useFallback),
+    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh for 5 minutes
+    refetchOnWindowFocus: false, // Don't auto-refetch when window regains focus
   });
+
+  // Combine all books from paginated results
+  // React Query already handles deduplication, so we just flatten the pages
+  const paginatedBooks = useMemo(() => {
+    if (!infiniteQuery.data) return [];
+    return infiniteQuery.data.pages.flatMap(page => page.items);
+  }, [infiniteQuery.data]);
+
+  // Use either paginated or legacy books
+  const books = useMemo(() => {
+    return (usePagination && !useFallback) ? paginatedBooks : (legacyQuery.data || []);
+  }, [usePagination, useFallback, paginatedBooks, legacyQuery.data]);
+
+  // Loading state from either query
+  const isLoading = (usePagination && !useFallback) ? infiniteQuery.isLoading : legacyQuery.isLoading;
+  
+  // Error handling with better error messages
+  let error = (usePagination && !useFallback) ? infiniteQuery.error : legacyQuery.error;
+  
+  // Provide more specific error message for Firebase index issues
+  if (error && error.toString().includes('index')) {
+    error = new Error('Wystąpił błąd z indeksem Firebase. Proszę skontaktować się z administratorem.');
+  } else if (error) {
+    error = new Error('Błąd pobierania paginowanych książek.');
+  }
+
+  // Pagination status
+  const hasNextPage = !useFallback && infiniteQuery.hasNextPage || false;
+  const isFetchingNextPage = !useFallback && infiniteQuery.isFetchingNextPage;
+  const fetchNextPage = !useFallback ? infiniteQuery.fetchNextPage : () => Promise.resolve();
 
   // Statistiken berechnen
   const stats = useMemo(() => calculateStats(books), [books]);
@@ -75,8 +171,12 @@ export const useBooksQuery = () => {
       const bookToAdd = { ...newBook, userId: user.uid, createdAt: new Date().toISOString() };
       return booksService.addBook(bookToAdd);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+    onSettled: () => {
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -85,23 +185,66 @@ export const useBooksQuery = () => {
     mutationFn: ({ bookId, updatedBook }: { bookId: string; updatedBook: Partial<Book> }) =>
       booksService.updateBook(bookId, updatedBook),
     onMutate: async ({ bookId, updatedBook }) => {
-      // Optimistic Update
-      await queryClient.cancelQueries({ queryKey: booksKeys.list(user?.uid || '') });
-      const previousBooks = queryClient.getQueryData<Book[]>(booksKeys.list(user?.uid || ''));
-      
-      queryClient.setQueryData<Book[]>(booksKeys.list(user?.uid || ''), (old = []) =>
-        old.map((book) => (book.id === bookId ? { ...book, ...updatedBook } : book))
-      );
-      
-      return { previousBooks };
+      if (usePagination && !useFallback) {
+        // Optimistic update for paginated data
+        await queryClient.cancelQueries({ 
+          queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
+        });
+        
+        const previousData = queryClient.getQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        );
+        
+        queryClient.setQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+          (old: any) => {
+            if (!old) return old;
+            
+            return {
+              ...old,
+              pages: old.pages.map((page: PaginatedResult<Book>) => ({
+                ...page,
+                items: page.items.map((book: Book) => 
+                  book.id === bookId ? { ...book, ...updatedBook } : book
+                )
+              }))
+            };
+          }
+        );
+        
+        return { previousData };
+      } else {
+        // Legacy optimistic update
+        await queryClient.cancelQueries({ queryKey: booksKeys.list(user?.uid || '') });
+        const previousBooks = queryClient.getQueryData<Book[]>(booksKeys.list(user?.uid || ''));
+        
+        queryClient.setQueryData<Book[]>(booksKeys.list(user?.uid || ''), (old = []) =>
+          old.map((book) => (book.id === bookId ? { ...book, ...updatedBook } : book))
+        );
+        
+        return { previousBooks };
+      }
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousBooks) {
-        queryClient.setQueryData(booksKeys.list(user?.uid || ''), context.previousBooks);
+      // Rollback to previous state on error
+      if (usePagination && !useFallback && context?.previousData) {
+        queryClient.setQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+          context.previousData
+        );
+      } else if ((!usePagination || useFallback) && context?.previousBooks) {
+        queryClient.setQueryData(
+          booksKeys.list(user?.uid || ''),
+          context.previousBooks
+        );
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -109,23 +252,64 @@ export const useBooksQuery = () => {
   const deleteBookMutation = useMutation({
     mutationFn: (bookId: string) => booksService.deleteBook(bookId),
     onMutate: async (bookId) => {
-      // Optimistic Update
-      await queryClient.cancelQueries({ queryKey: booksKeys.list(user?.uid || '') });
-      const previousBooks = queryClient.getQueryData<Book[]>(booksKeys.list(user?.uid || ''));
-      
-      queryClient.setQueryData<Book[]>(booksKeys.list(user?.uid || ''), (old = []) =>
-        old.filter((book) => book.id !== bookId)
-      );
-      
-      return { previousBooks };
+      if (usePagination && !useFallback) {
+        // Optimistic update for paginated data
+        await queryClient.cancelQueries({ 
+          queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
+        });
+        
+        const previousData = queryClient.getQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        );
+        
+        queryClient.setQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+          (old: any) => {
+            if (!old) return old;
+            
+            return {
+              ...old,
+              pages: old.pages.map((page: PaginatedResult<Book>) => ({
+                ...page,
+                items: page.items.filter((book: Book) => book.id !== bookId)
+              }))
+            };
+          }
+        );
+        
+        return { previousData };
+      } else {
+        // Legacy optimistic update
+        await queryClient.cancelQueries({ queryKey: booksKeys.list(user?.uid || '') });
+        const previousBooks = queryClient.getQueryData<Book[]>(booksKeys.list(user?.uid || ''));
+        
+        queryClient.setQueryData<Book[]>(booksKeys.list(user?.uid || ''), (old = []) =>
+          old.filter((book) => book.id !== bookId)
+        );
+        
+        return { previousBooks };
+      }
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousBooks) {
-        queryClient.setQueryData(booksKeys.list(user?.uid || ''), context.previousBooks);
+      // Rollback to previous state on error
+      if (usePagination && !useFallback && context?.previousData) {
+        queryClient.setQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+          context.previousData
+        );
+      } else if ((!usePagination || useFallback) && context?.previousBooks) {
+        queryClient.setQueryData(
+          booksKeys.list(user?.uid || ''),
+          context.previousBooks
+        );
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -134,22 +318,66 @@ export const useBooksQuery = () => {
     mutationFn: ({ bookId, currentFavorite }: { bookId: string; currentFavorite: boolean }) =>
       booksService.updateBook(bookId, { isFavorite: !currentFavorite }),
     onMutate: async ({ bookId, currentFavorite }) => {
-      await queryClient.cancelQueries({ queryKey: booksKeys.list(user?.uid || '') });
-      const previousBooks = queryClient.getQueryData<Book[]>(booksKeys.list(user?.uid || ''));
-      
-      queryClient.setQueryData<Book[]>(booksKeys.list(user?.uid || ''), (old = []) =>
-        old.map((book) => (book.id === bookId ? { ...book, isFavorite: !currentFavorite } : book))
-      );
-      
-      return { previousBooks };
+      if (usePagination && !useFallback) {
+        // Optimistic update for paginated data
+        await queryClient.cancelQueries({ 
+          queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection) 
+        });
+        
+        const previousData = queryClient.getQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        );
+        
+        queryClient.setQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+          (old: any) => {
+            if (!old) return old;
+            
+            return {
+              ...old,
+              pages: old.pages.map((page: PaginatedResult<Book>) => ({
+                ...page,
+                items: page.items.map((book: Book) => 
+                  book.id === bookId ? { ...book, isFavorite: !currentFavorite } : book
+                )
+              }))
+            };
+          }
+        );
+        
+        return { previousData };
+      } else {
+        // Legacy optimistic update
+        await queryClient.cancelQueries({ queryKey: booksKeys.list(user?.uid || '') });
+        const previousBooks = queryClient.getQueryData<Book[]>(booksKeys.list(user?.uid || ''));
+        
+        queryClient.setQueryData<Book[]>(booksKeys.list(user?.uid || ''), (old = []) =>
+          old.map((book) => (book.id === bookId ? { ...book, isFavorite: !currentFavorite } : book))
+        );
+        
+        return { previousBooks };
+      }
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousBooks) {
-        queryClient.setQueryData(booksKeys.list(user?.uid || ''), context.previousBooks);
+      // Rollback to previous state on error
+      if (usePagination && !useFallback && context?.previousData) {
+        queryClient.setQueryData(
+          booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
+          context.previousData
+        );
+      } else if ((!usePagination || useFallback) && context?.previousBooks) {
+        queryClient.setQueryData(
+          booksKeys.list(user?.uid || ''),
+          context.previousBooks
+        );
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: booksKeys.list(user?.uid || '') });
+      // Invalidate the correct query key based on current mode
+      const queryKey = (usePagination && !useFallback)
+        ? booksKeys.paginatedList(user?.uid || '', sortField, sortDirection)
+        : booksKeys.list(user?.uid || '');
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -178,6 +406,17 @@ export const useBooksQuery = () => {
     error: error as Error | null,
     booksStats: stats.booksStats,
     additionalStats: stats.additionalStats,
+    
+    // Pagination
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    
+    // Sorting
+    sortField,
+    sortDirection,
+    setSortField,
+    setSortDirection,
     
     // Mutations
     handleBookAdd: (newBook: Book) => addBookMutation.mutateAsync(newBook),

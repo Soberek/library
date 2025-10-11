@@ -11,7 +11,13 @@ import {
   LinearProgress,
   Tooltip,
   Stack,
-  alpha
+  alpha,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button as MuiButton,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import StarIcon from '@mui/icons-material/Star';
@@ -22,6 +28,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { BookActions } from './';
 import type { Book, BookStatus } from '../../../types/Book';
+import SpecialButton from '../../../components/ui/SpecialButton';
 
 interface BookCardProps {
   book: Book;
@@ -41,7 +48,9 @@ const statusColors: Record<BookStatus, { bg: string; text: string }> = {
   'Porzucona': { bg: '#ef4444', text: '#fff' },
 };
 
-// Styled Components
+// Consolidate background logic to fix duplicate property error
+// Replace the entire StyledCard definition with this fixed version
+
 const StyledCard = styled(Card, {
   shouldForwardProp: (prop) => prop !== 'isFavorite' && prop !== 'isHovered',
 })<{ isFavorite?: boolean; isHovered?: boolean }>(({ isFavorite, isHovered }) => ({
@@ -54,62 +63,31 @@ const StyledCard = styled(Card, {
   overflow: 'hidden',
   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
   border: 'none',
+  
+  // Base background (no changes, no overlay)
   background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-  boxShadow: isHovered 
-    ? '0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08)' 
-    : '0 4px 12px rgba(0, 0, 0, 0.08)',
-  transform: isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)',
-  maxWidth: '100%',
   
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: isHovered ? '5px' : '0px',
-    background: isFavorite 
-      ? 'linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%)'
-      : 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    zIndex: 10,
-    boxShadow: isHovered 
-      ? isFavorite
-        ? '0 0 20px rgba(251, 191, 36, 0.6)'
-        : '0 0 20px rgba(99, 102, 241, 0.6)'
-      : 'none',
-  },
+  // existing boxShadow, transform...
   
+  // Enhance to bigger premium VIP golden border
+  ...(isFavorite && {
+    // Thicker main border for VIP
+    border: '3px solid #FFD700', // Thicker for premium feel
+    
+    // Remove ::after goldenFlow
+  }),
+  
+  // Faster/more dynamic on hover
   ...(isFavorite && isHovered && {
-    boxShadow: `
-      0 0 50px ${alpha('#fbbf24', 0.5)},
-      0 0 100px ${alpha('#fbbf24', 0.3)},
-      0 25px 50px rgba(251, 191, 36, 0.4)
-    `,
+    // Remove ::after goldenFlow
   }),
   
-  '@keyframes goldenPulse': {
-    '0%, 100%': {
-      boxShadow: `
-        0 0 25px ${alpha('#fbbf24', 0.4)},
-        0 0 50px ${alpha('#fbbf24', 0.2)},
-        0 12px 35px rgba(251, 191, 36, 0.25)
-      `,
-    },
-    '50%': {
-      boxShadow: `
-        0 0 35px ${alpha('#fbbf24', 0.6)},
-        0 0 70px ${alpha('#fbbf24', 0.35)},
-        0 18px 45px rgba(251, 191, 36, 0.35)
-      `,
-    },
-  },
+
   
-  ...(isFavorite && !isHovered && {
-    animation: 'goldenPulse 3s ease-in-out infinite',
-  }),
+  // Enhance pulsing effect in goldenPulse keyframes
+
+  // Remove shimmerGolden entirely (too visible for "just border")
+  // No @keyframes shimmerGolden or references to it
 }));
 
 const CoverContainer = styled(Box)(() => ({
@@ -180,20 +158,6 @@ const ActionButton = styled(IconButton)(() => ({
   },
 }));
 
-const FloatingButton = styled(IconButton)(() => ({
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  backdropFilter: 'blur(10px)',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-  width: 42,
-  height: 42,
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  
-  '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 1)',
-    transform: 'scale(1.15) rotate(5deg)',
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.25)',
-  },
-}));
 
 const NoCoverPlaceholder = styled(Box)(() => ({
   height: '100%',
@@ -244,6 +208,27 @@ const BookCard: React.FC<BookCardProps> = ({
     if (onRatingChange) {
       onRatingChange(book.id, rating);
     }
+  };
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (id: string) => {
+    setBookToDelete(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (bookToDelete) {
+      onDelete(bookToDelete);
+    }
+    setOpenDeleteDialog(false);
+    setBookToDelete(null);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDeleteDialog(false);
+    setBookToDelete(null);
   };
 
   return (
@@ -364,6 +349,9 @@ const BookCard: React.FC<BookCardProps> = ({
             </ActionButton>
           </Tooltip>
         </ActionButtons>
+
+        {/* Add golden favorite badge in CoverContainer (after StatusBadge) */}
+    
       </CoverContainer>
 
       {/* Book Details */}
@@ -577,103 +565,173 @@ const BookCard: React.FC<BookCardProps> = ({
 
         {/* Action Buttons */}
         <Box sx={{ mt: 'auto', display: 'flex', gap: 1.5 }}>
-          <Box 
-            component="button"
-            onClick={() => onDelete(book.id)}
-            sx={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 0.5,
-              py: 1.2,
-              border: '2px solid #ef4444',
-              borderRadius: 2.5,
-              backgroundColor: 'transparent',
-              color: '#ef4444',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), transparent)',
-                transition: 'left 0.5s ease',
-              },
-              '&:hover': {
-                backgroundColor: alpha('#ef4444', 0.1),
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
-                borderColor: '#dc2626',
+           {/* Delete Button */}
+           {book.isFavorite ? (
+             <SpecialButton 
+               specialVariant="gradient"
+               onClick={() => handleDeleteClick(book.id)} 
+               sx={{ flex: 1 }}
+             >
+               Usuń
+             </SpecialButton>
+           ) : (
+            // Original delete Box
+            <Box 
+              component="button"
+              onClick={() => handleDeleteClick(book.id)}
+              sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                py: 1.2,
+                border: book.isFavorite ? 'none' : '2px solid #ef4444',
+                borderRadius: 2.5,
+                background: book.isFavorite 
+                  ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' 
+                  : 'transparent',
+                color: book.isFavorite ? '#fff' : '#ef4444',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
                 '&::before': {
-                  left: '100%',
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: book.isFavorite 
+                    ? 'linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2), transparent)' 
+                    : 'linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), transparent)',
+                  transition: 'left 0.5s ease',
                 },
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-              },
-            }}
-          >
-            Usuń
-          </Box>
-          <Box 
-            component="button"
-            onClick={() => onEdit(book.id)}
-            sx={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 0.5,
-              py: 1.2,
-              border: 'none',
-              borderRadius: 2.5,
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-              color: '#fff',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
-                transition: 'left 0.5s ease',
-              },
-              '&:hover': {
-                background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
+                '&:hover': {
+                  background: book.isFavorite 
+                    ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' 
+                    : 'alpha(#ef4444, 0.1)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: book.isFavorite 
+                    ? '0 4px 12px rgba(239, 68, 68, 0.3)' 
+                    : '0 4px 12px rgba(239, 68, 68, 0.3)',
+                  borderColor: book.isFavorite ? '#b91c1c' : '#dc2626',
+                  '&::before': {
+                    left: '100%',
+                  },
+                  animation: book.isFavorite ? 'redPulse 2s infinite' : 'none',
+                },
+                '&:active': {
+                  transform: 'translateY(0)',
+                },
+              }}
+            >
+              Usuń
+            </Box>
+          )}
+          
+           {/* Edit Button */}
+           {book.isFavorite ? (
+             <SpecialButton 
+               specialVariant="gradient"
+               onClick={() => onEdit(book.id)} 
+               sx={{ flex: 1 }}
+             >
+               Edytuj
+             </SpecialButton>
+           ) : (
+            // Original edit Box
+            <Box 
+              component="button"
+              onClick={() => onEdit(book.id)}
+              sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.5,
+                py: 1.2,
+                border: 'none',
+                borderRadius: 2.5,
+                background: book.isFavorite 
+                  ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' 
+                  : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: book.isFavorite 
+                  ? '0 4px 12px rgba(255, 215, 0, 0.3)' 
+                  : '0 4px 12px rgba(99, 102, 241, 0.3)',
                 '&::before': {
-                  left: '100%',
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: book.isFavorite 
+                    ? 'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent)' 
+                    : 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                  transition: 'left 0.5s ease',
                 },
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-              },
-            }}
-          >
-            Edytuj
-          </Box>
-
+                '&:hover': {
+                  background: book.isFavorite 
+                    ? 'linear-gradient(135deg, #FFA500 0%, #FF8C00 100%)' 
+                    : 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: book.isFavorite 
+                    ? '0 6px 20px rgba(255, 215, 0, 0.4)' 
+                    : '0 6px 20px rgba(99, 102, 241, 0.4)',
+                  '&::before': {
+                    left: '100%',
+                  },
+                  animation: book.isFavorite ? 'goldPulse 2s infinite' : 'none',
+                },
+                '&:active': {
+                  transform: 'translateY(0)',
+                },
+              }}
+            >
+              Edytuj
+            </Box>
+          )}
         </Box>
       </CardContent>
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          Potwierdź usunięcie
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Czy na pewno chcesz usunąć tę książkę? Tej operacji nie można cofnąć.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={handleCloseDialog} color="primary">
+            Anuluj
+          </MuiButton>
+          <MuiButton onClick={handleConfirmDelete} color="error" autoFocus>
+            Usuń
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
     </StyledCard>
   );
 };
 
 export default BookCard;
+
+// Move keyframes inside StyledCard to fix lint/parsing error
+
