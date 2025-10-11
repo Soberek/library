@@ -1,2 +1,2 @@
 // Barrel exports for utilities
-export * from "./validation";
+export * from './validation';
