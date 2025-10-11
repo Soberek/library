@@ -36,6 +36,7 @@ export const bookSchema = z.object({
     .refine((val) => !isNaN(val) && val >= VALIDATION_RULES.BOOK.RATING.MIN && val <= VALIDATION_RULES.BOOK.RATING.MAX, 
       "Ocena musi być liczbą między 0 a 10"),
   createdAt: z.string().optional(),
+  isFavorite: z.boolean().optional().default(false),
 });
 
 export const bookFormSchema = bookSchema.omit({ id: true, createdAt: true });
