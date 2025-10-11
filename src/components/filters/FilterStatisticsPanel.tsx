@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useFilterStore } from '../../stores';
+import { useFilterStore, type FilterStore } from '../../stores';
 import type { FilterState } from '../../stores';
 import {
   Box, Paper, Typography, FormControl, InputLabel, Select, MenuItem, Chip,
@@ -57,9 +57,9 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   additionalStats,
 }) => {
   // Zustand Store
-  const filters = useFilterStore((state) => state.filters);
-  const activeTab = useFilterStore((state) => state.activeTab);
-  const expanded = useFilterStore((state) => state.expanded);
+  const filters = useFilterStore((state: FilterStore) => state.filters);
+  const activeTab = useFilterStore((state: FilterStore) => state.activeTab);
+  const expanded = useFilterStore((state: FilterStore) => state.expanded);
   const showAdvancedFilters = useFilterStore((state) => state.showAdvancedFilters);
   const activeFilters = useFilterStore((state) => state.activeFilters);
   
@@ -656,14 +656,14 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
               {/* Results Summary */}
               <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Wyświetlanie <strong>{books.length}</strong> książek, sortowanie według <strong>{{
+                  Wyświetlanie <strong>{books.length}</strong> książek, sortowanie według <strong>{({
                     'title': 'tytułu',
                     'author': 'autora',
                     'rating': 'oceny',
                     'pages': 'liczby stron',
                     'dateAdded': 'daty dodania',
                     'status': 'statusu',
-                  }[filters.sortBy] || filters.sortBy}</strong> ({filters.sortOrder === 'asc' ? 'rosnąco' : 'malejąco'})
+                  } as Record<string, string>)[filters.sortBy] || filters.sortBy}</strong> ({filters.sortOrder === 'asc' ? 'rosnąco' : 'malejąco'})
                 </Typography>
               </Box>
             </Box>
