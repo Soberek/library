@@ -3,6 +3,7 @@ import { BookOpen } from 'lucide-react';
 import type { Book, BookStatus } from '../../types/Book';
 import { BOOK_STATUSES } from '../../constants/bookStatus';
 import BookCard from './BookCard';
+import BookTable from './BookTable'; // Add import
 
 interface BookListProps {
   loading: boolean;
@@ -12,6 +13,7 @@ interface BookListProps {
   handleBookDelete: (bookId: string) => void;
   handleBookModalOpen: (params: { mode: 'add' | 'edit'; bookId: string | null }) => void;
   handleToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
+  viewMode: 'cards' | 'table';
 }
 
 export default function BookList({
@@ -22,6 +24,7 @@ export default function BookList({
   handleBookDelete,
   handleBookModalOpen,
   handleToggleFavorite,
+  viewMode,
 }: BookListProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -90,6 +93,20 @@ export default function BookList({
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (viewMode === 'table') {
+    return (
+      <BookTable
+        books={books}
+        handleStatusChange={handleStatusChange}
+        handleRatingChange={handleRatingChange}
+        handleToggleFavorite={handleToggleFavorite}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        handleShare={handleShare}
+      />
     );
   }
 
