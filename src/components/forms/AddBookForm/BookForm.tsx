@@ -253,7 +253,7 @@ const BookForm: React.FC<Props> = ({
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Okładka (URL)"
+                label="URL okładki"
                 variant="outlined"
                 fullWidth
                 inputProps={{ 'data-testid': 'cover-input' }}
