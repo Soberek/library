@@ -5,15 +5,14 @@ import {
   BottomNav,
   ErrorDisplay,
   LoadingSpinner,
-  FilterSortPanel,
-  StatisticsDashboard,
+  FilterStatisticsPanel,
   PageHeader,
   BookForms,
 } from "../components";
 import { useBooks } from "../hooks/useBooks";
 import { useSearch } from "../hooks/useSearch";
 import type { Book } from "../types/Book";
-import { Box, Container } from "@mui/material";
+import { Box, Container, Snackbar, Alert } from "@mui/material";
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ViewModule as GridViewIcon, ViewList as ViewListIcon } from '@mui/icons-material';
@@ -43,8 +42,18 @@ const Books = () => {
   });
 
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
+  // Zustand, ob das Filterpanel geöffnet ist
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [viewMode, setViewMode] = useLocalStorage<'cards' | 'table'>('bookViewMode', 'cards');
+  const [sortConfig, setSortConfig] = useState<{ sortBy: string; sortOrder: 'asc' | 'desc' }>({
+    sortBy: 'status',
+    sortOrder: 'asc'
+  });
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const searchContext = useSearch();
 
@@ -100,7 +109,7 @@ const Books = () => {
     const averageRating =
       booksWithRatings.length > 0
         ? booksWithRatings.reduce((sum, book) => sum + Number(book.rating), 0) /
-          booksWithRatings.length
+        booksWithRatings.length
         : 0;
 
     // Completion rate: percentage of books that are marked as "Przeczytana"
@@ -134,6 +143,34 @@ const Books = () => {
     setIsEditing((prev) => ({ ...prev, status: false }));
   }, []);
 
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  }, []);
+  
+  const handleSortChange = useCallback((sortBy: string, sortOrder: 'asc' | 'desc') => {
+    setSortConfig({ sortBy, sortOrder });
+  }, []);
+
+  const wrappedHandleBookSubmit = useCallback(async (book: import("../types/Book").BookFormData) => {
+    const result = await handleBookSubmit(book);
+    if (result) {
+      setSnackbar({ open: true, message: 'Książka dodana!', severity: 'success' });
+      handleBookModalClose();
+    } else {
+      setSnackbar({ open: true, message: 'Nie udało się dodać książki', severity: 'error' });
+    }
+  }, [handleBookSubmit, handleBookModalClose]);
+
+  const wrappedHandleBookUpdate = useCallback(async (bookId: string, updatedData: Partial<Book>) => {
+    const result = await handleBookUpdate(bookId, updatedData);
+    if (result) {
+      setSnackbar({ open: true, message: 'Książka zaktualizowana!', severity: 'success' });
+      handleBookModalClose();
+    } else {
+      setSnackbar({ open: true, message: 'Nie udało się zaktualizować książki', severity: 'error' });
+    }
+  }, [handleBookUpdate, handleBookModalClose]);
+
   if (loading) {
     return <LoadingSpinner message="Ładowanie książek..." fullScreen />;
   }
@@ -149,56 +186,25 @@ const Books = () => {
       <Container maxWidth="xl">
         <ErrorDisplay error={error} onRetry={refetch} />
 
-        {/* Page Header */}
+        {/* Page Header with View Mode Toggle */}
         <PageHeader
+          onAddBook={() => handleBookModalOpen({ mode: "add", bookId: null })}
+          viewMode={viewMode}
+          onViewModeChange={(newView) => setViewMode(newView)}
           isFilterPanelOpen={isFilterPanelOpen}
           onFilterToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-          onAddBook={() => handleBookModalOpen({ mode: "add", bookId: null })}
         />
 
-        {/* Toggle Buttons for View Mode */}
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={(_, newView) => setViewMode(newView)}
-          aria-label="book view"
-          size="small"
-          sx={{ 
-            mb: 2, 
-            backgroundColor: 'background.paper', 
-            borderRadius: 1, 
-            border: '1px solid', 
-            borderColor: 'divider',
-            '& .MuiToggleButton-root': {
-              textTransform: 'none',
-              padding: '8px 16px',
-              '&.Mui-selected': { backgroundColor: 'primary.light', color: 'primary.contrastText' }
-            }
-          }}
-        >
-          <ToggleButton value="cards">
-            <GridViewIcon fontSize="small" sx={{ mr: 0.5 }} /> Cards
-          </ToggleButton>
-          <ToggleButton value="table">
-            <ViewListIcon fontSize="small" sx={{ mr: 0.5 }} /> Table
-          </ToggleButton>
-        </ToggleButtonGroup>
-
-        {/* Statistics Dashboard */}
-        {booksStats.total > 0 && additionalStats && (
-          <StatisticsDashboard
-            booksStats={booksStats}
-            additionalStats={additionalStats}
-          />
-        )}
-
-        {/* Filter and Sort Panel */}
-        {books.length > 0 && (
-          <FilterSortPanel
+        {/* Combined Filter and Statistics Panel */}
+        {books.length > 0 && additionalStats && (
+          <FilterStatisticsPanel
             books={books}
             onFilterChange={setFilteredBooks}
-            isOpen={isFilterPanelOpen}
-            onToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+            onSortChange={handleSortChange}
+            isFilterOpen={isFilterPanelOpen}
+            onFilterToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+            booksStats={booksStats}
+            additionalStats={additionalStats}
           />
         )}
 
@@ -206,8 +212,8 @@ const Books = () => {
         <BookForms
           isEditing={isEditing}
           books={books}
-          handleBookSubmit={handleBookSubmit}
-          handleBookUpdate={handleBookUpdate}
+          handleBookSubmit={wrappedHandleBookSubmit}
+          handleBookUpdate={wrappedHandleBookUpdate}
           handleBookModalOpen={handleBookModalOpen}
           handleBookModalClose={handleBookModalClose}
         />
@@ -223,11 +229,26 @@ const Books = () => {
             handleBookModalOpen={handleBookModalOpen}
             handleToggleFavorite={handleToggleFavorite}
             viewMode={viewMode}
+            sortField={sortConfig.sortBy}
+            sortOrder={sortConfig.sortOrder}
+            onSortChange={handleSortChange}
           />
         </Box>
 
         {/* Fixed add book button */}
         <BottomNav handleBookModalOpen={handleBookModalOpen} />
+
+        {/* Success/Error Snackbar */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
