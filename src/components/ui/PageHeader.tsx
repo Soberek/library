@@ -1,7 +1,6 @@
-import React from "react";
-import { Box, Button, IconButton, Tooltip, ToggleButton, ToggleButtonGroup, useMediaQuery, useTheme, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import React from 'react';
+import { Box, Button, ToggleButton, ToggleButtonGroup, useMediaQuery, useTheme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { ViewModule as GridViewIcon, ViewList as ViewListIcon } from '@mui/icons-material';
 
 interface PageHeaderProps {
@@ -56,22 +55,22 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             startIcon={<AddIcon />}
             onClick={onAddBook}
             sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               borderRadius: 2,
               px: { xs: 2, md: 3 },
               py: 1,
               fontWeight: 600,
-              textTransform: "none",
-              boxShadow: "0 4px 16px rgba(102, 126, 234, 0.3)",
-              "&:hover": {
-                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                transform: "translateY(-2px)",
-                boxShadow: "0 8px 24px rgba(102, 126, 234, 0.4)",
+              textTransform: 'none',
+              boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)',
               },
-              transition: "all 0.3s ease",
+              transition: 'all 0.3s ease',
             }}
           >
-            {isMobile ? "Dodaj" : "Dodaj książkę"}
+            {isMobile ? 'Dodaj' : 'Dodaj książkę'}
           </Button>
         </Box>
       </Box>
@@ -99,9 +98,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
               '&.Mui-selected': { 
                 backgroundColor: 'primary.light', 
                 color: 'primary.contrastText',
-                fontWeight: 500
-              }
-            }
+                fontWeight: 500,
+              },
+            },
           }}
         >
           <ToggleButton value="cards">
