@@ -60,10 +60,17 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   const [sortField, setSortField] = useState<string>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  // State to track if we should fall back to non-paginated query
+  const [useFallback, setUseFallback] = useState(false);
+
   // Paginated Books Query
   const infiniteQuery = useInfiniteQuery({
     queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
     queryFn: async ({ pageParam }) => {
+      if (useFallback) {
+        throw new Error('Using fallback query instead');
+      }
+      
       try {
         return await booksService.getUserBooksDataPaginated(
           user!.uid,
@@ -74,31 +81,50 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
         );
       } catch (error) {
         console.error('Error fetching paginated books:', error);
+        
         // If there's an error with the specified sort field, try with default sort
         if (sortField !== 'createdAt' && error instanceof Error && error.toString().includes('index')) {
           console.log('Falling back to default sort field');
           setSortField('createdAt');
-          return booksService.getUserBooksDataPaginated(
-            user!.uid,
-            pageSize,
-            pageParam as QueryDocumentSnapshot<DocumentData> | null,
-            'createdAt',
-            sortDirection
-          );
+          try {
+            return await booksService.getUserBooksDataPaginated(
+              user!.uid,
+              pageSize,
+              pageParam as QueryDocumentSnapshot<DocumentData> | null,
+              'createdAt',
+              sortDirection
+            );
+          } catch (innerError) {
+            console.error('Error with fallback sort field:', innerError);
+            // If even the fallback fails, switch to non-paginated mode
+            setUseFallback(true);
+            throw innerError;
+          }
         }
+        
+        // For persistent errors, switch to non-paginated mode
+        if (error instanceof Error && 
+            (error.toString().includes('permission') || 
+             error.toString().includes('exist') ||
+             error.toString().includes('unavailable'))) {
+          console.log('Switching to non-paginated mode due to persistent error');
+          setUseFallback(true);
+        }
+        
         throw error;
       }
     },
     initialPageParam: null as QueryDocumentSnapshot<DocumentData> | null,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.lastDoc : undefined,
-    enabled: !!user && !userLoading && usePagination,
+    enabled: !!user && !userLoading && usePagination && !useFallback,
+    retry: 1, // Limit retries to avoid excessive error logs
   });
 
-  // Legacy non-paginated query (for backward compatibility)
+  // Legacy non-paginated query (for backward compatibility or fallback)
   const legacyQuery = useQuery({
     queryKey: booksKeys.list(user?.uid || ''),
     queryFn: () => booksService.getUserBooksData(user!.uid),
-    enabled: !!user && !userLoading && !usePagination,
+    enabled: !!user && !userLoading && (!usePagination || useFallback),
   });
 
   // Combine all books from paginated results
@@ -109,14 +135,14 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
 
   // Use either paginated or legacy books
   const books = useMemo(() => {
-    return usePagination ? paginatedBooks : (legacyQuery.data || []);
-  }, [usePagination, paginatedBooks, legacyQuery.data]);
+    return (usePagination && !useFallback) ? paginatedBooks : (legacyQuery.data || []);
+  }, [usePagination, useFallback, paginatedBooks, legacyQuery.data]);
 
   // Loading state from either query
-  const isLoading = usePagination ? infiniteQuery.isLoading : legacyQuery.isLoading;
+  const isLoading = (usePagination && !useFallback) ? infiniteQuery.isLoading : legacyQuery.isLoading;
   
   // Error handling with better error messages
-  let error = usePagination ? infiniteQuery.error : legacyQuery.error;
+  let error = (usePagination && !useFallback) ? infiniteQuery.error : legacyQuery.error;
   
   // Provide more specific error message for Firebase index issues
   if (error && error.toString().includes('index')) {
@@ -126,9 +152,9 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   }
 
   // Pagination status
-  const hasNextPage = infiniteQuery.hasNextPage || false;
-  const isFetchingNextPage = infiniteQuery.isFetchingNextPage;
-  const fetchNextPage = infiniteQuery.fetchNextPage;
+  const hasNextPage = !useFallback && infiniteQuery.hasNextPage || false;
+  const isFetchingNextPage = !useFallback && infiniteQuery.isFetchingNextPage;
+  const fetchNextPage = !useFallback ? infiniteQuery.fetchNextPage : () => Promise.resolve();
 
   // Statistiken berechnen
   const stats = useMemo(() => calculateStats(books), [books]);

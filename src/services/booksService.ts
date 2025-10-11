@@ -62,44 +62,71 @@ const getUserBooksDataPaginated = async (
     }
 
     const booksCollection = collection(db, 'books');
-    let q;
     
-    // For createdAt field, we know the index exists by default
-    if (sortField === 'createdAt') {
-      q = query(
-        booksCollection,
-        where('userId', '==', userId),
-        orderBy(sortField, sortDirection),
-        limit(pageSize + 1) // Fetch one extra to check if more exist
-      );
-    } else {
-      // For other fields, we need to be careful with indexes
-      try {
-        // First try with compound query that requires index
+    // Start with a simple query that doesn't require special indexes
+    let q = query(
+      booksCollection,
+      where('userId', '==', userId),
+      limit(pageSize + 1)
+    );
+    
+    // Add sorting if specified
+    try {
+      if (sortField === 'createdAt') {
+        // For createdAt field, we know the index exists by default
         q = query(
           booksCollection,
           where('userId', '==', userId),
           orderBy(sortField, sortDirection),
-          limit(pageSize + 1) // Fetch one extra to check if more exist
+          limit(pageSize + 1)
         );
-      } catch (error) {
-        // Fallback to default sort by createdAt if index doesn't exist
-        console.error(`Firebase index error for field ${sortField}, falling back to createdAt:`, error);
+      } else {
+        // For other fields, try to use them but be ready to fall back
         q = query(
           booksCollection,
           where('userId', '==', userId),
-          orderBy('createdAt', sortDirection),
+          orderBy(sortField, sortDirection),
           limit(pageSize + 1)
         );
       }
+      
+      // If we have a last document, start after it for pagination
+      if (lastDoc) {
+        q = query(q, startAfter(lastDoc));
+      }
+    } catch (error) {
+      console.error(`Error creating query with field ${sortField}:`, error);
+      // Fallback to basic query without sorting
+      q = query(
+        booksCollection,
+        where('userId', '==', userId),
+        limit(pageSize + 1)
+      );
+      
+      // If we have a last document, we can't use it with a different query structure
+      // So we'll just skip pagination in this case
     }
 
-    // If we have a last document, start after it for pagination
-    if (lastDoc) {
-      q = query(q, startAfter(lastDoc));
+    // Execute the query with error handling
+    let booksList;
+    try {
+      booksList = await getDocs(q);
+    } catch (error) {
+      console.error('Error executing paginated query:', error);
+      
+      // If the error is related to indexes, try a simpler query
+      if (error instanceof Error && error.toString().includes('index')) {
+        console.log('Index error detected, falling back to simple query');
+        q = query(
+          booksCollection,
+          where('userId', '==', userId),
+          limit(pageSize + 1)
+        );
+        booksList = await getDocs(q);
+      } else {
+        throw error; // Re-throw if it's not an index issue
+      }
     }
-
-    const booksList = await getDocs(q);
     const hasMore = booksList.docs.length > pageSize;
     
     // Remove the extra document we used to check for more
