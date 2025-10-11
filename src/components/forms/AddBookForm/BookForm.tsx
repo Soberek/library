@@ -1,10 +1,10 @@
-import React from "react";
-import { GENRES } from "../../../constants/genres";
-import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../../constants/bookStatus";
-import type { Book, BookStatus, BookFormData } from "../../../types/Book";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { bookFormSchema } from "../../../schemas/bookSchema";
+import React from 'react';
+import { GENRES } from '../../../constants/genres';
+import { BOOK_STATUSES, BOOK_STATUS_LABELS } from '../../../constants/bookStatus';
+import type { Book, BookStatus, BookFormData } from '../../../types/Book';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { bookFormSchema } from '../../../schemas/bookSchema';
 import {
   Box,
   Button,
@@ -18,8 +18,8 @@ import {
   Divider,
   Rating,
   Alert,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 // type FormValues = {
 //   title: string;
@@ -33,12 +33,12 @@ import CloseIcon from "@mui/icons-material/Close";
 // };
 
 type Props = {
-  mode: "add" | "edit";
+  mode: 'add' | 'edit';
   bookToEdit?: Book | null;
   handleBookSubmit?: (data: BookFormData) => void;
   handleBookUpdate?: (bookId: string, newBook: Book) => void;
   handleBookModalOpen: (params: {
-    mode: "add" | "edit";
+    mode: 'add' | 'edit';
     bookId: string | null;
   }) => void;
   handleBookModalClose: () => void;
@@ -53,13 +53,13 @@ const genreOptions = Object.entries(GENRES)
   }));
 
 const DEFAULT_VALUES = {
-  title: "",
-  author: "",
-  read: "W trakcie" as BookStatus,
-  genre: "",
+  title: '',
+  author: '',
+  read: 'W trakcie' as BookStatus,
+  genre: '',
   readPages: 0,
   overallPages: 1,
-  cover: "",
+  cover: '',
   rating: 0,
 };
 
@@ -73,25 +73,23 @@ const BookForm: React.FC<Props> = ({
 }) => {
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(bookFormSchema),
-    defaultValues: mode === "edit" && bookToEdit ? bookToEdit : DEFAULT_VALUES,
+    defaultValues: mode === 'edit' && bookToEdit ? bookToEdit : DEFAULT_VALUES,
   });
 
   const onSubmit = (data: BookFormData) => {
-    if (mode === "add") {
+    if (mode === 'add') {
       const result = handleBookSubmit?.(data);
       if (result) {
         handleBookModalClose();
       }
-    } else if (mode === "edit") {
-      const result = handleBookUpdate?.(bookToEdit?.id || "", data as Book);
+    } else if (mode === 'edit') {
+      const result = handleBookUpdate?.(bookToEdit?.id || '', data as Book);
       if (result) {
         handleBookModalClose();
       }
     }
     reset();
   };
-
-  console.log("book form mode:", mode);
 
   return (
     <Dialog
@@ -102,13 +100,13 @@ const BookForm: React.FC<Props> = ({
     >
       <DialogTitle
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        {mode === "add"
-          ? "Dodaj nową książkę"
+        {mode === 'add'
+          ? 'Dodaj nową książkę'
           : `Edytujesz książkę: ${bookToEdit?.title}`}
 
         <IconButton
@@ -122,7 +120,7 @@ const BookForm: React.FC<Props> = ({
         <Box
           component="form"
           onSubmit={handleSubmit(onSubmit)}
-          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}
         >
           {Object.keys(errors).length > 0 && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -207,7 +205,7 @@ const BookForm: React.FC<Props> = ({
               />
             )}
           />
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Controller
               name="readPages"
               control={control}
@@ -246,11 +244,11 @@ const BookForm: React.FC<Props> = ({
           </Box>
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyItems: "center",
+              display: 'flex',
+              alignItems: 'center',
+              justifyItems: 'center',
               gap: 2,
-              width: "100%",
+              width: '100%',
             }}
           >
             <Controller
@@ -277,32 +275,32 @@ const BookForm: React.FC<Props> = ({
                 label="Okładka (URL)"
                 variant="outlined"
                 fullWidth
-                inputProps={{ "data-testid": "cover-input" }}
+                inputProps={{ 'data-testid': 'cover-input' }}
                 error={!!errors.cover}
                 helperText={errors.cover?.message}
               />
             )}
           />
-          {mode === "edit" && (
+          {mode === 'edit' && (
             <Button
               type="submit"
               variant="outlined"
               color="secondary"
               sx={{
                 mt: 2,
-                fontWeight: "bold",
+                fontWeight: 'bold',
                 background:
-                  "linear-gradient(30deg, #00ce67ff 30%, #186600ff 90%)",
+                  'linear-gradient(30deg, #00ce67ff 30%, #186600ff 90%)',
               }}
             >
               Edytuj książkę {mode}
             </Button>
           )}
-          {mode === "add" && (
+          {mode === 'add' && (
             <Button
               type="submit"
               variant="outlined"
-              sx={{ mt: 2, fontWeight: "bold" }}
+              sx={{ mt: 2, fontWeight: 'bold' }}
             >
               Dodaj książkę
             </Button>
