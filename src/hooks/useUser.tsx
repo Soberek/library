@@ -1,7 +1,7 @@
 // Hook do łatwego użycia kontekstu w innych komponentach
 
-import { createContext, useContext } from "react";
-import type { User } from "firebase/auth";
+import { createContext, useContext } from 'react';
+import type { User } from 'firebase/auth';
 
 export const UserContext = createContext<{
   user: User | null;
