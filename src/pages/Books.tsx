@@ -68,7 +68,8 @@ const Books: React.FC = () => {
     setIsFilterPanelOpen((prev) => !prev);
   }, []);
 
-  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+  // Error handling
+  if (error) return <Typography color="error">Błąd: {error.message}</Typography>;
 
   return (
     <Box 
