@@ -11,6 +11,7 @@ interface BookListProps {
   handleBookUpdate: (bookId: string, updatedBook: Partial<Book>) => void;
   handleBookDelete: (bookId: string) => void;
   handleBookModalOpen: (params: { mode: 'add' | 'edit'; bookId: string | null }) => void;
+  handleToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
 }
 
 export default function BookList({
@@ -20,8 +21,8 @@ export default function BookList({
   handleBookUpdate,
   handleBookDelete,
   handleBookModalOpen,
+  handleToggleFavorite,
 }: BookListProps) {
-  const [favoriteBooks, setFavoriteBooks] = useState<Set<string>>(new Set());
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -29,18 +30,6 @@ export default function BookList({
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const toggleFavorite = (bookId: string) => {
-    setFavoriteBooks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(bookId)) {
-        newSet.delete(bookId);
-      } else {
-        newSet.add(bookId);
-      }
-      return newSet;
-    });
-  };
 
   const handleShare = (book: Book) => {
     if (navigator.share) {
@@ -104,23 +93,11 @@ export default function BookList({
     );
   }
 
-  const sortedBooks = [...books].sort((a, b) => {
-    // Primary: status priority based on BOOK_STATUSES ordering
-    const aStatus = BOOK_STATUSES.indexOf(a.read as BookStatus);
-    const bStatus = BOOK_STATUSES.indexOf(b.read as BookStatus);
-    if (aStatus !== bStatus) return aStatus - bStatus;
-
-    // Secondary: newest first
-    const dateA = new Date(a.createdAt ?? 0).getTime();
-    const dateB = new Date(b.createdAt ?? 0).getTime();
-    return dateB - dateA;
-  });
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 p-4 mb-16">
-      {sortedBooks.map((book, index) => {
+      {books.map((book, index) => {
         const isHovered = hoveredCard === book.id;
-        const isFavorite = favoriteBooks.has(book.id);
+        const isFavorite = book.isFavorite ?? false;
 
         return (
           <BookCard
@@ -133,7 +110,7 @@ export default function BookList({
             openMenu={openMenu}
             onMouseEnter={() => setHoveredCard(book.id)}
             onMouseLeave={() => setHoveredCard(null)}
-            onToggleFavorite={toggleFavorite}
+            onToggleFavorite={() => handleToggleFavorite(book.id, isFavorite)}
             onShare={handleShare}
             onStatusChange={handleStatusChange}
             onRatingChange={handleRatingChange}
