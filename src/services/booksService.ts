@@ -102,7 +102,10 @@ const getAllBooksData = async (): Promise<BookWithId[]> => {
 const addBook = async (bookData: BookFormData): Promise<string | null> => {
   try {
     // Validate the book data
-    const validatedBook = bookToAddSchema.parse(bookData);
+    const validatedBook = {
+      ...bookToAddSchema.parse(bookData),
+      isFavorite: false,  // Explicit default
+    };
     
     const booksCollection = collection(db, "books");
     const docRef = await addDoc(booksCollection, validatedBook);
