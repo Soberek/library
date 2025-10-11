@@ -44,6 +44,9 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
         onStatusChange={onStatusChange}
         onToggleFavorite={onToggleFavorite}
         onRatingChange={onRatingChange}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={isFetchingNextPage}
       />
     );
   }
