@@ -165,10 +165,10 @@ export const BookGridView: React.FC<BookGridViewProps> = ({
             {isFetchingNextPage ? (
               <>
                 <CircularProgress size={20} color="inherit" />
-                Laden...
+                Ładowanie...
               </>
             ) : (
-              'Mehr Bücher laden'
+              'Załaduj więcej książek'
             )}
           </LoadMoreButton>
         </Box>
