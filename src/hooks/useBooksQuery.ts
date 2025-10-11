@@ -95,7 +95,7 @@ export const useBooksQuery = () => {
       
       return { previousBooks };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousBooks) {
         queryClient.setQueryData(booksKeys.list(user?.uid || ''), context.previousBooks);
       }
@@ -119,7 +119,7 @@ export const useBooksQuery = () => {
       
       return { previousBooks };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousBooks) {
         queryClient.setQueryData(booksKeys.list(user?.uid || ''), context.previousBooks);
       }
@@ -143,7 +143,7 @@ export const useBooksQuery = () => {
       
       return { previousBooks };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousBooks) {
         queryClient.setQueryData(booksKeys.list(user?.uid || ''), context.previousBooks);
       }
