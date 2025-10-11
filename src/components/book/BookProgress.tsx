@@ -35,7 +35,7 @@ export default function BookProgress({ book, isHovered, onRatingChange }: BookPr
             className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-3 border-indigo-600 rounded-full shadow-md shadow-indigo-400 transition-all duration-300 ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`}
-            style={{ left: `${progress}%`, transform: `translate(-50%, -50%)` }}
+            style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
           />
         </div>
         <span className="text-xs text-slate-600 font-semibold mt-1 block">
