@@ -66,7 +66,7 @@ describe('booksService', () => {
     it('should throw error when user ID is not provided', async () => {
       await expect(getUserBooksData('')).rejects.toMatchObject({
         code: 'FIREBASE_ERROR',
-        message: 'Wystąpił błąd. Spróbuj ponownie.',
+        message: 'Błąd Firebase. Spróbuj ponownie później.',
       });
     });
 
@@ -144,7 +144,7 @@ describe('booksService', () => {
     it('should throw error when book ID is not provided', async () => {
       await expect(deleteBook('')).rejects.toMatchObject({
         code: 'FIREBASE_ERROR',
-        message: 'Wystąpił błąd. Spróbuj ponownie.',
+        message: 'Błąd Firebase. Spróbuj ponownie później.',
       });
     });
   });
@@ -166,7 +166,7 @@ describe('booksService', () => {
     it('should throw error when book ID is not provided', async () => {
       await expect(updateBook('', { title: 'Updated Title' })).rejects.toMatchObject({
         code: 'FIREBASE_ERROR',
-        message: 'Wystąpił błąd. Spróbuj ponownie.',
+        message: 'Błąd Firebase. Spróbuj ponownie później.',
       });
     });
   });
