@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import type { Book, BookStatus } from "../types/Book";
 import type { ErrorType } from "../types/Error";
 import { getNextBookStatus } from "../constants/bookStatus";
+import type { BookToAdd } from "../types/Book";
 
 import {
   getUserBooksData,
@@ -97,6 +98,23 @@ export const useBooks = () => {
     }
   }, []);
 
+  const handleToggleFavorite = useCallback(async (bookId: string, currentFavorite: boolean) => {
+    console.log('handleToggleFavorite called for', bookId, 'toggling to', !currentFavorite);
+    try {
+      setError(null);
+      await updateBook(bookId, { isFavorite: !currentFavorite });
+      console.log('Firebase update successful for', bookId);
+      setBooks(prevBooks => 
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, isFavorite: !currentFavorite } : book
+        )
+      );
+    } catch (error) {
+      console.error('Toggle favorite failed:', error);
+      setError(error as ErrorType);
+    }
+  }, []);
+
   const handleBookSubmit = useCallback(async (book: import("../types/Book").BookFormData) => {
     if (!userId) {
       setError({ code: "VALIDATION_ERROR", message: "User not authenticated" });
@@ -110,7 +128,7 @@ export const useBooks = () => {
         ...book,
         userId: userId,
         createdAt: createdAt,
-      });
+      } as BookToAdd);
 
       if (newBookId) {
         setBooks(prevBooks => [
@@ -147,5 +165,6 @@ export const useBooks = () => {
     handleStatusChange,
     handleBookSubmit,
     refetch: fetchBooks,
+    handleToggleFavorite,
   };
 };

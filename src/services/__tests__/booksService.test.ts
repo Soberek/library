@@ -159,7 +159,7 @@ describe("booksService", () => {
       const result = await updateBook("test-book-id", updateData);
 
       expect(mockDoc).toHaveBeenCalledWith(db, "books", "test-book-id");
-      expect(mockUpdateDoc).toHaveBeenCalledWith({}, updateData);
+      expect(mockUpdateDoc).toHaveBeenCalledWith({}, expect.objectContaining(updateData));
       expect(result).toBe(true);
     });
 

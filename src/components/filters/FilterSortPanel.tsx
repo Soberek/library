@@ -14,6 +14,7 @@ import {
   FormControlLabel,
   Switch,
   Grid,
+  TextField,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -35,9 +36,10 @@ interface FilterState {
   genre: string | "all";
   ratingRange: [number, number];
   pagesRange: [number, number];
-  sortBy: "title" | "author" | "rating" | "pages" | "dateAdded";
+  sortBy: "title" | "author" | "rating" | "pages" | "dateAdded" | "status";
   sortOrder: "asc" | "desc";
   showOnlyFavorites: boolean;
+  author: string;
 }
 
 const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
@@ -51,12 +53,11 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
     genre: "all",
     ratingRange: [0, 10],
     pagesRange: [0, 5000],
-    sortBy: "dateAdded",
-    sortOrder: "desc",
+    sortBy: "status",
+    sortOrder: "asc",
     showOnlyFavorites: false,
+    author: '',
   });
-
-  const [favoriteBooks] = useState<Set<string>>(new Set());
 
   const applyFilters = React.useCallback(() => {
     let filtered = [...books];
@@ -87,19 +88,26 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
     // Favorites filter
     if (filters.showOnlyFavorites) {
-      filtered = filtered.filter((book) => favoriteBooks.has(book.id));
+      filtered = filtered.filter((book) => book.isFavorite === true);
+    }
+
+    if (filters.author.trim()) {
+      const searchAuthor = filters.author.toLowerCase();
+      filtered = filtered.filter((book) => book.author.toLowerCase().includes(searchAuthor));
     }
 
     // Sorting: primary by status (BOOK_STATUSES order so "W trakcie" is first),
     // secondary by selected sort field and order.
     filtered.sort((a, b) => {
-      // Primary: status priority
-      const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-      const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+      // Primary: status priority only for default sortBy
+      if (filters.sortBy === 'status') {
+        const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+        const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
 
-      if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+        if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+      }
 
-      // Secondary: selected sort field
+      // Secondary (or primary if not default): selected sort field
       let aValue: string | number, bValue: string | number;
 
       switch (filters.sortBy) {
@@ -120,9 +128,18 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
           bValue = b.overallPages;
           break;
         case "dateAdded":
+          // Status primary for dateAdded
+          const aStatusIndexDate = BOOK_STATUSES.indexOf(a.read as BookStatus);
+          const bStatusIndexDate = BOOK_STATUSES.indexOf(b.read as BookStatus);
+          if (aStatusIndexDate !== bStatusIndexDate) return aStatusIndexDate - bStatusIndexDate;
+
           aValue = new Date(a.createdAt || 0).getTime();
           bValue = new Date(b.createdAt || 0).getTime();
           break;
+        case "status":
+          const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+          const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+          return filters.sortOrder === "asc" ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
         default:
           return 0;
       }
@@ -137,7 +154,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
     });
 
     onFilterChange(filtered);
-  }, [books, filters, favoriteBooks, onFilterChange]);
+  }, [books, filters, onFilterChange]);
 
   const clearFilters = () => {
     setFilters({
@@ -148,8 +165,8 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
       sortBy: "dateAdded",
       sortOrder: "desc",
       showOnlyFavorites: false,
+      author: '',
     });
-    onFilterChange(books);
   };
 
   const getActiveFiltersCount = () => {
@@ -159,12 +176,13 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
     if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10) count++;
     if (filters.pagesRange[0] > 0 || filters.pagesRange[1] < 5000) count++;
     if (filters.showOnlyFavorites) count++;
+    if (filters.author.trim()) count++;
     return count;
   };
 
   React.useEffect(() => {
     applyFilters();
-  }, [filters, books, favoriteBooks, applyFilters]);
+  }, [filters, books, applyFilters]);
 
   const genreOptions = Object.entries(GENRES).map(([value, label]) => ({
     value,
@@ -215,6 +233,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
           {getActiveFiltersCount() > 0 && (
             <IconButton
               size="small"
+              aria-label="Clear"
               onClick={(e) => {
                 e.stopPropagation();
                 clearFilters();
@@ -279,6 +298,16 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
               </FormControl>
             </Grid>
 
+            {/* Author Filter */}
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <TextField
+                fullWidth
+                label="Autor"
+                value={filters.author}
+                onChange={(e) => setFilters((prev) => ({ ...prev, author: e.target.value }))}
+              />
+            </Grid>
+
             {/* Sort By */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FormControl fullWidth>
@@ -294,7 +323,8 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                         | "author"
                         | "rating"
                         | "pages"
-                        | "dateAdded",
+                        | "dateAdded"
+                        | "status",
                     }))
                   }
                 >
@@ -303,6 +333,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   <MenuItem value="author">Autor</MenuItem>
                   <MenuItem value="rating">Ocena</MenuItem>
                   <MenuItem value="pages">Liczba stron</MenuItem>
+                  <MenuItem value="status">Status</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
