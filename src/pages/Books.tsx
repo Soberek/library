@@ -1,255 +1,113 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { BOOK_STATUSES } from "../constants/bookStatus";
-import {
-  BookList,
-  BottomNav,
-  ErrorDisplay,
-  LoadingSpinner,
-  FilterStatisticsPanel,
-  PageHeader,
-  BookForms,
-} from "../components";
-import { useBooks } from "../hooks/useBooks";
-import { useSearch } from "../hooks/useSearch";
-import type { Book } from "../types/Book";
-import { Box, Container, Snackbar, Alert } from "@mui/material";
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { ViewModule as GridViewIcon, ViewList as ViewListIcon } from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Box, Typography, Button, Grid } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
+import { PageHeader } from '../components/ui';
+import { BookList } from '../components/book';
+import { BookForm } from '../components/forms/AddBookForm';
+import { useBooks } from '../hooks/useBooks';
+import CustomModal from '../components/ui/CustomModal';
+import FilterStatisticsPanel from '../components/filters/FilterStatisticsPanel';
+import type { Book } from '../types/Book';
 
-const Books = () => {
-  const {
-    books,
-    loading,
-    error,
-    booksStats,
-    handleBookDelete,
-    handleBookUpdate,
-    handleStatusChange,
-    handleBookSubmit,
-    refetch,
-    handleToggleFavorite,
+const Books: React.FC = () => {
+  const { 
+    books, loading, error, booksStats, additionalStats,
+    handleBookAdd, handleBookUpdate, handleBookDelete, handleStatusChange, handleToggleFavorite,
   } = useBooks();
-
-  const [isEditing, setIsEditing] = useState<{
-    status: boolean;
-    mode: "add" | "edit";
-    bookId: string | null;
-  }>({
-    status: false,
-    mode: "add",
-    bookId: null,
-  });
-
-  const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
-  // Zustand, ob das Filterpanel geöffnet ist
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBookId, setEditingBookId] = useState<string | null>(null);
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [viewMode, setViewMode] = useLocalStorage<'cards' | 'table'>('bookViewMode', 'cards');
-  const [sortConfig, setSortConfig] = useState<{ sortBy: string; sortOrder: 'asc' | 'desc' }>({
-    sortBy: 'status',
-    sortOrder: 'asc'
-  });
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
+  // const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards'); // Ungenutzt
 
-  const searchContext = useSearch();
+  // Update filteredBooks when books or filters change
+  React.useEffect(() => {
+    setFilteredBooks(books);
+  }, [books]);
 
-  useEffect(() => {
-    // Check if document and body exist before manipulating styles
-    if (typeof document !== "undefined" && document.body) {
-      if (isEditing.status) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
-    }
+  const handleBookModalOpen = ({ bookId }: { bookId: string | null }) => {
+    setEditingBookId(bookId);
+    setIsModalOpen(true);
+  };
 
-    // Cleanup: restores scroll when the component is removed from the DOM
-    return () => {
-      if (typeof document !== "undefined" && document.body) {
-        document.body.style.overflow = "";
-      }
-    };
-  }, [isEditing.status]);
+  const handleBookModalClose = () => {
+    setIsModalOpen(false);
+    setEditingBookId(null);
+  };
 
-  // Filter books based on searchTerm
-  const searchFilteredBooks = useMemo(() => {
-    if (searchContext?.searchTerm) {
-      return filteredBooks.filter(
-        (book) =>
-          book.title
-            .toLowerCase()
-            .includes(searchContext.searchTerm.toLowerCase()) ||
-          book.author
-            .toLowerCase()
-            .includes(searchContext.searchTerm.toLowerCase()),
-      );
-    }
-    return filteredBooks;
-  }, [filteredBooks, searchContext?.searchTerm]);
-
-  // Calculate additional statistics
-  const additionalStats = useMemo(() => {
-    if (books.length === 0) return null;
-
-    const totalPages = books.reduce(
-      (sum, book) => sum + Number(book.overallPages || 0),
-      0,
-    );
-    const readPages = books.reduce(
-      (sum, book) => sum + Number(book.readPages || 0),
-      0,
-    );
-
-    // Calculate average rating only from books with ratings > 0
-    const booksWithRatings = books.filter((book) => book.rating > 0);
-    const averageRating =
-      booksWithRatings.length > 0
-        ? booksWithRatings.reduce((sum, book) => sum + Number(book.rating), 0) /
-        booksWithRatings.length
-        : 0;
-
-    // Completion rate: percentage of books that are marked as "Przeczytana"
-    const completionRate =
-      booksStats.total > 0 ? (booksStats.read / booksStats.total) * 100 : 0;
-
-    // Progress rate: percentage of pages read across all books
-    const progressRate = totalPages > 0 ? (readPages / totalPages) * 100 : 0;
-
-    return {
-      totalPages,
-      readPages,
-      averageRating: Math.round(averageRating * 10) / 10,
-      completionRate: Math.round(completionRate),
-      progressRate: Math.round(progressRate),
-    };
-  }, [books, booksStats]);
-
-  const handleBookModalOpen = useCallback(
-    ({ bookId, mode }: { bookId: string | null; mode: "add" | "edit" }) => {
-      setIsEditing({
-        mode: mode,
-        status: true,
-        bookId: bookId,
-      });
-    },
-    [],
-  );
-
-  const handleBookModalClose = useCallback(() => {
-    setIsEditing((prev) => ({ ...prev, status: false }));
-  }, []);
-
-  const handleSnackbarClose = useCallback(() => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  }, []);
-  
-  const handleSortChange = useCallback((sortBy: string, sortOrder: 'asc' | 'desc') => {
-    setSortConfig({ sortBy, sortOrder });
-  }, []);
-
-  const wrappedHandleBookSubmit = useCallback(async (book: import("../types/Book").BookFormData) => {
-    const result = await handleBookSubmit(book);
-    if (result) {
-      setSnackbar({ open: true, message: 'Książka dodana!', severity: 'success' });
-      handleBookModalClose();
+  const handleFormSubmit = async (data: Book) => {
+    if (editingBookId) {
+      await handleBookUpdate(editingBookId, data);
     } else {
-      setSnackbar({ open: true, message: 'Nie udało się dodać książki', severity: 'error' });
+      await handleBookAdd(data);
     }
-  }, [handleBookSubmit, handleBookModalClose]);
+    handleBookModalClose();
+  };
 
-  const wrappedHandleBookUpdate = useCallback(async (bookId: string, updatedData: Partial<Book>) => {
-    const result = await handleBookUpdate(bookId, updatedData);
-    if (result) {
-      setSnackbar({ open: true, message: 'Książka zaktualizowana!', severity: 'success' });
-      handleBookModalClose();
-    } else {
-      setSnackbar({ open: true, message: 'Nie udało się zaktualizować książki', severity: 'error' });
-    }
-  }, [handleBookUpdate, handleBookModalClose]);
+  const editingBook = editingBookId
+    ? books.find((book) => book.id === editingBookId)
+    : undefined;
 
-  if (loading) {
-    return <LoadingSpinner message="Ładowanie książek..." fullScreen />;
-  }
+  const handleFilterPanelToggle = () => {
+    setIsFilterPanelOpen((prev) => !prev);
+  };
+
+  const handleFilterChange = (newFilteredBooks: Book[]) => {
+    setFilteredBooks(newFilteredBooks);
+  };
+
+  if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-        py: 2,
-      }}
-    >
-      <Container maxWidth="xl">
-        <ErrorDisplay error={error} onRetry={refetch} />
+    <Box sx={{ p: 3 }}>
+      <PageHeader title="Moje Książki" icon={BookList} />
 
-        {/* Page Header with View Mode Toggle */}
-        <PageHeader
-          onAddBook={() => handleBookModalOpen({ mode: "add", bookId: null })}
-          viewMode={viewMode}
-          onViewModeChange={(newView) => setViewMode(newView)}
-          isFilterPanelOpen={isFilterPanelOpen}
-          onFilterToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-        />
-
-        {/* Combined Filter and Statistics Panel */}
-        {books.length > 0 && additionalStats && (
+      <Grid container spacing={3} alignItems="flex-start">
+        <Grid item xs={12} md={4}>
           <FilterStatisticsPanel
-            books={books}
-            onFilterChange={setFilteredBooks}
-            onSortChange={handleSortChange}
+            books={books} // Pass the original books to the filter panel
+            onFilterChange={handleFilterChange}
             isFilterOpen={isFilterPanelOpen}
-            onFilterToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+            onFilterToggle={handleFilterPanelToggle}
             booksStats={booksStats}
             additionalStats={additionalStats}
           />
-        )}
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => handleBookModalOpen({ bookId: null })}
+            >
+              Dodaj książkę
+            </Button>
+          </Box>
 
-        {/* Book Forms */}
-        <BookForms
-          isEditing={isEditing}
-          books={books}
-          handleBookSubmit={wrappedHandleBookSubmit}
-          handleBookUpdate={wrappedHandleBookUpdate}
-          handleBookModalOpen={handleBookModalOpen}
-          handleBookModalClose={handleBookModalClose}
+          {loading ? (
+            <Typography>Ładowanie książek...</Typography>
+          ) : filteredBooks.length === 0 ? (
+            <Typography>Brak książek do wyświetlenia.</Typography>
+          ) : (
+            <BookList
+              books={filteredBooks}
+              onEdit={(id) => handleBookModalOpen({ bookId: id })}
+              onDelete={handleBookDelete}
+              onStatusChange={handleStatusChange}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          )}
+        </Grid>
+      </Grid>
+
+      <CustomModal isOpen={isModalOpen} onClose={handleBookModalClose} title={editingBookId ? 'Edytuj książkę' : 'Dodaj nową książkę'}>
+        <BookForm 
+          initialData={editingBook}
+          onSubmit={handleFormSubmit}
+          onClose={handleBookModalClose}
         />
-
-        {/* Books List */}
-        <Box>
-          <BookList
-            loading={loading}
-            books={searchFilteredBooks}
-            handleStatusChange={handleStatusChange}
-            handleBookUpdate={handleBookUpdate}
-            handleBookDelete={handleBookDelete}
-            handleBookModalOpen={handleBookModalOpen}
-            handleToggleFavorite={handleToggleFavorite}
-            viewMode={viewMode}
-            sortField={sortConfig.sortBy}
-            sortOrder={sortConfig.sortOrder}
-            onSortChange={handleSortChange}
-          />
-        </Box>
-
-        {/* Fixed add book button */}
-        <BottomNav handleBookModalOpen={handleBookModalOpen} />
-
-        {/* Success/Error Snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Container>
+      </CustomModal>
     </Box>
   );
 };
