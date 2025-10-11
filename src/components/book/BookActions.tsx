@@ -16,12 +16,28 @@ export default function BookActions({
   book,
   onEdit,
   onDelete,
-  onToggleFavorite
+  onToggleFavorite,
 }: BookActionsProps) {
-  const isFavorite = book.isFavorite ?? false;
+  const isFavorite = book.isFavorite;
 
   return (
     <div className="flex gap-2 mt-auto">
+      {onToggleFavorite && (
+        <button
+          onClick={() => {
+            onToggleFavorite(book.id);
+          }}
+          className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 ${ 
+            isFavorite
+              ? 'bg-gradient-to-r from-amber-400 to-yellow-600 text-white hover:shadow-amber-200'
+              : 'border-2 border-amber-400 text-amber-500 hover:shadow-amber-100'
+          }`}
+          title={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
+        >
+          <Star className={`w-4 h-4 ${isFavorite ? 'fill-yellow-100' : ''}`}/>
+          {isFavorite ? 'Ulubione' : 'Ulubione'}
+        </button>
+      )}
       <button
         onClick={() => onDelete(book.id)}
         className="flex-1 px-3 py-2 border-2 border-red-500 text-red-600 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-200 transition-all duration-200 flex items-center justify-center gap-1"
@@ -36,8 +52,6 @@ export default function BookActions({
         <Edit className="w-4 h-4" />
         Edytuj
       </button>
-
-
     </div>
   );
 }
