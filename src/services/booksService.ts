@@ -117,6 +117,19 @@ const getUserBooksDataPaginated = async (
       // If the error is related to indexes, try a simpler query
       if (error instanceof Error && error.toString().includes('index')) {
         console.log('Index error detected, falling back to simple query');
+        
+        // Create a simple query, but maintain pagination if we have lastDoc
+        if (lastDoc) {
+          // If we have a lastDoc, we need to use a query that's compatible with it
+          // This means we can't change the orderBy field
+          console.warn('Cannot paginate with different query structure, returning empty result');
+          return {
+            items: [],
+            lastDoc: null,
+            hasMore: false
+          };
+        }
+        
         q = query(
           booksCollection,
           where('userId', '==', userId),

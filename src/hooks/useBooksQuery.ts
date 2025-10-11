@@ -127,10 +127,19 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     enabled: !!user && !userLoading && (!usePagination || useFallback),
   });
 
-  // Combine all books from paginated results
+  // Combine all books from paginated results with deduplication
   const paginatedBooks = useMemo(() => {
     if (!infiniteQuery.data) return [];
-    return infiniteQuery.data.pages.flatMap(page => page.items);
+    
+    // Flatten all pages
+    const allBooks = infiniteQuery.data.pages.flatMap(page => page.items);
+    
+    // Deduplicate by id to avoid duplicate keys in React
+    const uniqueBooks = Array.from(
+      new Map(allBooks.map(book => [book.id, book])).values()
+    );
+    
+    return uniqueBooks;
   }, [infiniteQuery.data]);
 
   // Use either paginated or legacy books
