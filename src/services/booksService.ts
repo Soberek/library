@@ -101,11 +101,8 @@ const getAllBooksData = async (): Promise<BookWithId[]> => {
  */
 const addBook = async (bookData: BookFormData): Promise<string | null> => {
   try {
-    // Validate the book data
-    const validatedBook = {
-      ...bookToAddSchema.parse(bookData),
-      isFavorite: false,  // Explicit default
-    };
+    // Validate and parse the book data (ensures all fields are correct types/values)
+    const validatedBook = bookToAddSchema.parse(bookData);
     
     const booksCollection = collection(db, "books");
     const docRef = await addDoc(booksCollection, validatedBook);
@@ -142,11 +139,13 @@ const updateBook = async (bookId: string, updatedData: Partial<Book>): Promise<b
       throw createFirebaseError("Book ID is required");
     }
 
-    // Validate the update data
+    // Validate and parse the update data (ensures types are correct, e.g., isFavorite is boolean)
     const validatedData = bookUpdateSchema.parse(updatedData);
+    console.log('Validated update data for', bookId, ':', validatedData);
     
     const bookDoc = doc(db, "books", bookId);
     await updateDoc(bookDoc, validatedData);
+    console.log('Firebase updateDoc completed for', bookId);
     return true;
   } catch (error) {
     console.error("Error updating book:", error);
