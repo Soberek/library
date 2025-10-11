@@ -14,6 +14,9 @@ interface BookListProps {
   handleBookModalOpen: (params: { mode: 'add' | 'edit'; bookId: string | null }) => void;
   handleToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   viewMode: 'cards' | 'table';
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
 }
 
 export default function BookList({
@@ -25,6 +28,9 @@ export default function BookList({
   handleBookModalOpen,
   handleToggleFavorite,
   viewMode,
+  sortField,
+  sortOrder,
+  onSortChange
 }: BookListProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -60,6 +66,8 @@ export default function BookList({
   const handleMenuToggle = (bookId: string) => {
     setOpenMenu(bookId || null);
   };
+
+
 
   if (loading) {
     return (
@@ -106,6 +114,9 @@ export default function BookList({
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         handleShare={handleShare}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSortChange={onSortChange}
       />
     );
   }
@@ -127,7 +138,7 @@ export default function BookList({
             openMenu={openMenu}
             onMouseEnter={() => setHoveredCard(book.id)}
             onMouseLeave={() => setHoveredCard(null)}
-            onToggleFavorite={() => handleToggleFavorite(book.id, isFavorite)}
+            onToggleFavorite={(bookId) => handleToggleFavorite(bookId, isFavorite)}
             onShare={handleShare}
             onStatusChange={handleStatusChange}
             onRatingChange={handleRatingChange}
@@ -145,6 +156,60 @@ export default function BookList({
         }
         .animate-float {
           animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes golden-pulse {
+          0% { box-shadow: 0 0 15px 0 rgba(251, 191, 36, 0.4), 0 0 30px 0 rgba(245, 158, 11, 0.1); }
+          50% { box-shadow: 0 0 25px 8px rgba(251, 191, 36, 0.6), 0 0 40px 10px rgba(245, 158, 11, 0.3); }
+          100% { box-shadow: 0 0 15px 0 rgba(251, 191, 36, 0.4), 0 0 30px 0 rgba(245, 158, 11, 0.1); }
+        }
+        .animate-golden-pulse {
+          animation: golden-pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+          0% { background-position: -100% 0; opacity: 0.8; }
+          50% { opacity: 1; }
+          100% { background-position: 200% 0; opacity: 0.8; }
+        }
+        .animate-shimmer {
+          background-size: 200% 100%;
+          background-image: linear-gradient(to right, #f59e0b, #fcd34d, #fbbf24, #f59e0b);
+          animation: shimmer 3s infinite linear;
+          height: 3px !important;
+        }
+        
+        @keyframes golden-badge {
+          0% { box-shadow: 0 0 10px 0 rgba(251, 191, 36, 0.6); transform: scale(1); }
+          50% { box-shadow: 0 0 20px 8px rgba(251, 191, 36, 0.9), 0 0 30px 15px rgba(245, 158, 11, 0.3); transform: scale(1.05); }
+          100% { box-shadow: 0 0 10px 0 rgba(251, 191, 36, 0.6); transform: scale(1); }
+        }
+        .animate-golden-badge {
+          animation: golden-badge 2s ease-in-out infinite;
+          background-image: linear-gradient(135deg, #f59e0b, #fcd34d, #fbbf24, #d97706);
+          background-size: 400% 100%;
+          animation: golden-badge 2s ease-in-out infinite, shimmer 6s infinite linear;
+        }
+        
+        @keyframes star-spin {
+          0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6)); }
+          25% { transform: rotate(15deg) scale(1.2); filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.9)); }
+          50% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6)); }
+          75% { transform: rotate(-15deg) scale(1.2); filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.9)); }
+          100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6)); }
+        }
+        .animate-star-spin {
+          animation: star-spin 3s ease-in-out infinite;
+          transform-origin: center;
+          filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.8));
+        }
+        
+        /* Premium gold effect */
+        .gold-text {
+          background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 1px rgba(251, 191, 36, 0.5));
         }
       `}</style>
     </div>
