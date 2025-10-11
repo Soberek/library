@@ -97,6 +97,21 @@ export const useBooks = () => {
     }
   }, []);
 
+  const handleToggleFavorite = useCallback(async (bookId: string, currentFavorite: boolean) => {
+    try {
+      setError(null);
+      await updateBook(bookId, { isFavorite: !currentFavorite });
+      setBooks(prevBooks => 
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, isFavorite: !currentFavorite } : book
+        )
+      );
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      setError(error as ErrorType);
+    }
+  }, []);
+
   const handleBookSubmit = useCallback(async (book: import("../types/Book").BookFormData) => {
     if (!userId) {
       setError({ code: "VALIDATION_ERROR", message: "User not authenticated" });
@@ -146,6 +161,7 @@ export const useBooks = () => {
     handleBookUpdate,
     handleStatusChange,
     handleBookSubmit,
+    handleToggleFavorite,
     refetch: fetchBooks,
   };
 };
