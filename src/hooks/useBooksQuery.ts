@@ -35,13 +35,13 @@ const calculateStats = (books: Book[]): { booksStats: BooksStats; additionalStat
   const inProgress = books.filter((book) => book.read === 'W trakcie').length;
   const dropped = books.filter((book) => book.read === 'Porzucona').length;
 
-  const totalRating = books.reduce((sum, book) => sum + (book.rating || 0), 0);
+  const totalRating = books.reduce((sum, book) => sum + (Number(book.rating) || 0), 0);
   const averageRating = total > 0 ? parseFloat((totalRating / total).toFixed(1)) : 0;
 
-  const totalPages = books.reduce((sum, book) => sum + (book.overallPages || 0), 0);
-  const readPages = books.reduce((sum, book) => sum + (book.readPages || 0), 0);
+  const totalPages = books.reduce((sum, book) => sum + (Number(book.overallPages) || 0), 0);
+  const readPages = books.reduce((sum, book) => sum + (Number(book.readPages) || 0), 0);
   const progressRate = totalPages > 0 ? parseFloat(((readPages / totalPages) * 100).toFixed(1)) : 0;
-  const completionRate = total > 0 ? parseFloat(((readPages / totalPages) * 100).toFixed(1)) : 0;
+  const completionRate = total > 0 ? parseFloat(((read / total) * 100).toFixed(1)) : 0;
 
   return {
     booksStats: { total, read, inProgress, dropped },
