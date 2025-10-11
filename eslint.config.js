@@ -1,23 +1,58 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import { globalIgnores } from 'eslint/config'
+import globals from "globals";
+import tseslint from "typescript-eslint";
+import { FlatCompat } from "@eslint/eslintrc"; 
 
-export default tseslint.config([
-  globalIgnores(['dist']),
+const compat = new FlatCompat({
+  baseDirectory: process.cwd(),
+});
+
+export default [
+  // Configuration for JavaScript files
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
-    ],
+    files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        process: true,
+      },
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
     },
   },
-])
+  // Configuration for TypeScript/React files
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        process: true,
+      },
+      parser: tseslint.parser,
+      parserOptions: {
+        project: ['./tsconfig.app.json'],
+        tsconfigRootDir: process.cwd(),
+        ecmaFeatures: {
+          jsx: true,
+        },
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+    },
+  },
+  // Ignore paths
+  {
+    ignores: [
+      "build/**", 
+      "dist/**", 
+      "node_modules/**", 
+      "coverage/**", 
+      "*.d.ts", 
+      "jest.config.cjs", 
+      "src/setupTests.js",
+      "**/*.test.{ts,tsx}", 
+      "vite.config.ts"
+    ],
+  }
+];

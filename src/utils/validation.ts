@@ -1,4 +1,4 @@
-import { VALIDATION_RULES } from "../constants/validation";
+import { VALIDATION_RULES } from '../constants/validation';
 
 /**
  * Validates if a string is a valid URL
@@ -18,7 +18,7 @@ export const isValidUrl = (url: string): boolean => {
 export const isInRange = (
   value: number,
   min: number,
-  max: number
+  max: number,
 ): boolean => {
   return value >= min && value <= max;
 };
@@ -28,7 +28,7 @@ export const isInRange = (
  */
 export const validateBookTitle = (title: string): string | null => {
   if (!title || title.trim().length === 0) {
-    return "Tytuł jest wymagany";
+    return 'Tytuł jest wymagany';
   }
   if (title.length > VALIDATION_RULES.BOOK.TITLE.MAX_LENGTH) {
     return `Tytuł nie może być dłuższy niż ${VALIDATION_RULES.BOOK.TITLE.MAX_LENGTH} znaków`;
@@ -41,7 +41,7 @@ export const validateBookTitle = (title: string): string | null => {
  */
 export const validateBookAuthor = (author: string): string | null => {
   if (!author || author.trim().length === 0) {
-    return "Autor jest wymagany";
+    return 'Autor jest wymagany';
   }
   if (author.length > VALIDATION_RULES.BOOK.AUTHOR.MAX_LENGTH) {
     return `Autor nie może być dłuższy niż ${VALIDATION_RULES.BOOK.AUTHOR.MAX_LENGTH} znaków`;
@@ -80,7 +80,7 @@ export const validateCoverUrl = (url: string): string | null => {
     return `URL okładki nie może być dłuższy niż ${VALIDATION_RULES.BOOK.COVER_URL.MAX_LENGTH} znaków`;
   }
   if (!isValidUrl(url)) {
-    return "Nieprawidłowy URL";
+    return 'Nieprawidłowy URL';
   }
   return null;
 };

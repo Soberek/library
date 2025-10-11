@@ -1,9 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
-import { BOOK_STATUSES } from '../../constants/bookStatus';
-import { GENRES } from '../../constants/genres';
 import FilterSortPanel from './FilterSortPanel';
 import theme from '../../theme/theme';
 import type { Book } from '../../types/Book';
@@ -50,7 +47,7 @@ const mockBooks: Book[] = [
 const mockOnFilterChange = jest.fn();
 
 // Simple mock for Select - use input for easy change
-jest.mock('@mui/material/Select', () => ({ onChange, value, label }: any) => (
+jest.mock('@mui/material/Select', () => ({ onChange, value, label }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; value: string; label: string }) => (
   <input 
     value={value} 
     onChange={onChange} 
@@ -60,18 +57,21 @@ jest.mock('@mui/material/Select', () => ({ onChange, value, label }: any) => (
 ));
 
 // Mock Slider as input
-jest.mock('@mui/material/Slider', () => ({ onChange, value }: any) => (
-  <input type="range" value={value} onChange={onChange} data-testid="slider" />
+jest.mock('@mui/material/Slider', () => ({ onChange, value }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; value: number | number[] }) => (
+  <input type="range" value={Array.isArray(value) ? value.join(',') : value} onChange={onChange} data-testid="slider" />
 ));
 
 // Mock Switch
-jest.mock('@mui/material/Switch', () => ({ onChange, checked }: any) => (
+jest.mock('@mui/material/Switch', () => ({ onChange, checked }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; checked: boolean }) => (
   <input type="checkbox" checked={checked} onChange={onChange} data-testid="switch" />
 ));
 
-describe('FilterSortPanel', () => {
-  const user = userEvent.setup();
+// Mock TextField
+jest.mock('@mui/material/TextField', () => ({ onChange, value, label }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; value: string; label: string }) => (
+  <input type="text" value={value} onChange={onChange} data-testid={`${label}-input`} />
+));
 
+describe('FilterSortPanel', () => {
   beforeEach(() => {
     mockOnFilterChange.mockClear();
   });
@@ -85,7 +85,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
     expect(screen.getByText('Filtry i sortowanie')).toBeInTheDocument();
   });
@@ -99,7 +99,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const statusInput = screen.getByTestId('Status-input');
@@ -121,7 +121,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const genreInput = screen.getByTestId('Gatunek-input');
@@ -143,10 +143,10 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
-    const authorInput = screen.getByLabelText('Autor');
+    const authorInput = screen.getByTestId('Autor-input');
     fireEvent.change(authorInput, { target: { value: 'Author A' } });
 
     await waitFor(() => expect(mockOnFilterChange).toHaveBeenCalledTimes(2));
@@ -165,7 +165,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const favoritesSwitch = screen.getByTestId('switch');
@@ -187,7 +187,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const sortByInput = screen.getByTestId('Sortuj według-input');
@@ -211,7 +211,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const sortByInput = screen.getByTestId('Sortuj według-input');
@@ -235,7 +235,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     await waitFor(() => expect(mockOnFilterChange).toHaveBeenCalledTimes(1));
@@ -255,7 +255,7 @@ describe('FilterSortPanel', () => {
           isOpen={true}
           onToggle={jest.fn()}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     // Apply a filter first

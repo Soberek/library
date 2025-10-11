@@ -1,18 +1,18 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import NotFound from "../pages/NotFound";
-import { ProtectedRoute } from "../components";
-import App from "../App";
-import SignUp from "../pages/SignUp";
-import SignIn from "../pages/SignIn";
-import Books from "../pages/Books";
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import NotFound from '../pages/NotFound';
+import { ProtectedRoute } from '../components';
+import App from '../App';
+import SignUp from '../pages/SignUp';
+import SignIn from '../pages/SignIn';
+import Books from '../pages/Books';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <ProtectedRoute />,
     children: [
       {
-        path: "",
+        path: '',
         element: <App />,
         children: [
           {
@@ -24,15 +24,15 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/sign-up",
+    path: '/sign-up',
     element: <SignUp />,
   },
   {
-    path: "/sign-in",
+    path: '/sign-in',
     element: <SignIn />,
   },
   {
-    path: "*",
+    path: '*',
     element: <NotFound />,
   },
 ]);

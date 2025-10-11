@@ -23,15 +23,15 @@ export const VALIDATION_RULES = {
 } as const;
 
 export const ERROR_MESSAGES = {
-  REQUIRED_FIELD: "To pole jest wymagane",
-  INVALID_EMAIL: "Nieprawidłowy adres email",
-  PASSWORD_TOO_SHORT: "Hasło musi mieć co najmniej 6 znaków",
+  REQUIRED_FIELD: 'To pole jest wymagane',
+  INVALID_EMAIL: 'Nieprawidłowy adres email',
+  PASSWORD_TOO_SHORT: 'Hasło musi mieć co najmniej 6 znaków',
   TITLE_TOO_LONG: `Tytuł nie może być dłuższy niż ${VALIDATION_RULES.BOOK.TITLE.MAX_LENGTH} znaków`,
   AUTHOR_TOO_LONG: `Autor nie może być dłuższy niż ${VALIDATION_RULES.BOOK.AUTHOR.MAX_LENGTH} znaków`,
   INVALID_PAGES: `Liczba stron musi być między ${VALIDATION_RULES.BOOK.PAGES.MIN} a ${VALIDATION_RULES.BOOK.PAGES.MAX}`,
   INVALID_RATING: `Ocena musi być między ${VALIDATION_RULES.BOOK.RATING.MIN} a ${VALIDATION_RULES.BOOK.RATING.MAX}`,
-  INVALID_URL: "Nieprawidłowy URL",
-  NETWORK_ERROR: "Błąd połączenia. Sprawdź połączenie internetowe.",
-  FIREBASE_ERROR: "Wystąpił błąd. Spróbuj ponownie.",
-  UNKNOWN_ERROR: "Wystąpił nieoczekiwany błąd.",
+  INVALID_URL: 'Nieprawidłowy URL',
+  NETWORK_ERROR: 'Błąd połączenia. Sprawdź połączenie internetowe.',
+  FIREBASE_ERROR: 'Wystąpił błąd. Spróbuj ponownie.',
+  UNKNOWN_ERROR: 'Wystąpił nieoczekiwany błąd.',
 } as const;

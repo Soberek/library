@@ -1,5 +1,5 @@
-import React from "react";
-import { Paper, Box, Typography, LinearProgress, Zoom } from "@mui/material";
+import React from 'react';
+import { Paper, Box, Typography, LinearProgress, Zoom } from '@mui/material';
 
 interface MetricCardProps {
   title: string;
@@ -37,11 +37,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
         sx={{
           p: 2,
           borderRadius: 3,
-          background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-          border: "1px solid rgba(0,0,0,0.05)",
-          transition: "all 0.3s ease",
+          background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          transition: 'all 0.3s ease',
           minHeight: 100,
-          "&:hover": { transform: "translateY(-2px)", boxShadow: "0 6px 20px rgba(0,0,0,0.1)" },
+          '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(0,0,0,0.1)' },
         }}
       >
         <Box display="flex" alignItems="center" gap={1.5}>
@@ -50,9 +50,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
               p: 1,
               borderRadius: 2,
               background: color,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               minWidth: 40,
               height: 40,
             }}
@@ -63,7 +63,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
             <Typography variant="h5" fontWeight="700" color="text.primary" sx={{ lineHeight: 1.2 }}>
               {value}
             </Typography>
-            <Typography variant="body2" color="text.secondary" fontWeight="500" sx={{ fontSize: "0.85rem" }}>
+            <Typography variant="body2" color="text.secondary" fontWeight="500" sx={{ fontSize: '0.85rem' }}>
               {title}
             </Typography>
             {showProgress && (
@@ -74,8 +74,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
                   mt: 0.5,
                   height: 4,
                   borderRadius: 2,
-                  bgcolor: "rgba(0,0,0,0.1)",
-                  "& .MuiLinearProgress-bar": {
+                  bgcolor: 'rgba(0,0,0,0.1)',
+                  '& .MuiLinearProgress-bar': {
                     background: color,
                     borderRadius: 2,
                   },

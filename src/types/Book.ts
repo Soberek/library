@@ -1,4 +1,4 @@
-export type BookStatus = "W trakcie" | "Przeczytana" | "Porzucona";
+export type BookStatus =  'W trakcie' | 'Przeczytana' | 'Porzucona' | 'Chcę przeczytać';
 
 export interface Book {
   id: string;
@@ -14,11 +14,11 @@ export interface Book {
   isFavorite?: boolean;
 }
 
-export type BookFormData = Omit<Book, "id" | "createdAt">;
+export type BookFormData = Omit<Book, 'id' | 'createdAt'>;
 
-export interface BookToAdd extends Omit<Book, "id"> {
+export interface BookToAdd extends Omit<Book, 'id'> {
   userId: string;
   createdAt: string;
 }
 
-export type BookUpdateData = Partial<Omit<Book, "id" | "createdAt">>;
+export type BookUpdateData = Partial<Omit<Book, 'id' | 'createdAt'>>;

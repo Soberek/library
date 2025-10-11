@@ -1,22 +1,22 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import { UserProvider } from "./providers/UserContext.tsx";
-import { SearchProvider } from "./providers/SearchProvider.tsx";
-import { ThemeProvider } from "./theme";
-import { FilterProvider } from "./contexts/FilterContext.tsx";
-import RouterProviderWrapper from "./providers/RouterProvider.tsx";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import './index.css';
+import { queryClient } from './lib/queryClient';
+import { SearchProvider } from './providers/SearchProvider.tsx';
+import { ThemeProvider } from './theme';
+import RouterProviderWrapper from './providers/RouterProvider.tsx';
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <UserProvider>
+    <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <FilterProvider>
-          <SearchProvider>
-            <RouterProviderWrapper />
-          </SearchProvider>
-        </FilterProvider>
+        <SearchProvider>
+          <RouterProviderWrapper />
+        </SearchProvider>
       </ThemeProvider>
-    </UserProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </StrictMode>,
 );

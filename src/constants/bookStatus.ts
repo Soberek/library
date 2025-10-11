@@ -1,15 +1,17 @@
-import type { BookStatus } from "../types/Book";
+import type { BookStatus } from '../types/Book';
 
 export const BOOK_STATUSES: readonly BookStatus[] = [
-  "W trakcie",
-  "Przeczytana", 
-  "Porzucona"
+  'Chcę przeczytać',
+  'W trakcie',
+  'Przeczytana', 
+  'Porzucona',
 ] as const;
 
 export const BOOK_STATUS_LABELS: Record<BookStatus, string> = {
-  "W trakcie": "W trakcie",
-  "Przeczytana": "Przeczytana",
-  "Porzucona": "Porzucona",
+  'Chcę przeczytać': 'Chcę przeczytać',
+  'W trakcie': 'W trakcie',
+  'Przeczytana': 'Przeczytana',
+  'Porzucona': 'Porzucona',
 } as const;
 
 export const getNextBookStatus = (currentStatus: BookStatus): BookStatus => {

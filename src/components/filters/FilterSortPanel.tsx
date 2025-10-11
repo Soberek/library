@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -15,14 +15,14 @@ import {
   Switch,
   Grid,
   TextField,
-} from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ClearIcon from "@mui/icons-material/Clear";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
-import { GENRES } from "../../constants/genres";
-import type { Book, BookStatus } from "../../types/Book";
+} from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { BOOK_STATUSES, BOOK_STATUS_LABELS } from '../../constants/bookStatus';
+import { GENRES } from '../../constants/genres';
+import type { Book, BookStatus } from '../../types/Book';
 
 interface FilterSortPanelProps {
   books: Book[];
@@ -32,12 +32,12 @@ interface FilterSortPanelProps {
 }
 
 interface FilterState {
-  status: BookStatus | "all";
-  genre: string | "all";
+  status: BookStatus | 'all';
+  genre: string | 'all';
   ratingRange: [number, number];
   pagesRange: [number, number];
-  sortBy: "title" | "author" | "rating" | "pages" | "dateAdded" | "status";
-  sortOrder: "asc" | "desc";
+  sortBy: 'title' | 'author' | 'rating' | 'pages' | 'dateAdded' | 'status';
+  sortOrder: 'asc' | 'desc';
   showOnlyFavorites: boolean;
   author: string;
 }
@@ -49,12 +49,12 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
   onToggle,
 }) => {
   const [filters, setFilters] = useState<FilterState>({
-    status: "all",
-    genre: "all",
+    status: 'all',
+    genre: 'all',
     ratingRange: [0, 10],
     pagesRange: [0, 5000],
-    sortBy: "status",
-    sortOrder: "asc",
+    sortBy: 'status',
+    sortOrder: 'asc',
     showOnlyFavorites: false,
     author: '',
   });
@@ -63,12 +63,12 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
     let filtered = [...books];
 
     // Status filter
-    if (filters.status !== "all") {
+    if (filters.status !== 'all') {
       filtered = filtered.filter((book) => book.read === filters.status);
     }
 
     // Genre filter
-    if (filters.genre !== "all") {
+    if (filters.genre !== 'all') {
       filtered = filtered.filter((book) => book.genre === filters.genre);
     }
 
@@ -108,48 +108,45 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
       }
 
       // Secondary (or primary if not default): selected sort field
-      let aValue: string | number, bValue: string | number;
 
       switch (filters.sortBy) {
-        case "title":
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        case "author":
-          aValue = a.author.toLowerCase();
-          bValue = b.author.toLowerCase();
-          break;
-        case "rating":
-          aValue = a.rating;
-          bValue = b.rating;
-          break;
-        case "pages":
-          aValue = a.overallPages;
-          bValue = b.overallPages;
-          break;
-        case "dateAdded":
+        case 'title': {
+          const aValue = a.title.toLowerCase();
+          const bValue = b.title.toLowerCase();
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'author': {
+          const aValue = a.author.toLowerCase();
+          const bValue = b.author.toLowerCase();
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'rating': {
+          const aValue = a.rating;
+          const bValue = b.rating;
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'pages': {
+          const aValue = a.overallPages;
+          const bValue = b.overallPages;
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'dateAdded': {
           // Status primary for dateAdded
           const aStatusIndexDate = BOOK_STATUSES.indexOf(a.read as BookStatus);
           const bStatusIndexDate = BOOK_STATUSES.indexOf(b.read as BookStatus);
           if (aStatusIndexDate !== bStatusIndexDate) return aStatusIndexDate - bStatusIndexDate;
 
-          aValue = new Date(a.createdAt || 0).getTime();
-          bValue = new Date(b.createdAt || 0).getTime();
-          break;
-        case "status":
+          const aValue = new Date(a.createdAt || 0).getTime();
+          const bValue = new Date(b.createdAt || 0).getTime();
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'status': {
           const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
           const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-          return filters.sortOrder === "asc" ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
+          return filters.sortOrder === 'asc' ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
+        }
         default:
           return 0;
-      }
-
-      if (aValue === bValue) return 0;
-
-      if (filters.sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
       }
     });
 
@@ -158,12 +155,12 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
   const clearFilters = () => {
     setFilters({
-      status: "all",
-      genre: "all",
+      status: 'all',
+      genre: 'all',
       ratingRange: [0, 10],
       pagesRange: [0, 5000],
-      sortBy: "dateAdded",
-      sortOrder: "desc",
+      sortBy: 'dateAdded',
+      sortOrder: 'desc',
       showOnlyFavorites: false,
       author: '',
     });
@@ -171,8 +168,8 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
   const getActiveFiltersCount = () => {
     let count = 0;
-    if (filters.status !== "all") count++;
-    if (filters.genre !== "all") count++;
+    if (filters.status !== 'all') count++;
+    if (filters.genre !== 'all') count++;
     if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10) count++;
     if (filters.pagesRange[0] > 0 || filters.pagesRange[1] < 5000) count++;
     if (filters.showOnlyFavorites) count++;
@@ -194,21 +191,21 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
       sx={{
         mb: 3,
         borderRadius: 3,
-        overflow: "hidden",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-        border: "1px solid rgba(0,0,0,0.05)",
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(0,0,0,0.05)',
       }}
     >
       {/* Header */}
       <Box
         sx={{
           p: 2,
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: "pointer",
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
         }}
         onClick={onToggle}
       >
@@ -222,8 +219,8 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
               label={getActiveFiltersCount()}
               size="small"
               sx={{
-                bgcolor: "rgba(255, 255, 255, 0.2)",
-                color: "white",
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
                 fontWeight: 600,
               }}
             />
@@ -238,7 +235,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                 e.stopPropagation();
                 clearFilters();
               }}
-              sx={{ color: "white" }}
+              sx={{ color: 'white' }}
             >
               <ClearIcon />
             </IconButton>
@@ -252,7 +249,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
         <Box sx={{ p: 3 }}>
           <Grid container spacing={3}>
             {/* Status Filter */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -261,7 +258,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
-                      status: e.target.value as BookStatus | "all",
+                      status: e.target.value as BookStatus | 'all',
                     }))
                   }
                 >
@@ -276,7 +273,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Genre Filter */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Gatunek</InputLabel>
                 <Select
@@ -299,7 +296,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Author Filter */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Autor"
@@ -309,7 +306,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Sort By */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Sortuj według</InputLabel>
                 <Select
@@ -319,12 +316,12 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                     setFilters((prev) => ({
                       ...prev,
                       sortBy: e.target.value as
-                        | "title"
-                        | "author"
-                        | "rating"
-                        | "pages"
-                        | "dateAdded"
-                        | "status",
+                        | 'title'
+                        | 'author'
+                        | 'rating'
+                        | 'pages'
+                        | 'dateAdded'
+                        | 'status',
                     }))
                   }
                 >
@@ -339,7 +336,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Sort Order */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Kolejność</InputLabel>
                 <Select
@@ -348,7 +345,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
-                      sortOrder: e.target.value as "asc" | "desc",
+                      sortOrder: e.target.value as 'asc' | 'desc',
                     }))
                   }
                 >
@@ -359,7 +356,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Rating Range */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Zakres ocen: {filters.ratingRange[0]} - {filters.ratingRange[1]}
               </Typography>
@@ -376,15 +373,15 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                 max={10}
                 step={0.5}
                 marks={[
-                  { value: 0, label: "0" },
-                  { value: 5, label: "5" },
-                  { value: 10, label: "10" },
+                  { value: 0, label: '0' },
+                  { value: 5, label: '5' },
+                  { value: 10, label: '10' },
                 ]}
               />
             </Grid>
 
             {/* Pages Range */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Zakres stron: {filters.pagesRange[0]} - {filters.pagesRange[1]}
               </Typography>
@@ -401,15 +398,15 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                 max={5000}
                 step={50}
                 marks={[
-                  { value: 0, label: "0" },
-                  { value: 2500, label: "2500" },
-                  { value: 5000, label: "5000" },
+                  { value: 0, label: '0' },
+                  { value: 2500, label: '2500' },
+                  { value: 5000, label: '5000' },
                 ]}
               />
             </Grid>
 
             {/* Favorites Toggle */}
-            <Grid size={{ xs: 12 }}>
+            <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Switch

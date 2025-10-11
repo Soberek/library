@@ -1,8 +1,8 @@
-import React from "react";
-import { auth } from "../config/firebaseConfig";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { useUser } from "../hooks/useUser";
+import React from 'react';
+import { auth } from '../config/firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import {
   Box,
   Button,
@@ -11,8 +11,8 @@ import {
   Paper,
   CircularProgress,
   Alert,
-} from "@mui/material";
-import { useForm } from "react-hook-form";
+} from '@mui/material';
+import { useForm } from 'react-hook-form';
 
 type FormData = {
   email: string;
@@ -28,7 +28,7 @@ const SignUp: React.FC = () => {
     clearErrors,
   } = useForm<FormData>();
   const [error, setLocalError] = React.useState<string | null>(null);
-  const authContext = useUser();
+  const authContext = useAuth();
   const navigate = useNavigate();
 
   if (authContext.user?.uid) {
@@ -45,13 +45,13 @@ const SignUp: React.FC = () => {
         data.password,
       );
       if (userCredential.user) {
-        navigate("/sign-in");
+        navigate('/sign-in');
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
         setLocalError(`Wystąpił błąd: ${error.message}`);
       } else {
-        setLocalError("Wystąpił nieznany błąd");
+        setLocalError('Wystąpił nieznany błąd');
       }
     }
   };
@@ -63,7 +63,7 @@ const SignUp: React.FC = () => {
       alignItems="center"
       minHeight="100vh"
       sx={{
-        background: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)",
+        background: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
       }}
     >
       <Paper
@@ -72,8 +72,8 @@ const SignUp: React.FC = () => {
           p: 4,
           borderRadius: 3,
           minWidth: 320,
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           gap: 3,
         }}
       >
@@ -93,7 +93,7 @@ const SignUp: React.FC = () => {
         )}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
         >
           <TextField
             type="email"
@@ -101,11 +101,11 @@ const SignUp: React.FC = () => {
             variant="outlined"
             fullWidth
             required
-            {...register("email", {
-              required: "Email jest wymagany",
+            {...register('email', {
+              required: 'Email jest wymagany',
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Nieprawidłowy format email",
+                message: 'Nieprawidłowy format email',
               },
             })}
             error={!!errors.email}
@@ -117,11 +117,11 @@ const SignUp: React.FC = () => {
             variant="outlined"
             fullWidth
             required
-            {...register("password", {
-              required: "Hasło jest wymagane",
+            {...register('password', {
+              required: 'Hasło jest wymagane',
               minLength: {
                 value: 6,
-                message: "Hasło musi mieć co najmniej 6 znaków",
+                message: 'Hasło musi mieć co najmniej 6 znaków',
               },
             })}
             error={!!errors.password}
@@ -135,31 +135,31 @@ const SignUp: React.FC = () => {
             fullWidth
             sx={{
               fontWeight: 600,
-              fontSize: "1rem",
+              fontSize: '1rem',
               py: 1.5,
               borderRadius: 2,
             }}
             startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
           >
-            {isSubmitting ? "Rejestruję..." : "Zarejestruj"}
+            {isSubmitting ? 'Rejestruję...' : 'Zarejestruj'}
           </Button>
         </form>
         <Typography
           align="center"
           variant="body2"
           sx={{
-            color: "text.secondary",
+            color: 'text.secondary',
             fontWeight: 500,
             letterSpacing: 0.2,
           }}
         >
-          Masz już konto?{" "}
+          Masz już konto?{' '}
           <Link
             to="/sign-in"
             replace
             style={{
-              color: "#7b1fa2",
-              textDecoration: "underline",
+              color: '#7b1fa2',
+              textDecoration: 'underline',
               fontWeight: 600,
             }}
           >

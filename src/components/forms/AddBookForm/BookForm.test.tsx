@@ -1,6 +1,6 @@
-import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
-import BookForm from "./BookForm";
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import BookForm from './BookForm';
 
 // type BookFormProps = {n
 //   handleBookSubmit: (e: React.ChangeEvent<HTMLFormElement>) => Promise<any>;
@@ -19,15 +19,13 @@ const mockOnSubmit = jest.fn();
 const mockBookModalOpen = jest.fn();
 const mockBookModalClose = jest.fn();
 
-describe("BookForm", () => {
-  test("renders form fields", () => {
+describe('BookForm', () => {
+  test('renders form fields', () => {
     render(
       <BookForm
-        handleBookSubmit={mockOnSubmit}
-        mode="add"
-        handleBookModalOpen={mockBookModalOpen}
-        handleBookModalClose={mockBookModalClose}
-        isFormVisible={true}
+        initialData={undefined}
+        onSubmit={mockOnSubmit}
+        onClose={mockBookModalClose}
       />,
     );
 
@@ -40,11 +38,11 @@ describe("BookForm", () => {
     expect(screen.getByLabelText(/Przeczytane strony/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Liczba stron/i)).toBeInTheDocument();
 
-    expect(screen.getAllByRole("radio")).toHaveLength(11); // 10 stars + empty
-    expect(screen.getByTestId("cover-input")).toBeInTheDocument();
+    expect(screen.getAllByRole('radio')).toHaveLength(11); // 10 stars + empty
+    expect(screen.getByTestId('cover-input')).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: /dodaj książkę/i }),
+      screen.getByRole('button', { name: /dodaj książkę/i }),
     ).toBeInTheDocument();
   });
 });
