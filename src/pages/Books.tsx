@@ -77,25 +77,6 @@ const Books = () => {
     return filteredBooks;
   }, [filteredBooks, searchContext?.searchTerm]);
 
-  // Update filtered books when books change
-  useEffect(() => {
-    // Ensure default ordering: status priority (BOOK_STATUSES order) then newest first
-    const sorted = [...books].sort((a, b) => {
-      const aStatus = BOOK_STATUSES.indexOf(
-        a.read as import("../types/Book").BookStatus,
-      );
-      const bStatus = BOOK_STATUSES.indexOf(
-        b.read as import("../types/Book").BookStatus,
-      );
-      if (aStatus !== bStatus) return aStatus - bStatus;
-      // newest first
-      const aTime = new Date(a.createdAt || 0).getTime();
-      const bTime = new Date(b.createdAt || 0).getTime();
-      return bTime - aTime;
-    });
-    setFilteredBooks(sorted);
-  }, [books]);
-
   // Calculate additional statistics
   const additionalStats = useMemo(() => {
     if (books.length === 0) return null;
