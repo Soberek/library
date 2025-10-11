@@ -45,6 +45,7 @@ export const bookUpdateSchema = bookSchema.partial().omit({ id: true, createdAt:
 export const bookToAddSchema = bookSchema.omit({ id: true }).extend({
   userId: z.string().min(1, "ID użytkownika jest wymagane"),
   createdAt: z.string().min(1, "Data utworzenia jest wymagana"),
+  isFavorite: z.boolean().optional().default(false),
 });
 
 export type BookFormData = z.infer<typeof bookFormSchema>;
