@@ -64,23 +64,28 @@ export default function BookCard({
       onMouseLeave={onMouseLeave}
     >
       <div
-        className={`h-full flex flex-col rounded-2xl bg-gradient-to-br from-white to-slate-50 border transition-all duration-400 overflow-hidden relative ${
-          isHovered
-            ? 'shadow-[0_20px_40px_rgba(99,102,241,0.15)] border-indigo-200 -translate-y-2 scale-[1.02]'
-            : 'shadow-lg border-slate-200'
-        }`}
+        className={`h-full flex flex-col rounded-2xl transition-all duration-400 overflow-hidden relative ${
+          isFavorite 
+            ? `bg-gradient-to-br from-amber-50 to-white border-2 ${isHovered ? 'border-amber-300 shadow-[0_20px_40px_rgba(251,191,36,0.3)] -translate-y-2 scale-[1.02]' : 'border-amber-200 shadow-lg shadow-amber-100/50'}`
+            : `bg-gradient-to-br from-white to-slate-50 border ${isHovered ? 'shadow-[0_20px_40px_rgba(99,102,241,0.15)] border-indigo-200 -translate-y-2 scale-[1.02]' : 'shadow-lg border-slate-200'}`
+        } ${isFavorite ? 'animate-golden-pulse' : ''}`}
+        style={isFavorite ? { background: 'linear-gradient(145deg, #fffbeb, #fef3c7, #fff7ed)' } : {}}
       >
         {/* Status Top Border */}
         <div
-          className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${statusGradients[book.read]} transition-opacity duration-300 ${
-            isHovered ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+            isFavorite 
+              ? 'from-amber-400 to-yellow-600'
+              : statusGradients[book.read]
+          } transition-opacity duration-300 ${
+            isHovered || isFavorite ? 'opacity-100' : 'opacity-0'
+          } ${isFavorite ? 'animate-shimmer' : ''}`}
         />
 
         {/* Book Cover Section */}
-        <div className="relative p-4">
+        <div className="relative p-4" style={{ zIndex: 1 }}>
           {book.cover ? (
-            <div className="relative rounded-xl overflow-hidden shadow-lg">
+            <div className="relative rounded-xl overflow-hidden shadow-lg" style={{ pointerEvents: 'none' }}>
               <div
                 className={`absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 transition-opacity duration-300 ${
                   isHovered ? 'opacity-60' : 'opacity-0'
@@ -92,6 +97,7 @@ export default function BookCard({
                 className={`w-full h-56 object-contain bg-white transition-transform duration-400 ${
                   isHovered ? 'scale-110' : 'scale-100'
                 }`}
+                style={{ pointerEvents: 'none' }}
               />
             </div>
           ) : (
@@ -111,22 +117,26 @@ export default function BookCard({
 
           {/* Floating Action Buttons */}
           <div
-            className={`absolute top-6 right-6 flex flex-col gap-2 transition-all duration-300 ${
-              isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-5'
-            }`}
+            className="absolute top-6 right-6 flex flex-col gap-2 transition-all duration-300 opacity-100 translate-x-0 z-50"
+            style={{ zIndex: 999 }}
           >
             <button
-              onClick={() => onToggleFavorite(book.id)}
-              className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110 hover:rotate-12"
+              onClick={() => {
+                console.log('Favorite button clicked in BookCard for book:', book.id, 'current favorite status:', isFavorite);
+                onToggleFavorite(book.id);
+              }}
+              className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110 hover:rotate-12 z-50"
+              style={{ zIndex: 999 }}
               title={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
             >
-              <Bookmark
+              <Star
                 className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-600'}`}
               />
             </button>
             <button
               onClick={() => onShare(book)}
-              className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110 z-50"
+              style={{ zIndex: 999 }}
               title="Udostępnij"
             >
               <Share2 className="w-5 h-5 text-slate-600" />
@@ -152,9 +162,9 @@ export default function BookCard({
 
           {/* Favorite Badge */}
           {isFavorite && (
-            <div className="absolute bottom-4 left-6 bg-red-500/95 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-xs font-bold shadow-lg shadow-red-500/40">
-              <Star className="w-3.5 h-3.5 fill-white" />
-              Ulubione
+            <div className="absolute bottom-4 left-6 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-xs font-bold shadow-lg shadow-amber-500/40">
+              <Star className="w-4 h-4 fill-yellow-100" />
+              <span className="font-extrabold text-white">Ulubione</span>
             </div>
           )}
         </div>
@@ -188,6 +198,7 @@ export default function BookCard({
             onMenuToggle={onMenuToggle}
             onStatusChange={onStatusChange}
             onShare={onShare}
+            onToggleFavorite={onToggleFavorite}
           />
         </div>
       </div>
