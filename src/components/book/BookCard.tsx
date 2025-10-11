@@ -11,7 +11,7 @@ interface BookCardProps {
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onShare?: (book: Book) => void;
-  onToggleFavorite: (bookId: string) => void;
+  onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
 }
 
 const statusGradients: Record<BookStatus, string> = {
@@ -60,7 +60,7 @@ const BookCard: React.FC<BookCardProps> = ({
       >
         <button
           onClick={() => {
-            onToggleFavorite(book.id);
+            onToggleFavorite(book.id, book.isFavorite!);
           }}
           className="w-9 h-9 rounded-lg bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-110 hover:rotate-12 z-50"
           title={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
@@ -160,7 +160,7 @@ const BookCard: React.FC<BookCardProps> = ({
             onStatusChange={onStatusChange}
             onShare={onShare}
             onMenuToggle={() => {}} // Dummy function
-            onToggleFavorite={onToggleFavorite} // Pass the prop here
+            onToggleFavorite={onToggleFavorite}
           />
         </div>
       </div>

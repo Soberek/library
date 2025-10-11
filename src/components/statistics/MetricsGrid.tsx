@@ -20,7 +20,7 @@ interface MetricsGridProps {
 const MetricsGrid: React.FC<MetricsGridProps> = ({ additionalStats }) => {
   return (
     <Grid container spacing={2}>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid item xs={12} sm={6} md={3}>
         <MetricCard
           title="Średnia ocena"
           value={additionalStats.averageRating > 0 ? additionalStats.averageRating.toFixed(1) : '0.0'}
@@ -29,7 +29,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ additionalStats }) => {
           delay={0}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid item xs={12} sm={6} md={3}>
         <MetricCard
           title="Wszystkich stron"
           value={additionalStats.totalPages.toLocaleString()}
@@ -38,7 +38,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ additionalStats }) => {
           delay={100}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid item xs={12} sm={6} md={3}>
         <MetricCard
           title="Przeczytanych stron"
           value={additionalStats.readPages.toLocaleString()}
@@ -47,7 +47,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ additionalStats }) => {
           delay={200}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid item xs={12} sm={6} md={3}>
         <MetricCard
           title="Postęp ogólny"
           value={`${additionalStats.progressRate}%`}

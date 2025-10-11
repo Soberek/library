@@ -249,7 +249,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
         <Box sx={{ p: 3 }}>
           <Grid container spacing={3}>
             {/* Status Filter */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -273,7 +273,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Genre Filter */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Gatunek</InputLabel>
                 <Select
@@ -296,7 +296,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Author Filter */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Autor"
@@ -306,7 +306,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Sort By */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Sortuj według</InputLabel>
                 <Select
@@ -336,7 +336,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Sort Order */}
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Kolejność</InputLabel>
                 <Select
@@ -356,7 +356,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Rating Range */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Zakres ocen: {filters.ratingRange[0]} - {filters.ratingRange[1]}
               </Typography>
@@ -381,7 +381,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Pages Range */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Zakres stron: {filters.pagesRange[0]} - {filters.pagesRange[1]}
               </Typography>
@@ -406,7 +406,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
             </Grid>
 
             {/* Favorites Toggle */}
-            <Grid size={{ xs: 12 }}>
+            <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Switch

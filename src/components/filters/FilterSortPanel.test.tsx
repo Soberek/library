@@ -67,8 +67,8 @@ jest.mock('@mui/material/Switch', () => ({ onChange, checked }: { onChange: (e: 
 ));
 
 // Mock TextField
-jest.mock('@mui/material/TextField', () => ({ onChange, value, placeholder }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; value: string; placeholder: string }) => (
-  <input type="text" value={value} onChange={onChange} placeholder={placeholder} data-testid="author-input" />
+jest.mock('@mui/material/TextField', () => ({ onChange, value, label }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; value: string; label: string }) => (
+  <input type="text" value={value} onChange={onChange} data-testid={`${label}-input`} />
 ));
 
 describe('FilterSortPanel', () => {
@@ -146,7 +146,7 @@ describe('FilterSortPanel', () => {
       </ThemeProvider>,
     );
 
-    const authorInput = screen.getByLabelText('Autor');
+    const authorInput = screen.getByTestId('Autor-input');
     fireEvent.change(authorInput, { target: { value: 'Author A' } });
 
     await waitFor(() => expect(mockOnFilterChange).toHaveBeenCalledTimes(2));

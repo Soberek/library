@@ -106,10 +106,10 @@ export const useBooks = (): UseBooksReturn => {
   const handleStatusChange = useCallback(async (bookId: string, currentStatus: BookStatus) => {
     const newStatus: BookStatus = (() => {
       switch (currentStatus) {
-        case 'Chcę przeczytać': return 'W trakcie';
-        case 'W trakcie': return 'Przeczytana';
         case 'Przeczytana': return 'Chcę przeczytać';
         case 'Porzucona': return 'Chcę przeczytać';
+        case 'W trakcie': return 'Przeczytana';
+        case 'Chcę przeczytać': return 'W trakcie';
         default: return 'Chcę przeczytać';
       }
     })();
@@ -141,7 +141,7 @@ export const useBooks = (): UseBooksReturn => {
       const bookToAdd = { ...newBook, userId: user.uid, createdAt: new Date().toISOString() };
       const id = await booksService.addBook(bookToAdd);
       setBooks((prevBooks) => {
-        const updated = [...prevBooks, { ...bookToAdd, id }];
+        const updated = [...prevBooks, { ...bookToAdd, id: id! }];
         calculateStats(updated);
         return updated;
       });

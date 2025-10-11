@@ -23,11 +23,9 @@ describe('BookForm', () => {
   test('renders form fields', () => {
     render(
       <BookForm
-        handleBookSubmit={mockOnSubmit}
-        mode="add"
-        handleBookModalOpen={mockBookModalOpen}
-        handleBookModalClose={mockBookModalClose}
-        isFormVisible={true}
+        initialData={undefined}
+        onSubmit={mockOnSubmit}
+        onClose={mockBookModalClose}
       />,
     );
 

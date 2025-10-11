@@ -25,7 +25,7 @@ interface StatisticsGridProps {
 const StatisticsGrid: React.FC<StatisticsGridProps> = ({ booksStats, additionalStats }) => {
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
-      <Grid size={{ xs: 6, sm: 3 }}>
+      <Grid item xs={6} sm={3}>
         <StatCard
           title="Wszystkich"
           value={booksStats.total}
@@ -35,7 +35,7 @@ const StatisticsGrid: React.FC<StatisticsGridProps> = ({ booksStats, additionalS
           delay={0}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
+      <Grid item xs={6} sm={3}>
         <StatCard
           title="Przeczytane"
           value={booksStats.read}
@@ -45,7 +45,7 @@ const StatisticsGrid: React.FC<StatisticsGridProps> = ({ booksStats, additionalS
           delay={100}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
+      <Grid item xs={6} sm={3}>
         <StatCard
           title="W trakcie"
           value={booksStats.inProgress}
@@ -55,7 +55,7 @@ const StatisticsGrid: React.FC<StatisticsGridProps> = ({ booksStats, additionalS
           delay={200}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
+      <Grid item xs={6} sm={3}>
         <StatCard
           title="Porzucone"
           value={booksStats.dropped}

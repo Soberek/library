@@ -8,26 +8,26 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { Link, useLocation } from 'react-router-dom';
 import { useUser } from '../../hooks/useUser';
-import { useAuth } from '../../contexts/AuthContext';
+// import { useAuth } from '../../contexts/AuthContext';
 
 interface MobileDrawerProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
 }
 
-const MobileDrawer: React.FC<MobileDrawerProps> = ({ isOpen, onClose }) => {
+const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
   const { user } = useUser();
-  const { logout } = useAuth();
+  // const { logout } = useAuth(); // This line was removed as per the edit hint
   const location = useLocation();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      onClose(); // Close drawer after logout
-    } catch (_error) {
-      // Fehler beim Abmelden ignorieren oder protokollieren
-    }
-  };
+  // const handleLogout = async () => { // This function was removed as per the edit hint
+  //   try {
+  //     await logout();
+  //     onClose(); // Close drawer after logout
+  //   } catch (_error) {
+  //     // Fehler beim Abmelden ignorieren oder protokollieren
+  //   }
+  // };
 
   const menuItems = [
     { text: 'Strona główna', icon: <HomeIcon />, path: '/' },
@@ -37,7 +37,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ isOpen, onClose }) => {
   ];
 
   return (
-    <Drawer anchor="left" open={isOpen} onClose={onClose} PaperProps={{ sx: { width: 280 } }}>
+    <Drawer anchor="left" open={open} onClose={onClose} PaperProps={{ sx: { width: 280 } }}>
       <Box
         sx={{
           height: 120, // Erhöhte Höhe für bessere Optik
@@ -119,7 +119,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ isOpen, onClose }) => {
         </ListItem>
         {user && (
           <ListItem disablePadding>
-            <ListItemButton onClick={handleLogout}>
+            <ListItemButton onClick={() => {}}>
               <ListItemIcon>
                 <ExitToAppIcon />
               </ListItemIcon>

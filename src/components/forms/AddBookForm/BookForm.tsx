@@ -33,16 +33,9 @@ import CloseIcon from '@mui/icons-material/Close';
 // };
 
 type Props = {
-  mode: 'add' | 'edit';
-  bookToEdit?: Book | null;
-  handleBookSubmit?: (data: BookFormData) => void;
-  handleBookUpdate?: (bookId: string, newBook: Book) => void;
-  handleBookModalOpen: (params: {
-    mode: 'add' | 'edit';
-    bookId: string | null;
-  }) => void;
-  handleBookModalClose: () => void;
-  isFormVisible: boolean;
+  initialData?: Book;
+  onSubmit: (data: Book) => Promise<void>;
+  onClose: () => void;
 };
 
 const genreOptions = Object.entries(GENRES)
@@ -64,37 +57,25 @@ const DEFAULT_VALUES = {
 };
 
 const BookForm: React.FC<Props> = ({
-  mode,
-  bookToEdit,
-  handleBookSubmit,
-  handleBookUpdate,
-  handleBookModalClose,
-  isFormVisible,
+  initialData,
+  onSubmit: handleFormSubmit,
+  onClose,
 }) => {
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(bookFormSchema),
-    defaultValues: mode === 'edit' && bookToEdit ? bookToEdit : DEFAULT_VALUES,
+    defaultValues: initialData ? initialData : DEFAULT_VALUES,
   });
 
-  const onSubmit = (data: BookFormData) => {
-    if (mode === 'add') {
-      const result = handleBookSubmit?.(data);
-      if (result) {
-        handleBookModalClose();
-      }
-    } else if (mode === 'edit') {
-      const result = handleBookUpdate?.(bookToEdit?.id || '', data as Book);
-      if (result) {
-        handleBookModalClose();
-      }
-    }
+  const onSubmit = async (data: BookFormData) => {
+    await handleFormSubmit(data as Book);
+    onClose();
     reset();
   };
 
   return (
     <Dialog
-      open={isFormVisible}
-      onClose={handleBookModalClose}
+      open={true}
+      onClose={onClose}
       maxWidth="sm"
       fullWidth
     >
@@ -105,12 +86,12 @@ const BookForm: React.FC<Props> = ({
           alignItems: 'center',
         }}
       >
-        {mode === 'add'
-          ? 'Dodaj nową książkę'
-          : `Edytujesz książkę: ${bookToEdit?.title}`}
+        {initialData?.title
+          ? `Edytujesz książkę: ${initialData.title}`
+          : 'Dodaj nową książkę'}
 
         <IconButton
-          onClick={() => handleBookModalClose()}
+          onClick={onClose}
           aria-label="Zamknij formularz"
         >
           <CloseIcon />
@@ -281,30 +262,13 @@ const BookForm: React.FC<Props> = ({
               />
             )}
           />
-          {mode === 'edit' && (
-            <Button
-              type="submit"
-              variant="outlined"
-              color="secondary"
-              sx={{
-                mt: 2,
-                fontWeight: 'bold',
-                background:
-                  'linear-gradient(30deg, #00ce67ff 30%, #186600ff 90%)',
-              }}
-            >
-              Edytuj książkę {mode}
-            </Button>
-          )}
-          {mode === 'add' && (
-            <Button
-              type="submit"
-              variant="outlined"
-              sx={{ mt: 2, fontWeight: 'bold' }}
-            >
-              Dodaj książkę
-            </Button>
-          )}
+          <Button
+            type="submit"
+            variant="outlined"
+            sx={{ mt: 2, fontWeight: 'bold' }}
+          >
+            {initialData ? 'Edytuj książkę' : 'Dodaj książkę'}
+          </Button>
         </Box>
       </DialogContent>
     </Dialog>

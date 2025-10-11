@@ -3,11 +3,12 @@ import { Box, Typography, Button, Grid } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { PageHeader } from '../components/ui';
 import { BookList } from '../components/book';
-import { BookForm } from '../components/forms/AddBookForm';
+import BookForm from '../components/forms/AddBookForm/BookForm';
 import { useBooks } from '../hooks/useBooks';
 import CustomModal from '../components/ui/CustomModal';
 import FilterStatisticsPanel from '../components/filters/FilterStatisticsPanel';
 import type { Book } from '../types/Book';
+import BookTable from '../components/book/BookTable';
 
 const Books: React.FC = () => {
   const { 
@@ -18,7 +19,7 @@ const Books: React.FC = () => {
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  // const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards'); // Ungenutzt
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
   // Update filteredBooks when books or filters change
   React.useEffect(() => {
@@ -60,7 +61,12 @@ const Books: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <PageHeader title="Moje Książki" icon={BookList} />
+      <PageHeader 
+        title="Moje Książki"
+        onAddBook={() => handleBookModalOpen({ bookId: null })}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
       <Grid container spacing={3} alignItems="flex-start">
         <Grid item xs={12} md={4}>
@@ -90,20 +96,31 @@ const Books: React.FC = () => {
           ) : filteredBooks.length === 0 ? (
             <Typography>Brak książek do wyświetlenia.</Typography>
           ) : (
-            <BookList
-              books={filteredBooks}
-              onEdit={(id) => handleBookModalOpen({ bookId: id })}
-              onDelete={handleBookDelete}
-              onStatusChange={handleStatusChange}
-              onToggleFavorite={handleToggleFavorite}
-            />
+            viewMode === 'cards' ? (
+              <BookList
+                books={filteredBooks}
+                onEdit={(id: string) => handleBookModalOpen({ bookId: id })}
+                onDelete={handleBookDelete}
+                onStatusChange={handleStatusChange}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            ) : (
+              <BookTable
+                books={filteredBooks}
+                handleEdit={(id: string) => handleBookModalOpen({ bookId: id })}
+                handleDelete={handleBookDelete}
+                handleStatusChange={handleStatusChange}
+                handleRatingChange={() => {}}
+                handleToggleFavorite={handleToggleFavorite}
+              />
+            )
           )}
         </Grid>
       </Grid>
 
       <CustomModal isOpen={isModalOpen} onClose={handleBookModalClose} title={editingBookId ? 'Edytuj książkę' : 'Dodaj nową książkę'}>
         <BookForm 
-          initialData={editingBook}
+          initialData={editingBook || undefined }
           onSubmit={handleFormSubmit}
           onClose={handleBookModalClose}
         />

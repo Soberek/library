@@ -1,4 +1,4 @@
-export type BookStatus = 'W trakcie' | 'Przeczytana' | 'Porzucona';
+export type BookStatus =  'W trakcie' | 'Przeczytana' | 'Porzucona' | 'Chcę przeczytać';
 
 export interface Book {
   id: string;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { VALIDATION_RULES } from '../constants/validation';
 
-export const bookStatusSchema = z.enum(['W trakcie', 'Przeczytana', 'Porzucona']);
+export const bookStatusSchema = z.enum(['W trakcie', 'Przeczytana', 'Porzucona', 'Chcę przeczytać']);
 
 export const bookSchema = z.object({
   id: z.string().min(1, 'ID jest wymagane'),

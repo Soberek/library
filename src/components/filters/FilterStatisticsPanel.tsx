@@ -15,7 +15,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { ArrowDownward as ArrowDownwardIcon } from '@mui/icons-material';
 import { BOOK_STATUSES, BOOK_STATUS_LABELS } from '../../constants/bookStatus';
 import { GENRES } from '../../constants/genres';
 import type { Book, BookStatus } from '../../types/Book';
@@ -412,7 +412,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
               <Box sx={{ mb: 2 }}>
                 <MuiGrid container spacing={2}>
                   {/* First row: Status, Genre, Author */}
-                  <MuiGrid size={{ xs: 12, sm: 4 }} >
+                  <MuiGrid item xs={12} sm={4}>
                     <FormControl fullWidth size="small" variant="outlined">
                       <InputLabel>Status</InputLabel>
                       <Select
@@ -436,7 +436,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                       </Select>
                     </FormControl>
                   </MuiGrid>
-                  <MuiGrid size={{ xs: 12, sm: 4 }} >
+                  <MuiGrid item xs={12} sm={4}>
                     <FormControl fullWidth size="small" variant="outlined">
                       <InputLabel>Gatunek</InputLabel>
                       <Select
@@ -460,7 +460,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                       </Select>
                     </FormControl>
                   </MuiGrid>
-                  <MuiGrid size={{ xs: 12, sm: 4 }} >
+                  <MuiGrid item xs={12} sm={4}>
                     <TextField
                       fullWidth
                       size="small"
@@ -522,7 +522,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                 <Box sx={{ mt: 1, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
                   <MuiGrid container spacing={3}>
                     {/* Rating Range */}
-                    <MuiGrid size={{ xs: 12, sm: 6 }} >
+                    <MuiGrid item xs={12} sm={6}>
                       <Typography variant="body2" fontWeight={500} gutterBottom>
                         Zakres ocen: {filters.ratingRange[0]} - {filters.ratingRange[1]}
                       </Typography>
@@ -553,7 +553,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                     </MuiGrid>
                     
                     {/* Pages Range */}
-                    <MuiGrid size={{ xs: 12, sm: 6 }} >
+                    <MuiGrid item xs={12} sm={6}>
                       <Typography variant="body2" fontWeight={500} gutterBottom>
                         Zakres stron: {filters.pagesRange[0]} - {filters.pagesRange[1]}
                       </Typography>

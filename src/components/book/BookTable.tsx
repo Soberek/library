@@ -38,11 +38,12 @@ interface BookTableProps {
 type SortField = 'title' | 'author' | 'rating' | 'pages' | 'status' | 'dateAdded' | null;
 type SortOrder = 'asc' | 'desc';
 
-const statusColors = {
+const statusColors: Record<BookStatus, { color: string; bg: string; text: string; border: string }> = {
+  'Chcę przeczytać': { color: 'info', bg: 'bg-blue-600', text: 'text-white', border: 'border-blue-300' },
   'W trakcie': { color: 'warning', bg: 'bg-amber-600', text: 'text-white', border: 'border-amber-300' },
   'Przeczytana': { color: 'success', bg: 'bg-green-600', text: 'text-white', border: 'border-green-300' },
   'Porzucona': { color: 'error', bg: 'bg-red-600', text: 'text-white', border: 'border-red-300' },
-} as const;
+};
 
 export default function BookTable({
   books,

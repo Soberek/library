@@ -3,13 +3,12 @@ import type { Book, BookStatus } from '../../types/Book';
 
 interface BookActionsProps {
   book: Book;
-  openMenu: string | null;
   onEdit: (bookId: string) => void;
   onDelete: (bookId: string) => void;
   onMenuToggle: (bookId: string) => void;
   onStatusChange: (bookId: string, currentStatus: BookStatus) => void;
   onShare?: (book: Book) => void;
-  onToggleFavorite?: (bookId: string) => void;
+  onToggleFavorite?: (bookId: string, currentFavorite: boolean) => void;
 }
 
 export default function BookActions({
@@ -25,7 +24,7 @@ export default function BookActions({
       {onToggleFavorite && (
         <button
           onClick={() => {
-            onToggleFavorite(book.id);
+            onToggleFavorite(book.id, book.isFavorite!);
           }}
           className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 ${ 
             isFavorite

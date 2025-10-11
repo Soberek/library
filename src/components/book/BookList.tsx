@@ -8,7 +8,7 @@ interface BookListProps {
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onShare?: (book: Book) => void;
-  onToggleFavorite: (bookId: string) => void;
+  onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
 }
 
 const BookList: React.FC<BookListProps> = ({
@@ -88,8 +88,8 @@ const BookList: React.FC<BookListProps> = ({
             onDelete={onDelete}
             onStatusChange={onStatusChange}
             onShare={onShare}
-            onToggleFavorite={(bookId) => {
-              onToggleFavorite(bookId);
+            onToggleFavorite={(bookId, currentFavorite) => {
+              onToggleFavorite(bookId, currentFavorite);
             }}
           />
         ))}
