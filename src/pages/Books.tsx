@@ -14,6 +14,9 @@ import { useBooks } from "../hooks/useBooks";
 import { useSearch } from "../hooks/useSearch";
 import type { Book } from "../types/Book";
 import { Box, Container } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { ViewModule as GridViewIcon, ViewList as ViewListIcon } from '@mui/icons-material';
 
 const Books = () => {
   const {
@@ -26,6 +29,7 @@ const Books = () => {
     handleStatusChange,
     handleBookSubmit,
     refetch,
+    handleToggleFavorite,
   } = useBooks();
 
   const [isEditing, setIsEditing] = useState<{
@@ -40,6 +44,7 @@ const Books = () => {
 
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [viewMode, setViewMode] = useLocalStorage<'cards' | 'table'>('bookViewMode', 'cards');
 
   const searchContext = useSearch();
 
@@ -151,6 +156,34 @@ const Books = () => {
           onAddBook={() => handleBookModalOpen({ mode: "add", bookId: null })}
         />
 
+        {/* Toggle Buttons for View Mode */}
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={(_, newView) => setViewMode(newView)}
+          aria-label="book view"
+          size="small"
+          sx={{ 
+            mb: 2, 
+            backgroundColor: 'background.paper', 
+            borderRadius: 1, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            '& .MuiToggleButton-root': {
+              textTransform: 'none',
+              padding: '8px 16px',
+              '&.Mui-selected': { backgroundColor: 'primary.light', color: 'primary.contrastText' }
+            }
+          }}
+        >
+          <ToggleButton value="cards">
+            <GridViewIcon fontSize="small" sx={{ mr: 0.5 }} /> Cards
+          </ToggleButton>
+          <ToggleButton value="table">
+            <ViewListIcon fontSize="small" sx={{ mr: 0.5 }} /> Table
+          </ToggleButton>
+        </ToggleButtonGroup>
+
         {/* Statistics Dashboard */}
         {booksStats.total > 0 && additionalStats && (
           <StatisticsDashboard
@@ -188,6 +221,8 @@ const Books = () => {
             handleBookUpdate={handleBookUpdate}
             handleBookDelete={handleBookDelete}
             handleBookModalOpen={handleBookModalOpen}
+            handleToggleFavorite={handleToggleFavorite}
+            viewMode={viewMode}
           />
         </Box>
 
