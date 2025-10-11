@@ -1,20 +1,20 @@
-import React from "react";
-import { AppBar, Toolbar, Box } from "@mui/material";
-import DesktopNavbar from "./DesktopNavbar";
-import SearchBar from "./SearchBar";
-import UserMenu from "./UserMenu";
+import React from 'react';
+import { AppBar, Toolbar, Box } from '@mui/material';
+import DesktopNavbar from './DesktopNavbar';
+import SearchBar from './SearchBar';
+import UserMenu from './UserMenu';
 
 // Styles constants for better maintainability
 const NAVBAR_STYLES = {
   secondaryBar: {
-    display: { xs: "none", md: "block" },
-    background: "#fff", // pure white for max contrast
-    borderBottom: "1px solid #667eea",
-    boxShadow: "0 8px 32px rgba(102, 126, 234, 0.18)",
-    backdropFilter: "none",
+    display: { xs: 'none', md: 'block' },
+    background: '#fff', // pure white for max contrast
+    borderBottom: '1px solid #667eea',
+    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.18)',
+    backdropFilter: 'none',
   },
   toolbar: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     py: 1.5,
   },
   spacer: {
@@ -22,8 +22,8 @@ const NAVBAR_STYLES = {
   },
   userMenuContainer: {
     flex: 1,
-    display: "flex",
-    justifyContent: "flex-end",
+    display: 'flex',
+    justifyContent: 'flex-end',
   },
 } as const;
 
