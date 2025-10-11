@@ -14,6 +14,7 @@ import { bookToAddSchema, bookUpdateSchema } from "../schemas/bookSchema";
 import { ERROR_MESSAGES } from "../constants/validation";
 
 import type { Book } from "../types/Book";
+import type { BookFormData } from "../types/Book";
 
 /**
  * Fetches all books for a specific user from Firestore
@@ -40,8 +41,10 @@ const getUserBooksData = async (userId: string): Promise<Book[]> => {
     const booksList = await getDocs(q);
     
     return booksList.docs.map((doc) => ({
-      ...(doc.data() as Book),
+      ... (doc.data() as Book),
       id: doc.id,
+      overallPages: Number((doc.data() as Book).overallPages || 0),
+      rating: Number((doc.data() as Book).rating || 0),
     }));
   } catch (error) {
     console.error("Error fetching user books:", error);
@@ -59,8 +62,10 @@ const getAllBooksData = async (): Promise<BookWithId[]> => {
     const booksCollection = collection(db, "books");
     const booksList = await getDocs(booksCollection);
     return booksList.docs.map((doc) => ({
-      ...(doc.data() as Book),
+      ... (doc.data() as Book),
       id: doc.id,
+      overallPages: Number((doc.data() as Book).overallPages || 0),
+      rating: Number((doc.data() as Book).rating || 0),
     }));
   } catch (error) {
     console.error("Error fetching all books:", error);
@@ -94,10 +99,10 @@ const getAllBooksData = async (): Promise<BookWithId[]> => {
  * });
  * ```
  */
-const addBook = async (book: import("../schemas/bookSchema").BookToAdd): Promise<string> => {
+const addBook = async (bookData: BookFormData): Promise<string | null> => {
   try {
     // Validate the book data
-    const validatedBook = bookToAddSchema.parse(book);
+    const validatedBook = bookToAddSchema.parse(bookData);
     
     const booksCollection = collection(db, "books");
     const docRef = await addDoc(booksCollection, validatedBook);
@@ -128,10 +133,7 @@ const deleteBook = async (bookId: string): Promise<void> => {
   }
 };
 
-const updateBook = async (
-  bookId: string,
-  updatedData: import("../schemas/bookSchema").BookUpdateData,
-): Promise<boolean> => {
+const updateBook = async (bookId: string, updatedData: Partial<Book>): Promise<boolean> => {
   try {
     if (!bookId) {
       throw createFirebaseError("Book ID is required");
