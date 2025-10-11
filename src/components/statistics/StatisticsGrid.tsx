@@ -1,10 +1,10 @@
-import React from "react";
-import { Grid } from "@mui/material";
-import StatCard from "./StatCard";
-import BookIcon from "@mui/icons-material/Book";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import React from 'react';
+import { Grid } from '@mui/material';
+import StatCard from './StatCard';
+import BookIcon from '@mui/icons-material/Book';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PauseCircleIcon from '@mui/icons-material/PauseCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 interface BooksStats {
   total: number;
