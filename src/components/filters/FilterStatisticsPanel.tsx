@@ -1,27 +1,27 @@
-import React, { useEffect } from "react";
-import { useFilterContext } from "../../contexts/FilterContext";
+import React, { useEffect } from 'react';
+import { useFilterContext } from '../../contexts/FilterContext';
 import {
   Box, Paper, Typography, FormControl, InputLabel, Select, MenuItem, Chip,
   IconButton, Collapse, Slider, FormControlLabel, Switch, TextField,
-  Fade, Tabs, Tab, Divider, Badge, Tooltip, useMediaQuery, useTheme, Button,
-  Stack, InputAdornment, Grid as MuiGrid, ToggleButton, ToggleButtonGroup
-} from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ClearIcon from "@mui/icons-material/Clear";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
-import SearchIcon from "@mui/icons-material/Search";
-import SortIcon from "@mui/icons-material/Sort";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import TuneIcon from "@mui/icons-material/Tune";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import StarIcon from "@mui/icons-material/Star";
-import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
-import { GENRES } from "../../constants/genres";
-import type { Book, BookStatus } from "../../types/Book";
-import StatisticsGrid from "../statistics/StatisticsGrid";
-import MetricsGrid from "../statistics/MetricsGrid";
+  Fade, Tabs, Tab, Divider, Badge, Button,
+  InputAdornment, Grid as MuiGrid,
+} from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SearchIcon from '@mui/icons-material/Search';
+import SortIcon from '@mui/icons-material/Sort';
+import TuneIcon from '@mui/icons-material/Tune';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import StarIcon from '@mui/icons-material/Star';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { BOOK_STATUSES, BOOK_STATUS_LABELS } from '../../constants/bookStatus';
+import { GENRES } from '../../constants/genres';
+import type { Book, BookStatus } from '../../types/Book';
+import StatisticsGrid from '../statistics/StatisticsGrid';
+import MetricsGrid from '../statistics/MetricsGrid';
+import type { FilterState } from '../../contexts/FilterContext';
 
 interface BooksStats {
   total: number;
@@ -56,86 +56,62 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   isFilterOpen, 
   onFilterToggle, 
   booksStats, 
-  additionalStats
+  additionalStats,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  // Context verwenden
   const { state, dispatch } = useFilterContext();
+  const { filters, activeTab, expanded, showAdvancedFilters, activeFilters } = state;
   
-  // Destrukturieren des Zustands für einfacheren Zugriff
-  const { filters, activeTab, lastOpenTab, expanded, showAdvancedFilters, activeFilters } = state;
-  
-  // Synchronize expanded state with parent component
   useEffect(() => {
     dispatch({ type: 'SET_EXPANDED', value: isFilterOpen });
   }, [isFilterOpen, dispatch]);
 
-  // Handler für Tab-Wechsel
-  const handleTabChange = (_: React.SyntheticEvent, newTab: any) => {
-    // Prüfe, ob der Tab sich ändert oder der gleiche Tab erneut angeklickt wird
-    console.log('Tab click', { activeTab, newTab, expanded });
+  const handleTabChange = (_: React.SyntheticEvent, newTab: string) => {
+    dispatch({ type: 'TOGGLE_TAB', tab: newTab as 'filters' | 'sort' | 'stats' });
     
-    // Dispatch TOGGLE_TAB Aktion, die die gesamte Logik im Reducer behandelt
-    dispatch({ type: 'TOGGLE_TAB', tab: newTab });
-    
-    // Synchronisiere den externen Zustand mit dem Context
     if (activeTab === newTab) {
-      // Wenn der gleiche Tab geklickt wird, toggle den externen Zustand
       onFilterToggle();
     } else if (!expanded) {
-      // Wenn ein anderer Tab geklickt wird und das Panel geschlossen ist, öffne es
       onFilterToggle();
     }
   };
 
-  // Handler für Filter-Änderungen
-  const handleFilterChange = (field: any, value: any) => {
+  const handleFilterChange = (field: keyof FilterState, value: unknown) => {
     dispatch({ type: 'SET_FILTER', field, value });
   };
 
-  // Handler zum Zurücksetzen aller Filter
   const clearFilters = (e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch({ type: 'RESET_FILTERS' });
     onFilterChange(books);
   };
 
-  // Handler zum Umschalten der erweiterten Filter
   const toggleAdvancedFilters = () => {
     dispatch({ type: 'TOGGLE_ADVANCED_FILTERS' });
   };
 
-  // Anwenden der Filter auf die Bücher
   const applyFilters = React.useCallback(() => {
     let filtered = [...books];
 
-    // Status filter
-    if (filters.status !== "all") {
+    if (filters.status !== 'all') {
       filtered = filtered.filter((book) => book.read === filters.status);
     }
 
-    // Genre filter
-    if (filters.genre !== "all") {
+    if (filters.genre !== 'all') {
       filtered = filtered.filter((book) => book.genre === filters.genre);
     }
 
-    // Rating filter
     filtered = filtered.filter(
       (book) =>
         book.rating >= filters.ratingRange[0] &&
-        book.rating <= filters.ratingRange[1]
+        book.rating <= filters.ratingRange[1],
     );
 
-    // Pages filter
     filtered = filtered.filter(
       (book) =>
         book.overallPages >= filters.pagesRange[0] &&
-        book.overallPages <= filters.pagesRange[1]
+        book.overallPages <= filters.pagesRange[1],
     );
 
-    // Favorites filter
     if (filters.showOnlyFavorites) {
       filtered = filtered.filter((book) => book.isFavorite === true);
     }
@@ -145,7 +121,6 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
       filtered = filtered.filter((book) => book.author.toLowerCase().includes(searchAuthor));
     }
 
-    // Sorting logic
     filtered.sort((a, b) => {
       if (filters.sortBy === 'status') {
         const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
@@ -153,74 +128,70 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
         if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
       }
 
-      let aValue: string | number, bValue: string | number;
-
       switch (filters.sortBy) {
-        case "title": 
-          aValue = a.title.toLowerCase(); 
-          bValue = b.title.toLowerCase(); 
-          break;
-        case "author": 
-          aValue = a.author.toLowerCase(); 
-          bValue = b.author.toLowerCase(); 
-          break;
-        case "rating": 
-          aValue = a.rating; 
-          bValue = b.rating; 
-          break;
-        case "pages": 
-          aValue = a.overallPages; 
-          bValue = b.overallPages; 
-          break;
-        case "dateAdded":
+        case 'title': {
+          const aValue = a.title.toLowerCase();
+          const bValue = b.title.toLowerCase();
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'author': {
+          const aValue = a.author.toLowerCase();
+          const bValue = b.author.toLowerCase();
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'rating': {
+          const aValue = a.rating;
+          const bValue = b.rating;
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'pages': {
+          const aValue = a.overallPages;
+          const bValue = b.overallPages;
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'dateAdded': {
           const aStatusIndexDate = BOOK_STATUSES.indexOf(a.read as BookStatus);
           const bStatusIndexDate = BOOK_STATUSES.indexOf(b.read as BookStatus);
           if (aStatusIndexDate !== bStatusIndexDate) return aStatusIndexDate - bStatusIndexDate;
-          aValue = new Date(a.createdAt || 0).getTime();
-          bValue = new Date(b.createdAt || 0).getTime();
-          break;
-        case "status":
+          const aValue = new Date(a.createdAt || 0).getTime();
+          const bValue = new Date(b.createdAt || 0).getTime();
+          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        }
+        case 'status': {
           const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
           const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-          return filters.sortOrder === "asc" ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
+          return filters.sortOrder === 'asc' ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
+        }
         default:
           return 0;
       }
-
-      if (aValue === bValue) return 0;
-      return filters.sortOrder === "asc" ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
     });
 
     onFilterChange(filtered);
   }, [books, filters, onFilterChange]);
   
-  // Benachrichtigen der übergeordneten Komponente über Sortieränderungen
-  React.useEffect(() => {
+  useEffect(() => {
     if (onSortChange) {
       onSortChange(filters.sortBy, filters.sortOrder);
     }
   }, [filters.sortBy, filters.sortOrder, onSortChange]);
 
-
-
-  React.useEffect(() => {
+  useEffect(() => {
     applyFilters();
     
-    // Notify parent component about sort changes
     if (onSortChange) {
       onSortChange(filters.sortBy, filters.sortOrder);
     }
   }, [filters, books, applyFilters, onSortChange]);
 
   const genreOptions = Object.entries(GENRES).map(([value, label]) => ({
-    value, label
+    value, label,
   }));
 
-  // Render filter chip badges
   const renderFilterBadges = () => {
     const badges = [];
     
-    if (filters.status !== "all") {
+    if (filters.status !== 'all') {
       badges.push(
         <Chip 
           key="status" 
@@ -228,13 +199,13 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           size="small" 
           color="primary" 
           variant="outlined"
-          onDelete={() => handleFilterChange('status', "all")}
+          onDelete={() => handleFilterChange('status', 'all')}
           sx={{ height: 24 }}
-        />
+        />,
       );
     }
     
-    if (filters.genre !== "all") {
+    if (filters.genre !== 'all') {
       const genreLabel = genreOptions.find(g => g.value === filters.genre)?.label || filters.genre;
       badges.push(
         <Chip 
@@ -243,9 +214,9 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           size="small" 
           color="primary" 
           variant="outlined"
-          onDelete={() => handleFilterChange('genre', "all")}
+          onDelete={() => handleFilterChange('genre', 'all')}
           sx={{ height: 24 }}
-        />
+        />,
       );
     }
     
@@ -257,9 +228,9 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           size="small" 
           color="primary" 
           variant="outlined"
-          onDelete={() => handleFilterChange('author', "")}
+          onDelete={() => handleFilterChange('author', '')}
           sx={{ height: 24 }}
-        />
+        />,
       );
     }
     
@@ -273,7 +244,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           variant="outlined"
           onDelete={() => handleFilterChange('ratingRange', [0, 10])}
           sx={{ height: 24 }}
-        />
+        />,
       );
     }
     
@@ -288,7 +259,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           icon={<StarIcon fontSize="small" />}
           onDelete={() => handleFilterChange('showOnlyFavorites', false)}
           sx={{ height: 24 }}
-        />
+        />,
       );
     }
     
@@ -298,9 +269,9 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   return (
     <Fade in={true} timeout={500}>
       <Paper sx={{
-        mb: 3, borderRadius: 2, overflow: "hidden",
-        boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-        border: "1px solid rgba(0,0,0,0.05)"
+        mb: 3, borderRadius: 2, overflow: 'hidden',
+        boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(0,0,0,0.05)',
       }}>
 
         {/* Tabs */}
@@ -310,30 +281,30 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           variant="fullWidth" 
           sx={{ 
             minHeight: 40, 
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             '& .MuiTab-root': { 
               minHeight: 40, 
               py: 0.5,
               fontWeight: 500,
-              color: "white",
+              color: 'white',
               opacity: 0.8,
-              transition: "all 0.2s ease",
-              "&.Mui-selected": {
+              transition: 'all 0.2s ease',
+              '&.Mui-selected': {
                 fontWeight: 600,
                 opacity: 1,
-                color: "white"
+                color: 'white',
               },
-              "&:hover": {
+              '&:hover': {
                 opacity: 1,
-              }
-            }
+              },
+            },
           }}
           TabIndicatorProps={{
             style: {
               height: 3,
-              backgroundColor: "white",
-              borderRadius: "3px 3px 0 0"
-            }
+              backgroundColor: 'white',
+              borderRadius: '3px 3px 0 0',
+            },
           }}
         >
           <Tab 
@@ -345,7 +316,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                 gap: 1,
                 width: '100%', 
                 height: '100%',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}>
                 <FilterListIcon fontSize="small" />
                 <span>Filtry</span>
@@ -376,7 +347,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                 gap: 1,
                 width: '100%', 
                 height: '100%',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}>
                 <SortIcon fontSize="small" />
                 <span>Sortowanie</span>
@@ -399,7 +370,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                 gap: 1,
                 width: '100%', 
                 height: '100%',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}>
                 <AnalyticsIcon fontSize="small" />
                 <span>Statystyki</span>
@@ -447,13 +418,13 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                       <Select
                         value={filters.status}
                         label="Status"
-                      onChange={(e) => handleFilterChange('status', e.target.value as BookStatus | "all")}
+                      onChange={(e) => handleFilterChange('status', e.target.value as BookStatus | 'all')}
                         MenuProps={{
                           PaperProps: {
                             style: {
-                              maxHeight: 300
-                            }
-                          }
+                              maxHeight: 300,
+                            },
+                          },
                         }}
                       >
                         <MenuItem value="all">Wszystkie</MenuItem>
@@ -475,9 +446,9 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                         MenuProps={{
                           PaperProps: {
                             style: {
-                              maxHeight: 300
-                            }
-                          }
+                              maxHeight: 300,
+                            },
+                          },
                         }}
                       >
                         <MenuItem value="all">Wszystkie</MenuItem>
@@ -513,7 +484,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                               <ClearIcon fontSize="small" />
                             </IconButton>
                           </InputAdornment>
-                        ) : null
+                        ) : null,
                       }}
                     />
                   </MuiGrid>
@@ -529,7 +500,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                   onClick={toggleAdvancedFilters}
                   sx={{ textTransform: 'none' }}
                 >
-                  {showAdvancedFilters ? "Ukryj filtry zaawansowane" : "Pokaż filtry zaawansowane"}
+                  {showAdvancedFilters ? 'Ukryj filtry zaawansowane' : 'Pokaż filtry zaawansowane'}
                 </Button>
                 
                 {(filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 || filters.pagesRange[0] > 0 || filters.pagesRange[1] < 5000) && (
@@ -564,19 +535,19 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                         max={10}
                         step={0.5}
                         marks={[
-                          { value: 0, label: "0" },
-                          { value: 5, label: "5" },
-                          { value: 10, label: "10" }
+                          { value: 0, label: '0' },
+                          { value: 5, label: '5' },
+                          { value: 10, label: '10' },
                         ]}
                         sx={{
                           '& .MuiSlider-thumb': {
                             '&:hover, &.Mui-focusVisible': {
-                              boxShadow: '0px 0px 0px 8px rgba(102, 126, 234, 0.16)'
-                            }
+                              boxShadow: '0px 0px 0px 8px rgba(102, 126, 234, 0.16)',
+                            },
                           },
                           '& .MuiSlider-rail': {
-                            opacity: 0.3
-                          }
+                            opacity: 0.3,
+                          },
                         }}
                       />
                     </MuiGrid>
@@ -595,19 +566,19 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                         max={5000}
                         step={50}
                         marks={[
-                          { value: 0, label: "0" },
-                          { value: 2500, label: "2500" },
-                          { value: 5000, label: "5000" }
+                          { value: 0, label: '0' },
+                          { value: 2500, label: '2500' },
+                          { value: 5000, label: '5000' },
                         ]}
                         sx={{
                           '& .MuiSlider-thumb': {
                             '&:hover, &.Mui-focusVisible': {
-                              boxShadow: '0px 0px 0px 8px rgba(102, 126, 234, 0.16)'
-                            }
+                              boxShadow: '0px 0px 0px 8px rgba(102, 126, 234, 0.16)',
+                            },
                           },
                           '& .MuiSlider-rail': {
-                            opacity: 0.3
-                          }
+                            opacity: 0.3,
+                          },
                         }}
                       />
                     </MuiGrid>
@@ -650,12 +621,12 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                     { value: 'rating', label: 'Ocena', icon: '⭐' },
                     { value: 'pages', label: 'Liczba stron', icon: '📄' },
                     { value: 'dateAdded', label: 'Data dodania', icon: '📅' },
-                    { value: 'status', label: 'Status', icon: '📊' }
+                    { value: 'status', label: 'Status', icon: '📊' },
                   ].map((option) => (
                     <Paper 
                       key={option.value}
                       onClick={() => {
-                        const sortByValue = option.value as "title" | "author" | "rating" | "pages" | "dateAdded" | "status";
+                        const sortByValue = option.value as 'title' | 'author' | 'rating' | 'pages' | 'dateAdded' | 'status';
                         if (filters.sortBy === sortByValue) {
                           handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc');
                         } else {
@@ -675,8 +646,8 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                         '&:hover': {
                           bgcolor: filters.sortBy === option.value ? 'primary.100' : 'action.hover',
                           transform: 'translateY(-2px)',
-                          boxShadow: '0 3px 5px rgba(0,0,0,0.08)'
-                        }
+                          boxShadow: '0 3px 5px rgba(0,0,0,0.08)',
+                        },
                       }}
                     >
                       <Box sx={{ 
@@ -687,7 +658,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                         alignItems: 'center', 
                         justifyContent: 'center',
                         borderRadius: '50%',
-                        bgcolor: filters.sortBy === option.value ? 'primary.100' : 'action.hover'
+                        bgcolor: filters.sortBy === option.value ? 'primary.100' : 'action.hover',
                       }}>
                         {option.icon}
                       </Box>
@@ -726,7 +697,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                     }
                     label={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <StarIcon fontSize="small" color={filters.showOnlyFavorites ? "warning" : "action"} />
+                        <StarIcon fontSize="small" color={filters.showOnlyFavorites ? 'warning' : 'action'} />
                         <Typography variant="body2">Tylko ulubione</Typography>
                       </Box>
                     }
@@ -738,29 +709,23 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                     Kierunek sortowania
                   </Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <ToggleButtonGroup
-                      value={filters.sortOrder}
-                      exclusive
-                      onChange={(_, newOrder) => {
-                        if (newOrder !== null) {
-                          handleFilterChange('sortOrder', newOrder as 'asc' | 'desc')
-                        }
-                      }}
-                      size="small"
-                    >
-                      <ToggleButton value="asc">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <ArrowUpwardIcon fontSize="small" />
-                          <Typography variant="caption">Rosnąco</Typography>
-                        </Box>
-                      </ToggleButton>
-                      <ToggleButton value="desc">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <ArrowDownwardIcon fontSize="small" />
-                          <Typography variant="caption">Malejąco</Typography>
-                        </Box>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
+                    {filters.sortOrder === 'asc' ? (
+                      <Button 
+                        size="small" 
+                        onClick={() => handleFilterChange('sortOrder', 'desc')}
+                        startIcon={<ArrowUpwardIcon fontSize="small" />}
+                      >
+                        Rosnąco
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="small" 
+                        onClick={() => handleFilterChange('sortOrder', 'asc')}
+                        startIcon={<ArrowDownwardIcon fontSize="small" />}
+                      >
+                        Malejąco
+                      </Button>
+                    )}
                   </Box>
                 </Box>
               </Box>
@@ -774,7 +739,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                     'rating': 'oceny',
                     'pages': 'liczby stron',
                     'dateAdded': 'daty dodania',
-                    'status': 'statusu'
+                    'status': 'statusu',
                   }[filters.sortBy] || filters.sortBy}</strong> ({filters.sortOrder === 'asc' ? 'rosnąco' : 'malejąco'})
                 </Typography>
               </Box>
