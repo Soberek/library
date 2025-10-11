@@ -1,7 +1,7 @@
-import { Component } from "react";
-import type { ErrorInfo, ReactNode } from "react";
-import { Box, Typography, Button, Paper } from "@mui/material";
-import { ERROR_MESSAGES } from "../../constants/validation";
+import { Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
+import { Box, Typography, Button, Paper } from '@mui/material';
+import { ERROR_MESSAGES } from '../../constants/validation';
 
 /**
  * Props for the ErrorBoundary component
@@ -41,8 +41,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
-    this.setState({ error, errorInfo });
+    this.setState({ errorInfo });
   }
 
   handleReset = () => {
@@ -58,10 +57,10 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "50vh",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '50vh',
             p: 2,
           }}
         >
@@ -70,7 +69,7 @@ class ErrorBoundary extends Component<Props, State> {
             sx={{
               p: 4,
               maxWidth: 500,
-              textAlign: "center",
+              textAlign: 'center',
             }}
           >
             <Typography variant="h5" color="error" gutterBottom>
@@ -79,17 +78,17 @@ class ErrorBoundary extends Component<Props, State> {
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
               {ERROR_MESSAGES.UNKNOWN_ERROR}
             </Typography>
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {process.env.NODE_ENV === 'development' && this.state.error && (
               <Box
                 sx={{
-                  backgroundColor: "grey.100",
+                  backgroundColor: 'grey.100',
                   p: 2,
                   borderRadius: 1,
                   mb: 3,
-                  textAlign: "left",
+                  textAlign: 'left',
                 }}
               >
-                <Typography variant="caption" component="pre" sx={{ fontSize: "0.75rem" }}>
+                <Typography variant="caption" component="pre" sx={{ fontSize: '0.75rem' }}>
                   {this.state.error.toString()}
                 </Typography>
               </Box>
