@@ -53,7 +53,7 @@ export default function BookTable({
   handleDelete,
   sortField: externalSortField,
   sortOrder: externalSortOrder,
-  onSortChange
+  onSortChange,
 }: BookTableProps) {
   // Use external sort state if provided, otherwise use internal state
   const [internalSortField, setInternalSortField] = React.useState<SortField>(null);
