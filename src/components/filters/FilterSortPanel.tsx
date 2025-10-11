@@ -167,7 +167,6 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
       showOnlyFavorites: false,
       author: '',
     });
-    onFilterChange(books);
   };
 
   const getActiveFiltersCount = () => {
@@ -234,6 +233,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
           {getActiveFiltersCount() > 0 && (
             <IconButton
               size="small"
+              aria-label="Clear"
               onClick={(e) => {
                 e.stopPropagation();
                 clearFilters();
