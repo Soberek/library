@@ -62,12 +62,37 @@ const getUserBooksDataPaginated = async (
     }
 
     const booksCollection = collection(db, 'books');
-    let q = query(
-      booksCollection,
-      where('userId', '==', userId),
-      orderBy(sortField, sortDirection),
-      limit(pageSize + 1) // Fetch one extra to check if more exist
-    );
+    let q;
+    
+    // For createdAt field, we know the index exists by default
+    if (sortField === 'createdAt') {
+      q = query(
+        booksCollection,
+        where('userId', '==', userId),
+        orderBy(sortField, sortDirection),
+        limit(pageSize + 1) // Fetch one extra to check if more exist
+      );
+    } else {
+      // For other fields, we need to be careful with indexes
+      try {
+        // First try with compound query that requires index
+        q = query(
+          booksCollection,
+          where('userId', '==', userId),
+          orderBy(sortField, sortDirection),
+          limit(pageSize + 1) // Fetch one extra to check if more exist
+        );
+      } catch (error) {
+        // Fallback to default sort by createdAt if index doesn't exist
+        console.error(`Firebase index error for field ${sortField}, falling back to createdAt:`, error);
+        q = query(
+          booksCollection,
+          where('userId', '==', userId),
+          orderBy('createdAt', sortDirection),
+          limit(pageSize + 1)
+        );
+      }
+    }
 
     // If we have a last document, start after it for pagination
     if (lastDoc) {

@@ -64,13 +64,30 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   const infiniteQuery = useInfiniteQuery({
     queryKey: booksKeys.paginatedList(user?.uid || '', sortField, sortDirection),
     queryFn: async ({ pageParam }) => {
-      return booksService.getUserBooksDataPaginated(
-        user!.uid,
-        pageSize,
-        pageParam as QueryDocumentSnapshot<DocumentData> | null,
-        sortField,
-        sortDirection
-      );
+      try {
+        return await booksService.getUserBooksDataPaginated(
+          user!.uid,
+          pageSize,
+          pageParam as QueryDocumentSnapshot<DocumentData> | null,
+          sortField,
+          sortDirection
+        );
+      } catch (error) {
+        console.error('Error fetching paginated books:', error);
+        // If there's an error with the specified sort field, try with default sort
+        if (sortField !== 'createdAt' && error instanceof Error && error.toString().includes('index')) {
+          console.log('Falling back to default sort field');
+          setSortField('createdAt');
+          return booksService.getUserBooksDataPaginated(
+            user!.uid,
+            pageSize,
+            pageParam as QueryDocumentSnapshot<DocumentData> | null,
+            'createdAt',
+            sortDirection
+          );
+        }
+        throw error;
+      }
     },
     initialPageParam: null as QueryDocumentSnapshot<DocumentData> | null,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.lastDoc : undefined,
@@ -98,8 +115,15 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   // Loading state from either query
   const isLoading = usePagination ? infiniteQuery.isLoading : legacyQuery.isLoading;
   
-  // Error from either query
-  const error = usePagination ? infiniteQuery.error : legacyQuery.error;
+  // Error handling with better error messages
+  let error = usePagination ? infiniteQuery.error : legacyQuery.error;
+  
+  // Provide more specific error message for Firebase index issues
+  if (error && error.toString().includes('index')) {
+    error = new Error('Wystąpił błąd z indeksem Firebase. Proszę skontaktować się z administratorem.');
+  } else if (error) {
+    error = new Error('Wystąpił błąd. Spróbuj ponownie.');
+  }
 
   // Pagination status
   const hasNextPage = infiniteQuery.hasNextPage || false;
