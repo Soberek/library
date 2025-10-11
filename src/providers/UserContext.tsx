@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { auth } from "../config/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
-import type { User } from "firebase/auth";
-import { UserContext } from "../hooks/useUser";
+import React, { useState, useEffect } from 'react';
+import { auth } from '../config/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import { UserContext } from '../hooks/useUser';
 
 type Props = {
   children: React.ReactNode;
