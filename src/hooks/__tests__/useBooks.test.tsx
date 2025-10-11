@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useBooks } from "../useBooks";
 import * as booksService from "../../services/booksService";
 import { useUser } from "../useUser";
@@ -9,6 +9,33 @@ jest.mock("../../services/booksService");
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 const mockBooksService = booksService as jest.Mocked<typeof booksService>;
+
+const mockBooksWithFavorites = [
+  {
+    id: '1',
+    title: 'Test Book',
+    author: 'Test Author',
+    genre: 'fiction',
+    read: 'W trakcie' as const,
+    rating: 8,
+    overallPages: 300,
+    readPages: 150,
+    isFavorite: true,
+    createdAt: '2023-01-01T00:00:00Z',
+  },
+  // Add more as needed
+];
+
+// At top of file, mock the service
+jest.mock('../../services/booksService', () => ({
+  getUserBooksData: jest.fn(),
+  addBook: jest.fn(),
+  deleteBook: jest.fn(),
+  updateBook: jest.fn(),
+}));
+
+const mockGetUserBooksData = require('../../services/booksService').getUserBooksData;
+const mockUpdateBook = require('../../services/booksService').updateBook;
 
 describe("useBooks", () => {
   const mockUser = { 
@@ -50,6 +77,9 @@ describe("useBooks", () => {
       user: mockUser,
       loading: false,
     });
+    jest.clearAllMocks();
+    (mockGetUserBooksData as jest.Mock).mockResolvedValue(mockBooksWithFavorites);
+    (mockUpdateBook as jest.Mock).mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -144,5 +174,32 @@ describe("useBooks", () => {
 
     expect(result.current.error).toBeDefined();
     expect(result.current.loading).toBe(false);
+  });
+
+  it('toggles favorite status correctly', async () => {
+    const { result } = renderHook(() => useBooks());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const bookId = result.current.books[0].id;
+    const currentFavorite = result.current.books[0].isFavorite || false;
+
+    await act(async () => {
+      await result.current.handleToggleFavorite(bookId, currentFavorite);
+    });
+
+    expect(mockUpdateBook).toHaveBeenCalledWith(bookId, { isFavorite: !currentFavorite });
+    const updatedBooks = result.current.books;
+    const updatedBook = updatedBooks.find(b => b.id === bookId);
+    expect(updatedBook?.isFavorite).toBe(!currentFavorite);
+  });
+
+  it('fetches books with isFavorite field', async () => {
+    mockGetUserBooksData.mockResolvedValue(mockBooksWithFavorites);
+
+    const { result } = renderHook(() => useBooks());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.books[0].isFavorite).toBeDefined();
+    expect(result.current.books[0].isFavorite).toBe(true);
   });
 });
