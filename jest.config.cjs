@@ -14,7 +14,7 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 module.exports = {
   testEnvironment: 'jest-environment-jsdom',
   preset: 'ts-jest',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js', 'jest-fetch-mock/setupJest'],
 
   transform: {
     ...tsJestTransformCfg,
