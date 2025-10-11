@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import type { Book, BookStatus } from "../types/Book";
 import type { ErrorType } from "../types/Error";
 import { getNextBookStatus } from "../constants/bookStatus";
+import type { BookToAdd } from "../types/Book";
 
 import {
   getUserBooksData,
@@ -125,7 +126,7 @@ export const useBooks = () => {
         ...book,
         userId: userId,
         createdAt: createdAt,
-      });
+      } as BookToAdd);
 
       if (newBookId) {
         setBooks(prevBooks => [
@@ -161,7 +162,7 @@ export const useBooks = () => {
     handleBookUpdate,
     handleStatusChange,
     handleBookSubmit,
-    handleToggleFavorite,
     refetch: fetchBooks,
+    handleToggleFavorite,
   };
 };
