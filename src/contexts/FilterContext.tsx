@@ -7,12 +7,12 @@ export type TabType = 'filters' | 'sort' | 'stats';
 
 // Filter-State
 export interface FilterState {
-  status: BookStatus | "all";
-  genre: string | "all";
+  status: BookStatus | 'all';
+  genre: string | 'all';
   ratingRange: [number, number];
   pagesRange: [number, number];
-  sortBy: "title" | "author" | "rating" | "pages" | "dateAdded" | "status";
-  sortOrder: "asc" | "desc";
+  sortBy: 'title' | 'author' | 'rating' | 'pages' | 'dateAdded' | 'status';
+  sortOrder: 'asc' | 'desc';
   showOnlyFavorites: boolean;
   author: string;
 }
@@ -29,19 +29,20 @@ export interface AppState {
 
 // Action-Typen
 export type FilterAction =
-  | { type: 'SET_FILTER'; field: keyof FilterState; value: any }
+  | { type: 'SET_FILTER'; field: keyof FilterState; value: unknown }
   | { type: 'SET_TAB'; tab: TabType }
   | { type: 'TOGGLE_EXPANDED' }
   | { type: 'SET_EXPANDED'; value: boolean }
   | { type: 'TOGGLE_TAB'; tab: TabType }
   | { type: 'TOGGLE_ADVANCED_FILTERS' }
-  | { type: 'RESET_FILTERS'; initialSortBy?: string; initialSortOrder?: 'asc' | 'desc' };
+  | { type: 'RESET_FILTERS'; initialSortBy?: string; initialSortOrder?: 'asc' | 'desc' }
+  | { type: 'SET_FILTER_VALUE'; payload: { filterType: keyof FilterState; value: unknown } };
 
 // Hilfsfunktion zur Berechnung der aktiven Filter
 export const getActiveFiltersCount = (filters: FilterState): number => {
   let count = 0;
-  if (filters.status !== "all") count++;
-  if (filters.genre !== "all") count++;
+  if (filters.status !== 'all') count++;
+  if (filters.genre !== 'all') count++;
   if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10) count++;
   if (filters.pagesRange[0] > 0 || filters.pagesRange[1] < 5000) count++;
   if (filters.showOnlyFavorites) count++;
@@ -51,36 +52,36 @@ export const getActiveFiltersCount = (filters: FilterState): number => {
 
 // Reducer-Funktion
 export const filterReducer = (state: AppState, action: FilterAction): AppState => {
-  console.log('action', action);
   switch (action.type) {
-    case 'SET_FILTER':
+    case 'SET_FILTER': {
       const newFilters = {
         ...state.filters,
-        [action.field]: action.value
+        [action.field]: action.value,
       };
       return {
         ...state,
         filters: newFilters,
-        activeFilters: getActiveFiltersCount(newFilters)
+        activeFilters: getActiveFiltersCount(newFilters),
       };
+    }
     
     case 'SET_TAB':
       return {
         ...state,
         activeTab: action.tab,
-        lastOpenTab: action.tab
+        lastOpenTab: action.tab,
       };
     
     case 'TOGGLE_EXPANDED':
       return {
         ...state,
-        expanded: !state.expanded
+        expanded: !state.expanded,
       };
     
     case 'SET_EXPANDED':
       return {
         ...state,
-        expanded: action.value
+        expanded: action.value,
       };
       
     case 'TOGGLE_TAB':
@@ -89,7 +90,7 @@ export const filterReducer = (state: AppState, action: FilterAction): AppState =
         // Panel umschalten (ein/ausklappen)
         return {
           ...state,
-          expanded: !state.expanded
+          expanded: !state.expanded,
         };
       } 
       // Wenn ein anderer Tab angeklickt wird
@@ -99,31 +100,37 @@ export const filterReducer = (state: AppState, action: FilterAction): AppState =
           activeTab: action.tab,
           lastOpenTab: action.tab,
           // Wenn das Panel geschlossen ist, öffnen
-          expanded: state.expanded ? state.expanded : true
+          expanded: state.expanded ? state.expanded : true,
         };
       }
     
     case 'TOGGLE_ADVANCED_FILTERS':
       return {
         ...state,
-        showAdvancedFilters: !state.showAdvancedFilters
+        showAdvancedFilters: !state.showAdvancedFilters,
       };
     
-    case 'RESET_FILTERS':
+    case 'RESET_FILTERS': {
       return {
         ...state,
         filters: {
-          status: "all",
-          genre: "all",
+          status: 'all',
+          genre: 'all',
           ratingRange: [0, 10],
           pagesRange: [0, 5000],
-          sortBy: action.initialSortBy as any || state.filters.sortBy,
+          sortBy: action.initialSortBy as 'title' | 'author' | 'rating' | 'pages' | 'dateAdded' | 'status',
           sortOrder: action.initialSortOrder || state.filters.sortOrder,
           showOnlyFavorites: false,
-          author: ''
+          author: '',
         },
-        activeFilters: 0
+        activeFilters: 0,
       };
+    }
+    
+    case 'SET_FILTER_VALUE': {
+      const { filterType, value } = action.payload;
+      return { ...state, [filterType]: value };
+    }
     
     default:
       return state;
@@ -150,26 +157,26 @@ interface FilterProviderProps {
 // Provider-Komponente
 export const FilterProvider: React.FC<FilterProviderProps> = ({ 
   children, 
-  initialSortBy = "status",
-  initialSortOrder = "asc",
-  isFilterOpen = false
+  initialSortBy = 'status',
+  initialSortOrder = 'asc',
+  isFilterOpen = false,
 }) => {
   const initialState: AppState = {
     filters: {
-      status: "all",
-      genre: "all",
+      status: 'all',
+      genre: 'all',
       ratingRange: [0, 10],
       pagesRange: [0, 5000],
-      sortBy: initialSortBy as "title" | "author" | "rating" | "pages" | "dateAdded" | "status",
+      sortBy: initialSortBy as 'title' | 'author' | 'rating' | 'pages' | 'dateAdded' | 'status',
       sortOrder: initialSortOrder,
       showOnlyFavorites: false,
-      author: ''
+      author: '',
     },
     activeTab: 'filters',
     lastOpenTab: null,
     expanded: isFilterOpen,
     showAdvancedFilters: false,
-    activeFilters: 0
+    activeFilters: 0,
   };
 
   const [state, dispatch] = useReducer(filterReducer, initialState);
