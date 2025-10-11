@@ -7,8 +7,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { Link, useLocation } from 'react-router-dom';
-import { useUser } from '../../hooks/useUser';
-// import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 interface MobileDrawerProps {
   open: boolean;
@@ -16,7 +15,7 @@ interface MobileDrawerProps {
 }
 
 const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
-  const { user } = useUser();
+  const { user } = useAuth();
   // const { logout } = useAuth(); // This line was removed as per the edit hint
   const location = useLocation();
 

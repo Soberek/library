@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { useFilterContext } from '../../contexts/FilterContext';
+import { useFilterStore } from '../../stores';
+import type { FilterState } from '../../stores';
 import {
   Box, Paper, Typography, FormControl, InputLabel, Select, MenuItem, Chip,
   IconButton, Collapse, Slider, FormControlLabel, Switch, TextField,
@@ -21,7 +22,6 @@ import { GENRES } from '../../constants/genres';
 import type { Book, BookStatus } from '../../types/Book';
 import StatisticsGrid from '../statistics/StatisticsGrid';
 import MetricsGrid from '../statistics/MetricsGrid';
-import type { FilterState } from '../../contexts/FilterContext';
 
 interface BooksStats {
   total: number;
@@ -41,7 +41,6 @@ interface AdditionalStats {
 
 interface FilterStatisticsPanelProps {
   books: Book[];
-  onFilterChange: (filteredBooks: Book[]) => void;
   onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
   isFilterOpen: boolean;
   onFilterToggle: () => void;
@@ -51,22 +50,32 @@ interface FilterStatisticsPanelProps {
 
 const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   books, 
-  onFilterChange, 
   onSortChange,
   isFilterOpen, 
   onFilterToggle, 
   booksStats, 
   additionalStats,
 }) => {
-  const { state, dispatch } = useFilterContext();
-  const { filters, activeTab, expanded, showAdvancedFilters, activeFilters } = state;
+  // Zustand Store
+  const filters = useFilterStore((state) => state.filters);
+  const activeTab = useFilterStore((state) => state.activeTab);
+  const expanded = useFilterStore((state) => state.expanded);
+  const showAdvancedFilters = useFilterStore((state) => state.showAdvancedFilters);
+  const activeFilters = useFilterStore((state) => state.activeFilters);
+  
+  const setFilter = useFilterStore((state) => state.setFilter);
+  const toggleTab = useFilterStore((state) => state.toggleTab);
+  const setExpanded = useFilterStore((state) => state.setExpanded);
+  const toggleAdvancedFiltersAction = useFilterStore((state) => state.toggleAdvancedFilters);
+  const resetFilters = useFilterStore((state) => state.resetFilters);
+  const toggleExpandedAction = useFilterStore((state) => state.toggleExpanded);
   
   useEffect(() => {
-    dispatch({ type: 'SET_EXPANDED', value: isFilterOpen });
-  }, [isFilterOpen, dispatch]);
+    setExpanded(isFilterOpen);
+  }, [isFilterOpen, setExpanded]);
 
   const handleTabChange = (_: React.SyntheticEvent, newTab: string) => {
-    dispatch({ type: 'TOGGLE_TAB', tab: newTab as 'filters' | 'sort' | 'stats' });
+    toggleTab(newTab as 'filters' | 'sort' | 'stats');
     
     if (activeTab === newTab) {
       onFilterToggle();
@@ -76,113 +85,24 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   };
 
   const handleFilterChange = (field: keyof FilterState, value: unknown) => {
-    dispatch({ type: 'SET_FILTER', field, value });
+    setFilter(field, value);
   };
 
   const clearFilters = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch({ type: 'RESET_FILTERS' });
-    onFilterChange(books);
+    resetFilters();
   };
 
   const toggleAdvancedFilters = () => {
-    dispatch({ type: 'TOGGLE_ADVANCED_FILTERS' });
+    toggleAdvancedFiltersAction();
   };
-
-  const applyFilters = React.useCallback(() => {
-    let filtered = [...books];
-
-    if (filters.status !== 'all') {
-      filtered = filtered.filter((book) => book.read === filters.status);
-    }
-
-    if (filters.genre !== 'all') {
-      filtered = filtered.filter((book) => book.genre === filters.genre);
-    }
-
-    filtered = filtered.filter(
-      (book) =>
-        book.rating >= filters.ratingRange[0] &&
-        book.rating <= filters.ratingRange[1],
-    );
-
-    filtered = filtered.filter(
-      (book) =>
-        book.overallPages >= filters.pagesRange[0] &&
-        book.overallPages <= filters.pagesRange[1],
-    );
-
-    if (filters.showOnlyFavorites) {
-      filtered = filtered.filter((book) => book.isFavorite === true);
-    }
-
-    if (filters.author.trim()) {
-      const searchAuthor = filters.author.toLowerCase();
-      filtered = filtered.filter((book) => book.author.toLowerCase().includes(searchAuthor));
-    }
-
-    filtered.sort((a, b) => {
-      if (filters.sortBy === 'status') {
-        const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-        const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-        if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-      }
-
-      switch (filters.sortBy) {
-        case 'title': {
-          const aValue = a.title.toLowerCase();
-          const bValue = b.title.toLowerCase();
-          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-        }
-        case 'author': {
-          const aValue = a.author.toLowerCase();
-          const bValue = b.author.toLowerCase();
-          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-        }
-        case 'rating': {
-          const aValue = a.rating;
-          const bValue = b.rating;
-          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-        }
-        case 'pages': {
-          const aValue = a.overallPages;
-          const bValue = b.overallPages;
-          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-        }
-        case 'dateAdded': {
-          const aStatusIndexDate = BOOK_STATUSES.indexOf(a.read as BookStatus);
-          const bStatusIndexDate = BOOK_STATUSES.indexOf(b.read as BookStatus);
-          if (aStatusIndexDate !== bStatusIndexDate) return aStatusIndexDate - bStatusIndexDate;
-          const aValue = new Date(a.createdAt || 0).getTime();
-          const bValue = new Date(b.createdAt || 0).getTime();
-          return filters.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-        }
-        case 'status': {
-          const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-          const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-          return filters.sortOrder === 'asc' ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
-        }
-        default:
-          return 0;
-      }
-    });
-
-    onFilterChange(filtered);
-  }, [books, filters, onFilterChange]);
   
+  // Rufe onSortChange nur bei Sort-Änderungen auf (optional)
   useEffect(() => {
     if (onSortChange) {
       onSortChange(filters.sortBy, filters.sortOrder);
     }
   }, [filters.sortBy, filters.sortOrder, onSortChange]);
-
-  useEffect(() => {
-    applyFilters();
-    
-    if (onSortChange) {
-      onSortChange(filters.sortBy, filters.sortOrder);
-    }
-  }, [filters, books, applyFilters, onSortChange]);
 
   const genreOptions = Object.entries(GENRES).map(([value, label]) => ({
     value, label,
@@ -334,7 +254,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
             onClick={() => {
               if (activeTab === 'filters') {
                 onFilterToggle();
-                dispatch({ type: 'TOGGLE_EXPANDED' });
+                toggleExpandedAction();
               }
             }}
           />
@@ -357,7 +277,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
             onClick={() => {
               if (activeTab === 'sort') {
                 onFilterToggle();
-                dispatch({ type: 'TOGGLE_EXPANDED' });
+                toggleExpandedAction();
               }
             }}
           />
@@ -380,7 +300,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
             onClick={() => {
               if (activeTab === 'stats') {
                 onFilterToggle();
-                dispatch({ type: 'TOGGLE_EXPANDED' });
+                toggleExpandedAction();
               }
             }}
           />
@@ -465,7 +385,7 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                       fullWidth
                       size="small"
                       label="Autor"
-                      value={filters.author}
+                      value={filters.author || ''}
                       onChange={(e) => handleFilterChange('author', e.target.value)}
                       variant="outlined"
                       InputProps={{
@@ -478,7 +398,10 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                           <InputAdornment position="end">
                             <IconButton 
                               size="small" 
-                              onClick={() => handleFilterChange('author', '')}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFilterChange('author', '');
+                              }}
                               edge="end"
                             >
                               <ClearIcon fontSize="small" />

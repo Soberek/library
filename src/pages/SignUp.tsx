@@ -2,7 +2,7 @@ import React from 'react';
 import { auth } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useUser } from '../hooks/useUser';
+import { useAuth } from '../hooks/useAuth';
 import {
   Box,
   Button,
@@ -28,7 +28,7 @@ const SignUp: React.FC = () => {
     clearErrors,
   } = useForm<FormData>();
   const [error, setLocalError] = React.useState<string | null>(null);
-  const authContext = useUser();
+  const authContext = useAuth();
   const navigate = useNavigate();
 
   if (authContext.user?.uid) {

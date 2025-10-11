@@ -16,15 +16,15 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Badge from '@mui/material/Badge';
-import { useUser } from '../../hooks/useUser';
-import { useBooks } from '../../hooks/useBooks';
+import { useAuth } from '../../hooks/useAuth';
+import { useBooksQuery } from '../../hooks/useBooksQuery';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
 
 const UserMenu: React.FC = () => {
-  const authContext = useUser();
-  const { booksStats } = useBooks();
+  const authContext = useAuth();
+  const { booksStats } = useBooksQuery();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

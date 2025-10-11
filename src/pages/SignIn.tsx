@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, Link as RouterLink, Navigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
-import { useUser } from '../hooks/useUser';
+import { useAuth } from '../hooks/useAuth';
 import {
   Box,
   Button,
@@ -50,7 +50,7 @@ const SignIn: React.FC = () => {
     }
   };
 
-  const userContext = useUser();
+  const userContext = useAuth();
 
   if (userContext.user) {
     return <Navigate to="/" replace />;
