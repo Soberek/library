@@ -137,15 +137,18 @@ export default function BookTable({
                   <div className="flex gap-1">
                     <Tooltip title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
                       <IconButton 
-                        onClick={() => { console.log('Toggle favorite for', book.id, 'current:', isFavorite); handleToggleFavorite(book.id, isFavorite); }} 
+                        onClick={() => handleToggleFavorite(book.id, isFavorite)} 
                         size="small" 
                         sx={{ 
                           color: isFavorite ? 'red' : 'gray', 
                           '&:hover': { color: isFavorite ? 'darkred' : 'darkgray' },
-                          '& .MuiSvgIcon-root': { fill: isFavorite ? 'red' : 'none' }  // Ensure fill for filled icon
                         }}
                       >
-                        {isFavorite ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />}
+                        {isFavorite ? (
+                          <BookmarkIcon fontSize="small" sx={{ color: 'red' }} />
+                        ) : (
+                          <BookmarkIcon fontSize="small" sx={{ color: 'gray' }} />
+                        )}
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Share">
