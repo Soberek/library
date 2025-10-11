@@ -1,5 +1,5 @@
-import React from "react";
-import { Card, CardContent, Typography, Box, Chip, Zoom } from "@mui/material";
+import React from 'react';
+import { Card, CardContent, Typography, Box, Chip, Zoom } from '@mui/material';
 
 interface StatCardProps {
   title: string;
@@ -34,49 +34,49 @@ const StatCard: React.FC<StatCardProps> = ({
       <Card
         sx={{
           background: color,
-          color: "white",
+          color: 'white',
           borderRadius: 2,
-          boxShadow: `0 4px 16px ${color.split("(")[1]?.split(",")[0] || "rgba(102, 126, 234, 0.25)"}`,
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          position: "relative",
-          overflow: "hidden",
+          boxShadow: `0 4px 16px ${color.split('(')[1]?.split(',')[0] || 'rgba(102, 126, 234, 0.25)'}`,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          overflow: 'hidden',
           minHeight: 100,
-          "&:hover": { 
-            transform: "translateY(-2px) scale(1.01)",
-            boxShadow: `0 8px 24px ${color.split("(")[1]?.split(",")[0] || "rgba(102, 126, 234, 0.35)"}`,
+          '&:hover': { 
+            transform: 'translateY(-2px) scale(1.01)',
+            boxShadow: `0 8px 24px ${color.split('(')[1]?.split(',')[0] || 'rgba(102, 126, 234, 0.35)'}`,
           },
-          "&::before": {
+          '&::before': {
             content: '""',
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            background: "linear-gradient(45deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%)",
-            pointerEvents: "none",
+            background: 'linear-gradient(45deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%)',
+            pointerEvents: 'none',
           },
         }}
       >
-        <CardContent sx={{ textAlign: "center", py: 1.5, px: 1.5, position: "relative", zIndex: 1 }}>
+        <CardContent sx={{ textAlign: 'center', py: 1.5, px: 1.5, position: 'relative', zIndex: 1 }}>
           <Box
             sx={{
               width: 32,
               height: 32,
-              borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mx: "auto",
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
               mb: 1,
             }}
           >
             {icon}
           </Box>
-          <Typography variant="h4" fontWeight="800" sx={{ mb: 0.25, textShadow: "0 1px 3px rgba(0,0,0,0.3)", lineHeight: 1.1 }}>
+          <Typography variant="h4" fontWeight="800" sx={{ mb: 0.25, textShadow: '0 1px 3px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>
             {value}
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 600, fontSize: "0.8rem", lineHeight: 1.2 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
             {title}
           </Typography>
           {chipLabel && (
@@ -85,12 +85,12 @@ const StatCard: React.FC<StatCardProps> = ({
               size="small"
               sx={{
                 mt: 0.25,
-                bgcolor: "rgba(255, 255, 255, 0.25)",
-                color: "white",
+                bgcolor: 'rgba(255, 255, 255, 0.25)',
+                color: 'white',
                 fontWeight: 600,
-                fontSize: "0.7rem",
+                fontSize: '0.7rem',
                 height: 18,
-                "& .MuiChip-label": {
+                '& .MuiChip-label': {
                   px: 0.5,
                 },
               }}
