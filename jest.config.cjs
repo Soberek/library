@@ -1,4 +1,4 @@
-const { createDefaultPreset } = require("ts-jest");
+const { createDefaultPreset } = require('ts-jest');
 
 const tsJestTransformCfg = createDefaultPreset().transform;
 
@@ -12,9 +12,9 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 // };
 
 module.exports = {
-  testEnvironment: "jest-environment-jsdom",
-  preset: "ts-jest",
-  setupFilesAfterEnv: ["<rootDir>/src/setupTests.js"],
+  testEnvironment: 'jest-environment-jsdom',
+  preset: 'ts-jest',
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
 
   transform: {
     ...tsJestTransformCfg,
@@ -22,11 +22,11 @@ module.exports = {
   },
   
   globals: {
-    "ts-jest": {
+    'ts-jest': {
       useESM: true,
     },
   },
   
-  extensionsToTreatAsEsm: [".ts", ".tsx"],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   
 };
