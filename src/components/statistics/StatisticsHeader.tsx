@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const StatisticsHeader: React.FC = () => {
   // Add safety check for SSR
