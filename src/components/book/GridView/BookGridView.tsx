@@ -1,8 +1,8 @@
-import React from 'react';
-import { Box, Grid, Zoom, Fade } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import BookCard from './BookCard';
-import type { Book, BookStatus } from '../../../types/Book';
+import React from "react";
+import { Box, Grid, Zoom, Fade } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import BookCard from "./BookCard";
+import type { Book, BookStatus } from "../../../types/Book";
 
 interface BookGridViewProps {
   books: Book[];
@@ -16,20 +16,20 @@ interface BookGridViewProps {
 
 // Styled Components
 const GridContainer = styled(Box)(({ theme }) => ({
-  width: '100%',
-  minHeight: '400px',
-  position: 'relative',
+  width: "100%",
+  minHeight: "400px",
+  position: "relative",
   padding: theme.spacing(1),
 }));
 
 const CardWrapper = styled(Box)(() => ({
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'relative',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  '&:hover': {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  position: "relative",
+  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  "&:hover": {
     zIndex: 2,
   },
 }));
@@ -49,17 +49,17 @@ export const BookGridView: React.FC<BookGridViewProps> = ({
 }) => {
   return (
     <GridContainer>
-      <Grid 
-        container 
+      <Grid
+        container
         spacing={1}
         sx={{
           margin: 0,
-          width: '100%',
+          width: "100%",
         }}
       >
         {books.map((book, index) => (
-          <Grid 
-            item 
+          <Grid
+            item
             key={book.id}
             xs={12}
             sm={6}
@@ -67,27 +67,27 @@ export const BookGridView: React.FC<BookGridViewProps> = ({
             lg={3}
             xl={2}
             sx={{
-              display: 'flex',
+              display: "flex",
               padding: { xs: 1, sm: 1.5, md: 2 },
             }}
           >
-            <Zoom 
-              in={true} 
+            <Zoom
+              in={true}
               timeout={500}
-              style={{ 
+              style={{
                 transitionDelay: `${Math.min(index * 50, 800)}ms`,
-                width: '100%',
+                width: "100%",
               }}
             >
               <CardWrapper>
-                <Fade 
-                  in={true} 
+                <Fade
+                  in={true}
                   timeout={1000}
-                  style={{ 
+                  style={{
                     transitionDelay: `${Math.min(index * 50 + 100, 900)}ms`,
                   }}
                 >
-                  <Box sx={{ width: '100%', height: '100%' }}>
+                  <Box sx={{ width: "100%", height: "100%" }}>
                     <BookCard
                       book={book}
                       onEdit={onEdit}

@@ -69,6 +69,22 @@ export const filterByAuthor = (books: Book[], author: string): Book[] => {
 };
 
 /**
+ * Filters books based on search term (searches in title and author, case-insensitive)
+ */
+export const filterBySearchTerm = (
+  books: Book[],
+  searchTerm: string,
+): Book[] => {
+  if (!searchTerm.trim()) return books;
+  const term = searchTerm.toLowerCase();
+  return books.filter(
+    (book) =>
+      book.title.toLowerCase().includes(term) ||
+      book.author.toLowerCase().includes(term),
+  );
+};
+
+/**
  * Comparison function for sorting by title
  */
 const compareByTitle = (a: Book, b: Book, order: "asc" | "desc"): number => {
@@ -229,6 +245,9 @@ export const applyFiltersAndSort = (
   filters: FilterState,
 ): Book[] => {
   let filtered = [...books];
+
+  // Apply search filter first (highest priority)
+  filtered = filterBySearchTerm(filtered, filters.searchTerm);
 
   // Apply filters in sequence
   filtered = filterByStatus(filtered, filters.status);

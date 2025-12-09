@@ -1,7 +1,7 @@
-import React from 'react';
-import { Box, Paper } from '@mui/material';
-import BookTable from './BookTable';
-import type { Book, BookStatus } from '../../../types/Book';
+import React from "react";
+import { Box, Paper } from "@mui/material";
+import BookTable from "./BookTable";
+import type { Book, BookStatus } from "../../../types/Book";
 
 interface BookTableViewProps {
   books: Book[];
@@ -25,14 +25,14 @@ export const BookTableView: React.FC<BookTableViewProps> = ({
   onRatingChange = () => {},
 }) => {
   return (
-    <Box sx={{ width: '100%' }}>
-      <Paper 
+    <Box sx={{ width: "100%" }}>
+      <Paper
         elevation={0}
-        sx={{ 
+        sx={{
           borderRadius: 2,
-          overflow: 'hidden',
-          border: '1px solid',
-          borderColor: 'divider',
+          overflow: "hidden",
+          border: "1px solid",
+          borderColor: "divider",
         }}
       >
         <BookTable
@@ -49,4 +49,3 @@ export const BookTableView: React.FC<BookTableViewProps> = ({
 };
 
 export default BookTableView;
-

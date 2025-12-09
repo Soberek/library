@@ -1,11 +1,11 @@
-import React from 'react';
-import { Grid } from '@mui/material';
-import StatCard from './StatCard';
-import BookIcon from '@mui/icons-material/Book';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PauseCircleIcon from '@mui/icons-material/PauseCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import React from "react";
+import { Grid } from "@mui/material";
+import StatCard from "./StatCard";
+import BookIcon from "@mui/icons-material/Book";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 
 interface BooksStats {
   total: number;
@@ -24,7 +24,10 @@ interface StatisticsGridProps {
   additionalStats: AdditionalStats;
 }
 
-const StatisticsGrid: React.FC<StatisticsGridProps> = ({ booksStats, additionalStats }) => {
+const StatisticsGrid: React.FC<StatisticsGridProps> = ({
+  booksStats,
+  additionalStats,
+}) => {
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       <Grid item xs={6} sm={2.4}>

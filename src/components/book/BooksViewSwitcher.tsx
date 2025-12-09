@@ -1,11 +1,11 @@
-import React from 'react';
-import { BookGridView } from './GridView';
-import { BookTableView } from './TableView';
-import type { Book, BookStatus } from '../../types/Book';
+import React from "react";
+import { BookGridView } from "./GridView";
+import { BookTableView } from "./TableView";
+import type { Book, BookStatus } from "../../types/Book";
 
 interface BooksViewSwitcherProps {
   books: Book[];
-  viewMode: 'cards' | 'table';
+  viewMode: "cards" | "table";
   onEdit: (bookId: string) => void;
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
@@ -28,7 +28,7 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
   onShare,
   onRatingChange,
 }) => {
-  if (viewMode === 'table') {
+  if (viewMode === "table") {
     return (
       <BookTableView
         books={books}
