@@ -1,21 +1,17 @@
-import React from 'react';
-import { BookGridView } from './GridView';
-import { BookTableView } from './TableView';
-import type { Book, BookStatus } from '../../types/Book';
+import React from "react";
+import { BookGridView } from "./GridView";
+import { BookTableView } from "./TableView";
+import type { Book, BookStatus } from "../../types/Book";
 
 interface BooksViewSwitcherProps {
   books: Book[];
-  viewMode: 'cards' | 'table';
+  viewMode: "cards" | "table";
   onEdit: (bookId: string) => void;
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onShare?: (book: Book) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
-  // Pagination props
-  hasNextPage?: boolean;
-  fetchNextPage?: () => void;
-  isFetchingNextPage?: boolean;
 }
 
 /**
@@ -31,11 +27,8 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
   onToggleFavorite,
   onShare,
   onRatingChange,
-  hasNextPage,
-  fetchNextPage,
-  isFetchingNextPage,
 }) => {
-  if (viewMode === 'table') {
+  if (viewMode === "table") {
     return (
       <BookTableView
         books={books}
@@ -44,9 +37,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
         onStatusChange={onStatusChange}
         onToggleFavorite={onToggleFavorite}
         onRatingChange={onRatingChange}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
       />
     );
   }
@@ -60,10 +50,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
       onToggleFavorite={onToggleFavorite}
       onShare={onShare}
       onRatingChange={onRatingChange}
-      hasNextPage={hasNextPage}
-      fetchNextPage={fetchNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      enableInfiniteScroll={false}
     />
   );
 };
