@@ -68,6 +68,11 @@ export const filterByAuthor = (books: Book[], author: string): Book[] => {
  * Comparison function for sorting by title
  */
 const compareByTitle = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+  // Priorytet statusu
+  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+  
   const aValue = a.title.toLowerCase();
   const bValue = b.title.toLowerCase();
   return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
@@ -77,6 +82,11 @@ const compareByTitle = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
  * Comparison function for sorting by author
  */
 const compareByAuthor = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+  // Priorytet statusu
+  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+  
   const aValue = a.author.toLowerCase();
   const bValue = b.author.toLowerCase();
   return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
@@ -86,6 +96,11 @@ const compareByAuthor = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
  * Comparison function for sorting by rating
  */
 const compareByRating = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+  // Priorytet statusu
+  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+  
   const aValue = a.rating;
   const bValue = b.rating;
   return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
@@ -95,6 +110,11 @@ const compareByRating = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
  * Comparison function for sorting by page count
  */
 const compareByPages = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+  // Priorytet statusu
+  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
+  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
+  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+  
   const aValue = a.overallPages;
   const bValue = b.overallPages;
   return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);

@@ -29,7 +29,7 @@ const Books: React.FC = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
-  } = useBooksQuery(true);
+  } = useBooksQuery(false);
   
   const filteredBooks = useBookFilters(books);
   
