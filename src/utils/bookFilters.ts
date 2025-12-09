@@ -1,12 +1,15 @@
-import { BOOK_STATUSES } from '../constants/bookStatus';
-import type { Book, BookStatus } from '../types/Book';
-import type { FilterState } from '../stores/filterStore';
+import { BOOK_STATUSES } from "../constants/bookStatus";
+import type { Book, BookStatus } from "../types/Book";
+import type { FilterState } from "../stores/filterStore";
 
 /**
  * Filters books based on status
  */
-export const filterByStatus = (books: Book[], status: BookStatus | 'all'): Book[] => {
-  if (status === 'all') return books;
+export const filterByStatus = (
+  books: Book[],
+  status: BookStatus | "all",
+): Book[] => {
+  if (status === "all") return books;
   return books.filter((book) => book.read === status);
 };
 
@@ -14,7 +17,7 @@ export const filterByStatus = (books: Book[], status: BookStatus | 'all'): Book[
  * Filters books based on genre
  */
 export const filterByGenre = (books: Book[], genre: string): Book[] => {
-  if (genre === 'all') return books;
+  if (genre === "all") return books;
   return books.filter((book) => book.genre === genre);
 };
 
@@ -23,11 +26,10 @@ export const filterByGenre = (books: Book[], genre: string): Book[] => {
  */
 export const filterByRating = (
   books: Book[],
-  ratingRange: [number, number]
+  ratingRange: [number, number],
 ): Book[] => {
   return books.filter(
-    (book) =>
-      book.rating >= ratingRange[0] && book.rating <= ratingRange[1]
+    (book) => book.rating >= ratingRange[0] && book.rating <= ratingRange[1],
   );
 };
 
@@ -36,19 +38,21 @@ export const filterByRating = (
  */
 export const filterByPages = (
   books: Book[],
-  pagesRange: [number, number]
+  pagesRange: [number, number],
 ): Book[] => {
   return books.filter(
     (book) =>
-      book.overallPages >= pagesRange[0] &&
-      book.overallPages <= pagesRange[1]
+      book.overallPages >= pagesRange[0] && book.overallPages <= pagesRange[1],
   );
 };
 
 /**
  * Filters books to show only favorites
  */
-export const filterByFavorites = (books: Book[], showOnlyFavorites: boolean): Book[] => {
+export const filterByFavorites = (
+  books: Book[],
+  showOnlyFavorites: boolean,
+): Book[] => {
   if (!showOnlyFavorites) return books;
   return books.filter((book) => book.isFavorite === true);
 };
@@ -60,86 +64,122 @@ export const filterByAuthor = (books: Book[], author: string): Book[] => {
   if (!author.trim()) return books;
   const searchAuthor = author.toLowerCase();
   return books.filter((book) =>
-    book.author.toLowerCase().includes(searchAuthor)
+    book.author.toLowerCase().includes(searchAuthor),
   );
 };
 
 /**
  * Comparison function for sorting by title
  */
-const compareByTitle = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+const compareByTitle = (a: Book, b: Book, order: "asc" | "desc"): number => {
   // Priorytet statusu
   const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
   const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
   if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-  
+
   const aValue = a.title.toLowerCase();
   const bValue = b.title.toLowerCase();
-  return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+  return order === "asc"
+    ? aValue > bValue
+      ? 1
+      : -1
+    : aValue < bValue
+      ? 1
+      : -1;
 };
 
 /**
  * Comparison function for sorting by author
  */
-const compareByAuthor = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+const compareByAuthor = (a: Book, b: Book, order: "asc" | "desc"): number => {
   // Priorytet statusu
   const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
   const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
   if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-  
+
   const aValue = a.author.toLowerCase();
   const bValue = b.author.toLowerCase();
-  return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+  return order === "asc"
+    ? aValue > bValue
+      ? 1
+      : -1
+    : aValue < bValue
+      ? 1
+      : -1;
 };
 
 /**
  * Comparison function for sorting by rating
  */
-const compareByRating = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+const compareByRating = (a: Book, b: Book, order: "asc" | "desc"): number => {
   // Priorytet statusu
   const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
   const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
   if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-  
+
   const aValue = a.rating;
   const bValue = b.rating;
-  return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+  return order === "asc"
+    ? aValue > bValue
+      ? 1
+      : -1
+    : aValue < bValue
+      ? 1
+      : -1;
 };
 
 /**
  * Comparison function for sorting by page count
  */
-const compareByPages = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+const compareByPages = (a: Book, b: Book, order: "asc" | "desc"): number => {
   // Priorytet statusu
   const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
   const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
   if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-  
+
   const aValue = a.overallPages;
   const bValue = b.overallPages;
-  return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+  return order === "asc"
+    ? aValue > bValue
+      ? 1
+      : -1
+    : aValue < bValue
+      ? 1
+      : -1;
 };
 
 /**
  * Comparison function for sorting by date added
  */
-const compareByDateAdded = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+const compareByDateAdded = (
+  a: Book,
+  b: Book,
+  order: "asc" | "desc",
+): number => {
   const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
   const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
   if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-  
+
   const aValue = new Date(a.createdAt || 0).getTime();
   const bValue = new Date(b.createdAt || 0).getTime();
-  return order === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+  return order === "asc"
+    ? aValue > bValue
+      ? 1
+      : -1
+    : aValue < bValue
+      ? 1
+      : -1;
 };
 
 /**
  * Comparison function for sorting by status
  */
-const compareByStatus = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
+const compareByStatus = (a: Book, b: Book, order: "asc" | "desc"): number => {
   const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
   const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-  return order === 'asc' ? aStatusIndex - bStatusIndex : bStatusIndex - aStatusIndex;
+  return order === "asc"
+    ? aStatusIndex - bStatusIndex
+    : bStatusIndex - aStatusIndex;
 };
 
 /**
@@ -147,31 +187,31 @@ const compareByStatus = (a: Book, b: Book, order: 'asc' | 'desc'): number => {
  */
 export const sortBooks = (
   books: Book[],
-  sortBy: FilterState['sortBy'],
-  sortOrder: 'asc' | 'desc'
+  sortBy: FilterState["sortBy"],
+  sortOrder: "asc" | "desc",
 ): Book[] => {
   const sorted = [...books];
 
   sorted.sort((a, b) => {
     // Handle status priority first if sorting by status
-    if (sortBy === 'status') {
+    if (sortBy === "status") {
       const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
       const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
       if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
     }
 
     switch (sortBy) {
-      case 'title':
+      case "title":
         return compareByTitle(a, b, sortOrder);
-      case 'author':
+      case "author":
         return compareByAuthor(a, b, sortOrder);
-      case 'rating':
+      case "rating":
         return compareByRating(a, b, sortOrder);
-      case 'pages':
+      case "pages":
         return compareByPages(a, b, sortOrder);
-      case 'dateAdded':
+      case "dateAdded":
         return compareByDateAdded(a, b, sortOrder);
-      case 'status':
+      case "status":
         return compareByStatus(a, b, sortOrder);
       default:
         return 0;
@@ -186,7 +226,7 @@ export const sortBooks = (
  */
 export const applyFiltersAndSort = (
   books: Book[],
-  filters: FilterState
+  filters: FilterState,
 ): Book[] => {
   let filtered = [...books];
 
@@ -203,4 +243,3 @@ export const applyFiltersAndSort = (
 
   return filtered;
 };
-
