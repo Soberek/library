@@ -11,6 +11,7 @@ interface BooksStats {
   read: number;
   inProgress: number;
   dropped: number;
+  wantToRead: number;
 }
 
 interface AdditionalStats {
@@ -38,6 +39,7 @@ const calculateStats = (books: Book[]): { booksStats: BooksStats; additionalStat
   const read = books.filter((book) => book.read === 'Przeczytana').length;
   const inProgress = books.filter((book) => book.read === 'W trakcie').length;
   const dropped = books.filter((book) => book.read === 'Porzucona').length;
+  const wantToRead = books.filter((book) => book.read === 'Chcę przeczytać').length;
 
   const totalRating = books.reduce((sum, book) => sum + (Number(book.rating) || 0), 0);
   const averageRating = total > 0 ? parseFloat((totalRating / total).toFixed(1)) : 0;
@@ -48,7 +50,7 @@ const calculateStats = (books: Book[]): { booksStats: BooksStats; additionalStat
   const completionRate = total > 0 ? parseFloat(((read / total) * 100).toFixed(1)) : 0;
 
   return {
-    booksStats: { total, read, inProgress, dropped },
+    booksStats: { total, read, inProgress, dropped, wantToRead },
     additionalStats: { averageRating, totalPages, readPages, progressRate, completionRate },
   };
 };

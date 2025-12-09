@@ -26,9 +26,6 @@ const Books: React.FC = () => {
     handleStatusChange,
     handleToggleFavorite,
     handleRatingChange,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
   } = useBooksQuery(false);
 
   const filteredBooks = useBookFilters(books);
@@ -171,9 +168,6 @@ const Books: React.FC = () => {
             onStatusChange={handleStatusChange}
             onToggleFavorite={handleToggleFavorite}
             onRatingChange={handleRatingChange}
-            hasNextPage={hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={isFetchingNextPage}
           />
         )}
       </Box>

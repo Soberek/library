@@ -12,10 +12,6 @@ interface BooksViewSwitcherProps {
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onShare?: (book: Book) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
-  // Pagination props
-  hasNextPage?: boolean;
-  fetchNextPage?: () => void;
-  isFetchingNextPage?: boolean;
 }
 
 /**
@@ -31,9 +27,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
   onToggleFavorite,
   onShare,
   onRatingChange,
-  hasNextPage,
-  fetchNextPage,
-  isFetchingNextPage,
 }) => {
   if (viewMode === 'table') {
     return (
@@ -44,9 +37,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
         onStatusChange={onStatusChange}
         onToggleFavorite={onToggleFavorite}
         onRatingChange={onRatingChange}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
       />
     );
   }
@@ -60,10 +50,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
       onToggleFavorite={onToggleFavorite}
       onShare={onShare}
       onRatingChange={onRatingChange}
-      hasNextPage={hasNextPage}
-      fetchNextPage={fetchNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      enableInfiniteScroll={false}
     />
   );
 };

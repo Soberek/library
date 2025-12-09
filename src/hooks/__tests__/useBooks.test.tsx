@@ -306,6 +306,7 @@ describe('useBooksQuery', () => {
       read: 1,
       inProgress: 1,
       dropped: 1,
+      wantToRead: 0,
     }));
   });
 

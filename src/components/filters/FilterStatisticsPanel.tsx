@@ -28,6 +28,7 @@ interface BooksStats {
   read: number;
   inProgress: number;
   dropped: number;
+  wantToRead: number;
 }
 
 interface AdditionalStats {
