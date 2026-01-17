@@ -1,4 +1,4 @@
-# Library App - Book Tracker
+# Library App - Krzysztof Palpuchowski Student AJP II rok
 
 ## Description
 
