@@ -8,6 +8,7 @@ import { useAuth } from "./useAuth";
 import * as booksService from "../services/booksService";
 import type { Book, BookStatus } from "../types/Book";
 import { useMemo, useState } from "react";
+import { useFilterStore } from "../stores";
 import type { PaginatedResult } from "../services/booksService";
 import { QueryDocumentSnapshot, type DocumentData } from "firebase/firestore";
 
@@ -51,27 +52,44 @@ export const booksKeys = {
 // Statistiken berechnen
 const calculateStats = (
   books: Book[],
+  year: number | "all" = "all",
 ): { booksStats: BooksStats; additionalStats: AdditionalStats } => {
-  const total = books.length;
-  const read = books.filter((book) => book.read === "Przeczytana").length;
-  const inProgress = books.filter((book) => book.read === "W trakcie").length;
-  const dropped = books.filter((book) => book.read === "Porzucona").length;
-  const wantToRead = books.filter(
+  // Filtere nach Jahr, falls angegeben
+  const filteredBooksByYear =
+    year === "all"
+      ? books
+      : books.filter((book) => {
+          if (!book.createdAt) return false;
+          const bookYear = new Date(book.createdAt).getFullYear();
+          return bookYear === year;
+        });
+
+  const total = filteredBooksByYear.length;
+  const read = filteredBooksByYear.filter(
+    (book) => book.read === "Przeczytana",
+  ).length;
+  const inProgress = filteredBooksByYear.filter(
+    (book) => book.read === "W trakcie",
+  ).length;
+  const dropped = filteredBooksByYear.filter(
+    (book) => book.read === "Porzucona",
+  ).length;
+  const wantToRead = filteredBooksByYear.filter(
     (book) => book.read === "Chcę przeczytać",
   ).length;
 
-  const totalRating = books.reduce(
+  const totalRating = filteredBooksByYear.reduce(
     (sum, book) => sum + (Number(book.rating) || 0),
     0,
   );
   const averageRating =
     total > 0 ? parseFloat((totalRating / total).toFixed(1)) : 0;
 
-  const totalPages = books.reduce(
+  const totalPages = filteredBooksByYear.reduce(
     (sum, book) => sum + (Number(book.overallPages) || 0),
     0,
   );
-  const readPages = books.reduce(
+  const readPages = filteredBooksByYear.reduce(
     (sum, book) => sum + (Number(book.readPages) || 0),
     0,
   );
@@ -226,7 +244,11 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     : () => Promise.resolve();
 
   // Statistiken berechnen
-  const stats = useMemo(() => calculateStats(books), [books]);
+  const statsYear = useFilterStore((state) => state.filters.statsYear);
+  const stats = useMemo(
+    () => calculateStats(books, statsYear),
+    [books, statsYear],
+  );
 
   // Add Book Mutation
   const addBookMutation = useMutation({

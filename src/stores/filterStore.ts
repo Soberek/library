@@ -16,6 +16,7 @@ export interface FilterState {
   showOnlyFavorites: boolean;
   author: string;
   searchTerm: string;
+  statsYear: number | "all";
 }
 
 // App-State
@@ -68,6 +69,7 @@ const initialFilters: FilterState = {
   showOnlyFavorites: false,
   author: "",
   searchTerm: "",
+  statsYear: new Date().getFullYear(),
 };
 
 const initialState: AppState = {
@@ -160,6 +162,7 @@ export const useFilterStore = create<FilterStore>()(
               showOnlyFavorites: false,
               author: "",
               searchTerm: "",
+              statsYear: new Date().getFullYear(),
             },
             activeFilters: 0,
           },

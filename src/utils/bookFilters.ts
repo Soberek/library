@@ -162,14 +162,6 @@ const compareByDateAdded = (
       ? 1
       : -1;
 };
-  return order === "asc"
-    ? aValue > bValue
-      ? 1
-      : -1
-    : aValue < bValue
-      ? 1
-      : -1;
-};
 
 /**
  * Comparison function for sorting by status

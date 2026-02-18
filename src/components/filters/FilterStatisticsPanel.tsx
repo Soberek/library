@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useFilterStore, type FilterStore } from "../../stores";
 import type { FilterState } from "../../stores";
 import {
@@ -91,6 +91,18 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   );
   const resetFilters = useFilterStore((state) => state.resetFilters);
   const toggleExpandedAction = useFilterStore((state) => state.toggleExpanded);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    books.forEach((book) => {
+      if (book.createdAt) {
+        years.add(new Date(book.createdAt).getFullYear());
+      }
+    });
+    // Zawsze dodaj aktualny rok do wyboru
+    years.add(new Date().getFullYear());
+    return Array.from(years).sort((a, b) => b - a);
+  }, [books]);
 
   useEffect(() => {
     setExpanded(isFilterOpen);
@@ -837,12 +849,57 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
 
           {activeTab === "stats" && (
             <Box sx={{ p: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 3,
+                  flexWrap: "wrap",
+                  gap: 2,
+                }}
+              >
+                <Typography variant="h6" fontWeight={700}>
+                  Statystyki czytelnicze
+                </Typography>
+
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <InputLabel id="stats-year-label">Rok</InputLabel>
+                  <Select
+                    labelId="stats-year-label"
+                    value={filters.statsYear}
+                    label="Rok"
+                    onChange={(e) =>
+                      handleFilterChange("statsYear", e.target.value)
+                    }
+                  >
+                    <MenuItem value="all">Wszystkie lata</MenuItem>
+                    {availableYears.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
               <StatisticsGrid
                 booksStats={booksStats}
                 additionalStats={additionalStats}
               />
               <Divider sx={{ my: 2 }} />
               <MetricsGrid additionalStats={additionalStats} />
+
+              <Box sx={{ mt: 2, textAlign: "center" }}>
+                <Typography variant="caption" color="text.secondary">
+                  Statystyki obliczone dla:{" "}
+                  <strong>
+                    {filters.statsYear === "all"
+                      ? "wszystkich książek"
+                      : `roku ${filters.statsYear}`}
+                  </strong>
+                </Typography>
+              </Box>
             </Box>
           )}
         </Collapse>
