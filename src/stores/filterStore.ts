@@ -63,8 +63,8 @@ const initialFilters: FilterState = {
   genre: "all",
   ratingRange: [0, 10],
   pagesRange: [0, 5000],
-  sortBy: "status",
-  sortOrder: "asc",
+  sortBy: "dateAdded",
+  sortOrder: "desc",
   showOnlyFavorites: false,
   author: "",
   searchTerm: "",
@@ -147,7 +147,7 @@ export const useFilterStore = create<FilterStore>()(
           "toggleAdvancedFilters",
         ),
 
-      resetFilters: (initialSortBy = "status", initialSortOrder = "asc") =>
+      resetFilters: (initialSortBy = "dateAdded", initialSortOrder = "desc") =>
         set(
           {
             filters: {
