@@ -88,11 +88,6 @@ export const filterBySearchTerm = (
  * Comparison function for sorting by title
  */
 const compareByTitle = (a: Book, b: Book, order: "asc" | "desc"): number => {
-  // Priorytet statusu
-  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-
   const aValue = a.title.toLowerCase();
   const bValue = b.title.toLowerCase();
   return order === "asc"
@@ -108,11 +103,6 @@ const compareByTitle = (a: Book, b: Book, order: "asc" | "desc"): number => {
  * Comparison function for sorting by author
  */
 const compareByAuthor = (a: Book, b: Book, order: "asc" | "desc"): number => {
-  // Priorytet statusu
-  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-
   const aValue = a.author.toLowerCase();
   const bValue = b.author.toLowerCase();
   return order === "asc"
@@ -128,11 +118,6 @@ const compareByAuthor = (a: Book, b: Book, order: "asc" | "desc"): number => {
  * Comparison function for sorting by rating
  */
 const compareByRating = (a: Book, b: Book, order: "asc" | "desc"): number => {
-  // Priorytet statusu
-  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-
   const aValue = a.rating;
   const bValue = b.rating;
   return order === "asc"
@@ -148,11 +133,6 @@ const compareByRating = (a: Book, b: Book, order: "asc" | "desc"): number => {
  * Comparison function for sorting by page count
  */
 const compareByPages = (a: Book, b: Book, order: "asc" | "desc"): number => {
-  // Priorytet statusu
-  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-
   const aValue = a.overallPages;
   const bValue = b.overallPages;
   return order === "asc"
@@ -172,12 +152,16 @@ const compareByDateAdded = (
   b: Book,
   order: "asc" | "desc",
 ): number => {
-  const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-  const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-  if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-
   const aValue = new Date(a.createdAt || 0).getTime();
   const bValue = new Date(b.createdAt || 0).getTime();
+  return order === "asc"
+    ? aValue > bValue
+      ? 1
+      : -1
+    : aValue < bValue
+      ? 1
+      : -1;
+};
   return order === "asc"
     ? aValue > bValue
       ? 1
@@ -209,13 +193,6 @@ export const sortBooks = (
   const sorted = [...books];
 
   sorted.sort((a, b) => {
-    // Handle status priority first if sorting by status
-    if (sortBy === "status") {
-      const aStatusIndex = BOOK_STATUSES.indexOf(a.read as BookStatus);
-      const bStatusIndex = BOOK_STATUSES.indexOf(b.read as BookStatus);
-      if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
-    }
-
     switch (sortBy) {
       case "title":
         return compareByTitle(a, b, sortOrder);

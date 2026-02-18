@@ -49,14 +49,14 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
   onToggle,
 }) => {
   const [filters, setFilters] = useState<FilterState>({
-    status: 'all',
-    genre: 'all',
+    status: "all",
+    genre: "all",
     ratingRange: [0, 10],
     pagesRange: [0, 5000],
-    sortBy: 'status',
-    sortOrder: 'asc',
+    sortBy: "dateAdded",
+    sortOrder: "desc",
     showOnlyFavorites: false,
-    author: '',
+    author: "",
   });
 
   const applyFilters = React.useCallback(() => {
