@@ -6,7 +6,6 @@ import {
   Chip,
   CircularProgress,
   FormControl,
-  InputLabel,
   Link,
   MenuItem,
   Select,
@@ -34,7 +33,9 @@ import {
 } from '../services/tmdbService';
 import MagdaIcon from '../components/ui/MagdaIcon';
 import WatchlistPanel from '../components/magda/WatchlistPanel';
+import MagdaAdvancedFilters from '../components/magda/MagdaAdvancedFilters';
 import { useWatchlistQuery } from '../hooks/useWatchlistQuery';
+import { countAdvancedFilters } from '../services/tmdbService';
 import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -46,6 +47,23 @@ const DEFAULT_FILTERS: MovieFilters = {
   yearTo: null,
   minRating: 6,
   minVotes: 100,
+  maxRating: null,
+  runtimeMin: null,
+  runtimeMax: null,
+  originalLanguage: null,
+  originCountry: null,
+  excludeGenreId: null,
+  sortBy: 'popularity.desc',
+  castId: null,
+  castName: null,
+  crewId: null,
+  crewName: null,
+  companyId: null,
+  companyName: null,
+  watchProviderId: null,
+  watchRegion: 'PL',
+  certification: null,
+  certificationCountry: 'US',
 };
 
 const MagdaLosuje: React.FC = () => {
@@ -57,7 +75,9 @@ const MagdaLosuje: React.FC = () => {
   const [drawing, setDrawing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [watchlistActionError, setWatchlistActionError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const apiConfigured = hasTmdbApiKey();
+  const advancedCount = countAdvancedFilters(filters);
 
   const {
     watchlist,
@@ -238,97 +258,101 @@ const MagdaLosuje: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Stack spacing={2.5}>
-            <FormControl fullWidth size="small" disabled={!apiConfigured || loadingGenres}>
-              <InputLabel id="magda-genre-label">Gatunek</InputLabel>
-              <Select
-                labelId="magda-genre-label"
-                label="Gatunek"
-                value={filters.genreId ?? ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFilters((prev) => ({
-                    ...prev,
-                    genreId: value === '' ? null : Number(value),
-                  }));
-                }}
-              >
-                <MenuItem value="">Wszystkie gatunki</MenuItem>
-                {genres.map((genre) => (
-                  <MenuItem key={genre.id} value={genre.id}>
-                    {genre.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <div className="magda-controls-head">
+            <div>
+              <p className="magda-controls-kicker">konsola Magdy</p>
+              <h2 className="magda-controls-title">Ustaw i losuj</h2>
+            </div>
+            <p className="magda-controls-hint">Im ciaśniejsze filtry, tym rzadsze trafienia.</p>
+          </div>
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <FormControl fullWidth size="small" disabled={!apiConfigured}>
-                <InputLabel id="magda-year-from-label">Od roku</InputLabel>
+          <div className="magda-controls-grid">
+            <label className="magda-field magda-field--genre">
+              <span className="magda-field-label">Gatunek</span>
+              <FormControl fullWidth size="small" disabled={!apiConfigured || loadingGenres}>
                 <Select
-                  labelId="magda-year-from-label"
-                  label="Od roku"
-                  value={filters.yearFrom ?? ''}
+                  displayEmpty
+                  value={filters.genreId ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     setFilters((prev) => ({
                       ...prev,
-                      yearFrom: value === '' ? null : Number(value),
+                      genreId: value === '' ? null : Number(value),
                     }));
                   }}
+                  inputProps={{ 'aria-label': 'Gatunek' }}
                 >
-                  <MenuItem value="">Bez limitu</MenuItem>
-                  {YEAR_OPTIONS.map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
+                  <MenuItem value="">Wszystkie gatunki</MenuItem>
+                  {genres.map((genre) => (
+                    <MenuItem key={genre.id} value={genre.id}>
+                      {genre.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+            </label>
 
-              <FormControl fullWidth size="small" disabled={!apiConfigured}>
-                <InputLabel id="magda-year-to-label">Do roku</InputLabel>
-                <Select
-                  labelId="magda-year-to-label"
-                  label="Do roku"
-                  value={filters.yearTo ?? ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFilters((prev) => ({
-                      ...prev,
-                      yearTo: value === '' ? null : Number(value),
-                    }));
-                  }}
-                >
-                  <MenuItem value="">Bez limitu</MenuItem>
-                  {YEAR_OPTIONS.map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Stack>
+            <div className="magda-field magda-field--years">
+              <span className="magda-field-label">Lata premiery</span>
+              <div className="magda-year-row">
+                <FormControl fullWidth size="small" disabled={!apiConfigured}>
+                  <Select
+                    displayEmpty
+                    value={filters.yearFrom ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFilters((prev) => ({
+                        ...prev,
+                        yearFrom: value === '' ? null : Number(value),
+                      }));
+                    }}
+                    inputProps={{ 'aria-label': 'Od roku' }}
+                  >
+                    <MenuItem value="">Od zawsze</MenuItem>
+                    {YEAR_OPTIONS.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <span className="magda-year-sep" aria-hidden>
+                  →
+                </span>
+                <FormControl fullWidth size="small" disabled={!apiConfigured}>
+                  <Select
+                    displayEmpty
+                    value={filters.yearTo ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFilters((prev) => ({
+                        ...prev,
+                        yearTo: value === '' ? null : Number(value),
+                      }));
+                    }}
+                    inputProps={{ 'aria-label': 'Do roku' }}
+                  >
+                    <MenuItem value="">Do dziś</MenuItem>
+                    {YEAR_OPTIONS.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+            </div>
 
-            <Box>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
-                <Typography variant="body2" fontWeight={600} color="text.secondary">
-                  Minimalna ocena
-                </Typography>
-                <Typography variant="body2" fontWeight={700} className="magda-rating-value">
-                  {filters.minRating.toFixed(1)}+
-                </Typography>
-              </Stack>
+            <div className="magda-field magda-field--rating">
+              <div className="magda-field-label-row">
+                <span className="magda-field-label">Minimalna ocena</span>
+                <span className="magda-rating-pill">{filters.minRating.toFixed(1)}+</span>
+              </div>
               <Slider
                 value={filters.minRating}
                 min={0}
                 max={9}
                 step={0.5}
-                marks={[
-                  { value: 0, label: '0' },
-                  { value: 5, label: '5' },
-                  { value: 9, label: '9' },
-                ]}
                 disabled={!apiConfigured}
                 onChange={(_, value) =>
                   setFilters((prev) => ({
@@ -336,50 +360,66 @@ const MagdaLosuje: React.FC = () => {
                     minRating: Array.isArray(value) ? value[0] : value,
                   }))
                 }
-                sx={{
-                  color: '#f0b429',
-                  '& .MuiSlider-markLabel': { fontSize: '0.7rem' },
-                }}
+                className="magda-rating-slider"
               />
-            </Box>
+              <div className="magda-rating-ends">
+                <span>0</span>
+                <span>9</span>
+              </div>
+            </div>
 
-            <FormControl fullWidth size="small" disabled={!apiConfigured}>
-              <InputLabel id="magda-votes-label">Popularność</InputLabel>
-              <Select
-                labelId="magda-votes-label"
-                label="Popularność"
-                value={filters.minVotes}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    minVotes: Number(e.target.value),
-                  }))
-                }
-              >
-                <MenuItem value={20}>Luźno (min. 20 głosów)</MenuItem>
-                <MenuItem value={100}>Zrównoważone (min. 100)</MenuItem>
-                <MenuItem value={500}>Tylko znane (min. 500)</MenuItem>
-                <MenuItem value={2000}>Hitowe (min. 2000)</MenuItem>
-              </Select>
-            </FormControl>
+            <div className="magda-field magda-field--votes">
+              <span className="magda-field-label">Popularność</span>
+              <div className="magda-seg" role="group" aria-label="Popularność">
+                {(
+                  [
+                    { value: 20, label: 'Luźno' },
+                    { value: 100, label: 'Środek' },
+                    { value: 500, label: 'Znane' },
+                    { value: 2000, label: 'Hity' },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`magda-seg-btn${filters.minVotes === opt.value ? ' is-active' : ''}`}
+                    disabled={!apiConfigured}
+                    onClick={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minVotes: opt.value,
+                      }))
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
-            <Button
-              className="magda-draw-btn"
-              variant="contained"
-              size="large"
-              disabled={!apiConfigured || drawing || loadingGenres}
-              onClick={handleDraw}
-              startIcon={
-                drawing ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <ShuffleIcon />
-                )
-              }
-            >
-              {drawing ? 'Losuję…' : movie ? 'Losuj ponownie' : 'Losuj film'}
-            </Button>
-          </Stack>
+          <MagdaAdvancedFilters
+            filters={filters}
+            genres={genres}
+            disabled={!apiConfigured}
+            open={advancedOpen}
+            activeCount={advancedCount}
+            onToggle={() => setAdvancedOpen((prev) => !prev)}
+            onChange={(patch) => setFilters((prev) => ({ ...prev, ...patch }))}
+          />
+
+          <Button
+            className="magda-draw-btn"
+            variant="contained"
+            size="large"
+            disabled={!apiConfigured || drawing || loadingGenres}
+            onClick={handleDraw}
+            startIcon={
+              drawing ? <CircularProgress size={20} color="inherit" /> : <ShuffleIcon />
+            }
+          >
+            {drawing ? 'Losuję…' : movie ? 'Losuj ponownie' : 'Losuj film'}
+          </Button>
         </motion.section>
 
         <Box className="magda-result-slot">

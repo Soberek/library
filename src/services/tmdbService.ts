@@ -3,6 +3,8 @@ import type {
   MovieDiscoverResponse,
   MovieFilters,
   MovieGenre,
+  TmdbEntityRef,
+  WatchProvider,
 } from '../types/Movie';
 
 const TMDB_BASE = 'https://api.themoviedb.org/3';
@@ -32,7 +34,15 @@ export function backdropUrl(path: string | null): string | null {
   return `${TMDB_IMAGE}/w1280${path}`;
 }
 
-async function tmdbFetch<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
+export function providerLogoUrl(path: string | null): string | null {
+  if (!path) return null;
+  return `${TMDB_IMAGE}/w92${path}`;
+}
+
+async function tmdbFetch<T>(
+  path: string,
+  params: Record<string, string | number | undefined> = {},
+): Promise<T> {
   const apiKey = getApiKey();
   const url = new URL(`${TMDB_BASE}${path}`);
   url.searchParams.set('api_key', apiKey);
@@ -60,16 +70,63 @@ export async function fetchMovieGenres(): Promise<MovieGenre[]> {
   return data.genres;
 }
 
-function buildDiscoverParams(filters: MovieFilters, page: number): Record<string, string | number | undefined> {
+export async function searchPeople(query: string): Promise<TmdbEntityRef[]> {
+  if (!query.trim()) return [];
+  const data = await tmdbFetch<{ results: { id: number; name: string }[] }>('/search/person', {
+    query: query.trim(),
+    include_adult: 'false',
+  });
+  return data.results.slice(0, 8).map((p) => ({ id: p.id, name: p.name }));
+}
+
+export async function searchCompanies(query: string): Promise<TmdbEntityRef[]> {
+  if (!query.trim()) return [];
+  const data = await tmdbFetch<{ results: { id: number; name: string }[] }>('/search/company', {
+    query: query.trim(),
+  });
+  return data.results.slice(0, 8).map((c) => ({ id: c.id, name: c.name }));
+}
+
+export async function fetchWatchProviders(region: string): Promise<WatchProvider[]> {
+  const data = await tmdbFetch<{
+    results: WatchProvider[];
+  }>('/watch/providers/movie', {
+    watch_region: region,
+  });
+
+  return [...data.results]
+    .sort((a, b) => a.provider_name.localeCompare(b.provider_name, 'pl'))
+    .slice(0, 40);
+}
+
+function buildDiscoverParams(
+  filters: MovieFilters,
+  page: number,
+): Record<string, string | number | undefined> {
   return {
     page,
     include_adult: 'false',
-    sort_by: 'popularity.desc',
+    sort_by: filters.sortBy,
     with_genres: filters.genreId ?? undefined,
+    without_genres: filters.excludeGenreId ?? undefined,
     'primary_release_date.gte': filters.yearFrom ? `${filters.yearFrom}-01-01` : undefined,
     'primary_release_date.lte': filters.yearTo ? `${filters.yearTo}-12-31` : undefined,
     'vote_average.gte': filters.minRating > 0 ? filters.minRating : undefined,
+    'vote_average.lte': filters.maxRating ?? undefined,
     'vote_count.gte': filters.minVotes,
+    'with_runtime.gte': filters.runtimeMin ?? undefined,
+    'with_runtime.lte': filters.runtimeMax ?? undefined,
+    with_original_language: filters.originalLanguage ?? undefined,
+    with_origin_country: filters.originCountry ?? undefined,
+    with_cast: filters.castId ?? undefined,
+    with_crew: filters.crewId ?? undefined,
+    with_companies: filters.companyId ?? undefined,
+    with_watch_providers: filters.watchProviderId ?? undefined,
+    watch_region: filters.watchProviderId ? filters.watchRegion : undefined,
+    certification: filters.certification ?? undefined,
+    certification_country: filters.certification
+      ? filters.certificationCountry
+      : undefined,
   };
 }
 
@@ -90,7 +147,6 @@ export async function pickRandomMovie(
     throw new Error('Brak filmów dla wybranych filtrów. Poluzuj kryteria i spróbuj ponownie.');
   }
 
-  // TMDB caps discover at page 500
   const maxPage = Math.min(firstPage.total_pages, 500);
   const attempts = Math.min(8, maxPage);
 
@@ -111,4 +167,20 @@ export async function pickRandomMovie(
 export function releaseYear(date: string | undefined): string {
   if (!date || date.length < 4) return '—';
   return date.slice(0, 4);
+}
+
+export function countAdvancedFilters(filters: MovieFilters): number {
+  let count = 0;
+  if (filters.maxRating !== null) count += 1;
+  if (filters.runtimeMin !== null || filters.runtimeMax !== null) count += 1;
+  if (filters.originalLanguage) count += 1;
+  if (filters.originCountry) count += 1;
+  if (filters.excludeGenreId !== null) count += 1;
+  if (filters.sortBy !== 'popularity.desc') count += 1;
+  if (filters.castId !== null) count += 1;
+  if (filters.crewId !== null) count += 1;
+  if (filters.companyId !== null) count += 1;
+  if (filters.watchProviderId !== null) count += 1;
+  if (filters.certification) count += 1;
+  return count;
 }

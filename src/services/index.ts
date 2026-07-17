@@ -15,6 +15,11 @@ export {
   posterUrl,
   backdropUrl,
   releaseYear,
+  searchPeople,
+  searchCompanies,
+  fetchWatchProviders,
+  providerLogoUrl,
+  countAdvancedFilters,
 } from './tmdbService';
 
 export {

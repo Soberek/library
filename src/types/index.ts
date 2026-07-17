@@ -13,5 +13,8 @@ export type {
   MovieGenre,
   MovieFilters,
   MovieDiscoverResponse,
+  MovieSortBy,
+  TmdbEntityRef,
+  WatchProvider,
 } from './Movie';
 export type { WatchlistMovie, WatchlistMovieInput } from './WatchlistMovie';
