@@ -9,12 +9,10 @@ interface BookGridViewProps {
   onEdit: (bookId: string) => void;
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
-  onShare?: (book: Book) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
 }
 
-// Styled Components
 const GridContainer = styled(Box)(({ theme }) => ({
   width: "100%",
   minHeight: "400px",
@@ -34,16 +32,11 @@ const CardWrapper = styled(Box)(() => ({
   },
 }));
 
-/**
- * Grid view for displaying books as cards
- * Uses Material-UI Grid for responsive layout with enhanced animations
- */
 export const BookGridView: React.FC<BookGridViewProps> = ({
   books,
   onEdit,
   onDelete,
   onStatusChange,
-  onShare,
   onToggleFavorite,
   onRatingChange,
 }) => {
@@ -93,7 +86,6 @@ export const BookGridView: React.FC<BookGridViewProps> = ({
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onStatusChange={onStatusChange}
-                      onShare={onShare}
                       onToggleFavorite={onToggleFavorite}
                       onRatingChange={onRatingChange}
                     />

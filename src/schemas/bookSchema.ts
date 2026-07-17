@@ -27,6 +27,10 @@ export const bookSchema = z.object({
     .optional(),
   cover: z
     .string()
+    .refine(
+      (val) => !val || /^https?:\/\/.+/i.test(val),
+      'Podaj prawidłowy URL (http/https) lub zostaw puste',
+    )
     .optional()
     .or(z.literal('')),
   genre: z.string().min(1, 'Gatunek jest wymagany'),
@@ -39,7 +43,17 @@ export const bookSchema = z.object({
   isFavorite: z.boolean().optional().default(false),
 });
 
-export const bookFormSchema = bookSchema.omit({ id: true, createdAt: true });
+export const bookFormSchema = bookSchema
+  .omit({ id: true, createdAt: true })
+  .superRefine((data, ctx) => {
+    if ((data.readPages ?? 0) > data.overallPages) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Przeczytane strony nie mogą przekraczać liczby stron',
+        path: ['readPages'],
+      });
+    }
+  });
 
 export const bookUpdateSchema = bookSchema.partial().omit({ id: true, createdAt: true });
 

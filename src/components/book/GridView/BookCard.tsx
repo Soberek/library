@@ -20,63 +20,18 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined";
-import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
 import type { Book, BookStatus } from "../../../types/Book";
-import { BOOK_STATUS_LABELS } from "../../../constants/bookStatus";
+import { GOLD, STATUS_ACCENT } from "../../../constants/bookUi";
+import StatusMenuButton from "../StatusMenuButton";
 
 interface BookCardProps {
   book: Book;
   onEdit: (bookId: string) => void;
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
-  onShare?: (book: Book) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
 }
-
-const STATUS_STYLE: Record<
-  BookStatus,
-  { bg: string; Icon: React.ElementType; short: string }
-> = {
-  "Chcę przeczytać": {
-    bg: "#3b82f6",
-    Icon: BookmarkAddOutlinedIcon,
-    short: "Do przeczytania",
-  },
-  "W trakcie": {
-    bg: "#f59e0b",
-    Icon: AutoStoriesOutlinedIcon,
-    short: "W trakcie",
-  },
-  Przeczytana: {
-    bg: "#22c55e",
-    Icon: CheckCircleOutlineIcon,
-    short: "Przeczytana",
-  },
-  Porzucona: {
-    bg: "#ef4444",
-    Icon: HighlightOffOutlinedIcon,
-    short: "Porzucona",
-  },
-};
-
-const STATUS_ACCENT: Record<BookStatus, string> = {
-  "Chcę przeczytać": "#3b82f6",
-  "W trakcie": "#f59e0b",
-  Przeczytana: "#22c55e",
-  Porzucona: "#ef4444",
-};
-
-const GOLD = {
-  soft: "#f8f1df",
-  mid: "#e8c872",
-  rich: "#c9a227",
-  deep: "#8a6a12",
-  glow: "rgba(201, 162, 39, 0.35)",
-};
 
 const BookCard: React.FC<BookCardProps> = ({
   book,
@@ -92,23 +47,7 @@ const BookCard: React.FC<BookCardProps> = ({
     100,
   );
   const accent = STATUS_ACCENT[book.read] ?? "#667eea";
-  const status = STATUS_STYLE[book.read];
-  const StatusIcon = status.Icon;
   const isFavorite = Boolean(book.isFavorite);
-
-  const nextStatusLabel = (() => {
-    switch (book.read) {
-      case "Przeczytana":
-      case "Porzucona":
-        return BOOK_STATUS_LABELS["Chcę przeczytać"];
-      case "W trakcie":
-        return BOOK_STATUS_LABELS.Przeczytana;
-      case "Chcę przeczytać":
-        return BOOK_STATUS_LABELS["W trakcie"];
-      default:
-        return BOOK_STATUS_LABELS["Chcę przeczytać"];
-    }
-  })();
 
   return (
     <Box
@@ -134,14 +73,24 @@ const BookCard: React.FC<BookCardProps> = ({
         },
       }}
     >
-      {/* Cover — full width, mostly visible */}
       <Box
+        onClick={() => onEdit(book.id)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onEdit(book.id);
+          }
+        }}
+        aria-label={`Edytuj książkę ${book.title}`}
         sx={{
           position: "relative",
           height: 240,
           flexShrink: 0,
           overflow: "hidden",
           bgcolor: isFavorite ? GOLD.soft : "#f1f5f9",
+          cursor: "pointer",
           ...(isFavorite && {
             boxShadow: `inset 0 0 0 2px ${GOLD.mid}, inset 0 0 0 5px rgba(248,241,223,0.95)`,
           }),
@@ -177,39 +126,17 @@ const BookCard: React.FC<BookCardProps> = ({
           </Box>
         )}
 
-        {/* Status */}
-        <Tooltip title={`Zmień status → ${nextStatusLabel}`} arrow>
-          <Box
-            component="button"
-            type="button"
-            onClick={() => onStatusChange(book.id, book.read)}
-            sx={{
-              position: "absolute",
-              top: 10,
-              left: 10,
-              zIndex: 3,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 1,
-              py: 0.4,
-              border: "none",
-              borderRadius: 999,
-              bgcolor: status.bg,
-              color: "#fff",
-              fontSize: "0.65rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(15,23,42,0.18)",
-              "&:hover": { filter: "brightness(1.06)" },
-            }}
-          >
-            <StatusIcon sx={{ fontSize: 12 }} />
-            {status.short}
-          </Box>
-        </Tooltip>
+        <Box
+          sx={{ position: "absolute", top: 10, left: 10, zIndex: 3 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <StatusMenuButton
+            status={book.read}
+            onSelect={(next) => onStatusChange(book.id, next)}
+            variant="solid"
+          />
+        </Box>
 
-        {/* Favorite + optional gold medallion */}
         <Box
           sx={{
             position: "absolute",
@@ -220,6 +147,7 @@ const BookCard: React.FC<BookCardProps> = ({
             alignItems: "center",
             gap: 0.75,
           }}
+          onClick={(e) => e.stopPropagation()}
         >
           {isFavorite && (
             <Box
@@ -292,7 +220,6 @@ const BookCard: React.FC<BookCardProps> = ({
         </Box>
       </Box>
 
-      {/* Content */}
       <Box
         sx={{
           px: 2,
@@ -324,6 +251,7 @@ const BookCard: React.FC<BookCardProps> = ({
           )}
           <Typography
             component="h2"
+            onClick={() => onEdit(book.id)}
             sx={{
               fontWeight: 800,
               fontSize: "1rem",
@@ -335,6 +263,8 @@ const BookCard: React.FC<BookCardProps> = ({
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               mb: 0.35,
+              cursor: "pointer",
+              "&:hover": { color: "primary.main" },
             }}
           >
             {book.title}
@@ -353,7 +283,6 @@ const BookCard: React.FC<BookCardProps> = ({
           </Typography>
         </Box>
 
-        {/* Progress */}
         <Box
           sx={{
             px: 1.25,
@@ -406,7 +335,6 @@ const BookCard: React.FC<BookCardProps> = ({
           />
         </Box>
 
-        {/* Rating + actions */}
         <Box
           sx={{
             display: "flex",

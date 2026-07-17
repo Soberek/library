@@ -525,22 +525,8 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
   // Status Change Helper
   const handleStatusChange = async (
     bookId: string,
-    currentStatus: BookStatus,
+    newStatus: BookStatus,
   ) => {
-    const newStatus: BookStatus = (() => {
-      switch (currentStatus) {
-        case "Przeczytana":
-          return "Chcę przeczytać";
-        case "Porzucona":
-          return "Chcę przeczytać";
-        case "W trakcie":
-          return "Przeczytana";
-        case "Chcę przeczytać":
-          return "W trakcie";
-        default:
-          return "Chcę przeczytać";
-      }
-    })();
     await updateBookMutation.mutateAsync({
       bookId,
       updatedBook: { read: newStatus },

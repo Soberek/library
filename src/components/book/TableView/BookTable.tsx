@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Table,
@@ -27,8 +27,10 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import type { Book, BookStatus } from "../../../types/Book";
-import { BOOK_STATUS_LABELS } from "../../../constants/bookStatus";
+import { GOLD } from "../../../constants/bookUi";
+import { useFilterStore } from "../../../stores";
 import { formatBookCount } from "../../../utils/textHelpers";
+import StatusMenuButton from "../StatusMenuButton";
 
 interface BookTableProps {
   books: Book[];
@@ -37,49 +39,11 @@ interface BookTableProps {
   handleToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   handleEdit: (bookId: string) => void;
   handleDelete: (bookId: string) => void;
-  handleShare?: (book: Book) => void;
-  sortField?: string;
-  sortOrder?: "asc" | "desc";
-  onSortChange?: (field: string, order: "asc" | "desc") => void;
 }
 
-type SortField =
-  | "title"
-  | "author"
-  | "rating"
-  | "pages"
-  | "status"
-  | "dateAdded"
-  | null;
-type SortOrder = "asc" | "desc";
-
-const STATUS_STYLE: Record<BookStatus, { bg: string; color: string }> = {
-  "Chcę przeczytać": { bg: "rgba(59, 130, 246, 0.12)", color: "#1d4ed8" },
-  "W trakcie": { bg: "rgba(245, 158, 11, 0.14)", color: "#b45309" },
-  Przeczytana: { bg: "rgba(34, 197, 94, 0.12)", color: "#15803d" },
-  Porzucona: { bg: "rgba(239, 68, 68, 0.12)", color: "#b91c1c" },
-};
-
-const GOLD = {
-  soft: "#f8f1df",
-  mid: "#e8c872",
-  rich: "#c9a227",
-  deep: "#8a6a12",
-};
-
-const nextStatusFromCurrent = (current: BookStatus): BookStatus => {
-  switch (current) {
-    case "Przeczytana":
-    case "Porzucona":
-      return "Chcę przeczytać";
-    case "W trakcie":
-      return "Przeczytana";
-    case "Chcę przeczytać":
-      return "W trakcie";
-    default:
-      return "Chcę przeczytać";
-  }
-};
+type SortField = NonNullable<
+  ReturnType<typeof useFilterStore.getState>["filters"]["sortBy"]
+>;
 
 export default function BookTable({
   books,
@@ -88,74 +52,26 @@ export default function BookTable({
   handleToggleFavorite,
   handleEdit,
   handleDelete,
-  sortField: externalSortField,
-  sortOrder: externalSortOrder,
-  onSortChange,
 }: BookTableProps) {
-  const [internalSortField, setInternalSortField] =
-    useState<SortField>("title");
-  const [internalSortOrder, setInternalSortOrder] = useState<SortOrder>("asc");
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const sortBy = useFilterStore((state) => state.filters.sortBy);
+  const sortOrder = useFilterStore((state) => state.filters.sortOrder);
+  const showOnlyFavorites = useFilterStore(
+    (state) => state.filters.showOnlyFavorites,
+  );
+  const setFilter = useFilterStore((state) => state.setFilter);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const sortField =
-    (externalSortField as SortField) || internalSortField;
-  const sortOrder = externalSortOrder || internalSortOrder;
-
-  const favoritesCount = useMemo(
-    () => books.filter((b) => b.isFavorite).length,
-    [books],
-  );
-
   const handleSort = (field: SortField) => {
-    if (!field) return;
     const newOrder =
-      sortField === field && sortOrder === "asc" ? "desc" : "asc";
+      sortBy === field && sortOrder === "asc" ? "desc" : "asc";
 
-    if (onSortChange) {
-      onSortChange(field, newOrder);
+    if (sortBy === field) {
+      setFilter("sortOrder", newOrder);
     } else {
-      setInternalSortField(field);
-      setInternalSortOrder(newOrder);
+      setFilter("sortBy", field);
+      setFilter("sortOrder", "asc");
     }
   };
-
-  const filteredBooks = showFavoritesOnly
-    ? books.filter((book) => book.isFavorite)
-    : books;
-
-  const sortedBooks = useMemo(() => {
-    if (!sortField) return filteredBooks;
-
-    return [...filteredBooks].sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortField) {
-        case "title":
-          comparison = a.title.localeCompare(b.title);
-          break;
-        case "author":
-          comparison = a.author.localeCompare(b.author);
-          break;
-        case "rating":
-          comparison = a.rating - b.rating;
-          break;
-        case "pages":
-          comparison = a.overallPages - b.overallPages;
-          break;
-        case "status":
-          comparison = a.read.localeCompare(b.read);
-          break;
-        case "dateAdded":
-          comparison =
-            new Date(a.createdAt || 0).getTime() -
-            new Date(b.createdAt || 0).getTime();
-          break;
-      }
-
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-  }, [filteredBooks, sortField, sortOrder]);
 
   const deleteBook = books.find((b) => b.id === deleteId);
 
@@ -170,11 +86,26 @@ export default function BookTable({
     align?: "left" | "center" | "right";
     width?: number | string;
   }) => {
-    const active = sortField === field;
+    const active = sortBy === field;
+    const ariaSort = active
+      ? sortOrder === "asc"
+        ? "ascending"
+        : "descending"
+      : "none";
+
     return (
       <TableCell
         align={align}
+        role="columnheader"
+        aria-sort={ariaSort}
+        tabIndex={0}
         onClick={() => handleSort(field)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSort(field);
+          }
+        }}
         sx={{
           width,
           py: 1.25,
@@ -185,7 +116,13 @@ export default function BookTable({
           borderColor: "grey.200",
           bgcolor: "grey.50",
           whiteSpace: "nowrap",
+          outline: "none",
           "&:hover": { bgcolor: "rgba(102, 126, 234, 0.06)" },
+          "&:focus-visible": {
+            outline: "2px solid",
+            outlineColor: "primary.main",
+            outlineOffset: -2,
+          },
         }}
       >
         <Box
@@ -241,48 +178,8 @@ export default function BookTable({
             color: "text.secondary",
           }}
         >
-          {formatBookCount(sortedBooks.length)}
-          {sortedBooks.length !== books.length && (
-            <Box component="span" sx={{ color: "grey.400", fontWeight: 500 }}>
-              {" "}
-              z {books.length}
-            </Box>
-          )}
+          {formatBookCount(books.length)}
         </Typography>
-
-        <Button
-          size="small"
-          onClick={() => setShowFavoritesOnly((v) => !v)}
-          startIcon={
-            showFavoritesOnly ? (
-              <FavoriteIcon sx={{ fontSize: "16px !important" }} />
-            ) : (
-              <FavoriteBorderIcon sx={{ fontSize: "16px !important" }} />
-            )
-          }
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: "0.75rem",
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 999,
-            color: showFavoritesOnly ? GOLD.deep : "text.secondary",
-            bgcolor: showFavoritesOnly ? GOLD.soft : "background.paper",
-            border: "1px solid",
-            borderColor: showFavoritesOnly
-              ? "rgba(201, 162, 39, 0.45)"
-              : "grey.200",
-            boxShadow: "none",
-            "&:hover": {
-              bgcolor: showFavoritesOnly ? "#f3e8c8" : "grey.100",
-              boxShadow: "none",
-              borderColor: showFavoritesOnly ? GOLD.mid : "grey.300",
-            },
-          }}
-        >
-          Ulubione ({favoritesCount})
-        </Button>
       </Box>
 
       <TableContainer sx={{ overflowX: "auto" }}>
@@ -321,18 +218,18 @@ export default function BookTable({
           </TableHead>
 
           <TableBody>
-            {sortedBooks.length === 0 ? (
+            {books.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} sx={{ py: 6, textAlign: "center" }}>
                   <Typography color="text.secondary" fontWeight={500}>
-                    {showFavoritesOnly
+                    {showOnlyFavorites
                       ? "Brak ulubionych książek"
                       : "Brak książek"}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              sortedBooks.map((book) => {
+              books.map((book) => {
                 const isFavorite = Boolean(book.isFavorite);
                 const progress =
                   book.overallPages > 0
@@ -341,9 +238,6 @@ export default function BookTable({
                         100,
                       )
                     : 0;
-                const status = STATUS_STYLE[book.read];
-                const nextLabel =
-                  BOOK_STATUS_LABELS[nextStatusFromCurrent(book.read)];
 
                 return (
                   <TableRow
@@ -489,34 +383,11 @@ export default function BookTable({
                     </TableCell>
 
                     <TableCell>
-                      <Tooltip title={`Zmień status → ${nextLabel}`}>
-                        <Box
-                          component="button"
-                          type="button"
-                          onClick={() =>
-                            handleStatusChange(book.id, book.read)
-                          }
-                          sx={{
-                            border: "none",
-                            cursor: "pointer",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            px: 1,
-                            py: 0.4,
-                            borderRadius: 999,
-                            bgcolor: status.bg,
-                            color: status.color,
-                            fontSize: "0.6875rem",
-                            fontWeight: 700,
-                            lineHeight: 1.2,
-                            whiteSpace: "nowrap",
-                            transition: "filter 0.15s ease",
-                            "&:hover": { filter: "brightness(0.96)" },
-                          }}
-                        >
-                          {BOOK_STATUS_LABELS[book.read]}
-                        </Box>
-                      </Tooltip>
+                      <StatusMenuButton
+                        status={book.read}
+                        onSelect={(next) => handleStatusChange(book.id, next)}
+                        variant="pill"
+                      />
                     </TableCell>
 
                     <TableCell>

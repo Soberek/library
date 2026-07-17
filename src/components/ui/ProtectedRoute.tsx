@@ -1,35 +1,24 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { Navigate, Outlet } from "react-router-dom";
+import { Box } from "@mui/material";
+import { useAuth } from "../../hooks/useAuth";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ProtectedRoute = () => {
   const auth = useAuth();
 
   if (auth.loading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(135deg, #d400a6ff 0%, #da0000ff 100%)',
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "grey.50",
         }}
       >
-        <div
-          style={{
-            padding: '2rem 3rem',
-            borderRadius: '1rem',
-            background: '#fff',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-            fontSize: '1.25rem',
-            fontWeight: 500,
-            color: '#2d3748',
-          }}
-        >
-          Ładuje się stronka, poczekaj...
-        </div>
-      </div>
+        <LoadingSpinner message="Ładowanie biblioteki..." size={36} />
+      </Box>
     );
   }
 

@@ -1,6 +1,12 @@
 import React from "react";
-import { TextField, InputAdornment, Box, Fade } from "@mui/material";
+import {
+  TextField,
+  InputAdornment,
+  Box,
+  IconButton,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import { useFilterStore } from "../../stores";
 
 interface SearchBarProps {
@@ -14,80 +20,75 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const searchTerm = useFilterStore((state) => state.filters.searchTerm);
   const setFilter = useFilterStore((state) => state.setFilter);
-
   const isMobile = variant === "mobile";
 
+  const clearSearch = () => setFilter("searchTerm", "");
+
   return (
-    <Fade in timeout={1000}>
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: isMobile ? "100%" : 520,
+    <Box sx={{ width: "100%", maxWidth: isMobile ? "100%" : 520 }}>
+      <TextField
+        value={searchTerm}
+        onChange={(e) => setFilter("searchTerm", e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && searchTerm) {
+            e.preventDefault();
+            clearSearch();
+          }
         }}
-      >
-        <TextField
-          value={searchTerm}
-          onChange={(e) => setFilter("searchTerm", e.target.value)}
-          placeholder={placeholder}
-          variant="outlined"
-          size="small"
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon
-                  sx={{
-                    color: isMobile
-                      ? "rgba(255, 255, 255, 0.7)"
-                      : "text.secondary",
-                    fontSize: isMobile ? 20 : 20,
-                  }}
-                />
-              </InputAdornment>
-            ),
-            sx: {
-              bgcolor: isMobile
-                ? "rgba(255, 255, 255, 0.4)"
-                : "grey.50",
-              borderRadius: 2.5,
-              border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.5)" : "rgba(226, 232, 240, 1)"}`,
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              boxShadow: "none",
-              "& .MuiOutlinedInput-notchedOutline": {
-                border: "none",
-              },
-              "&:hover": {
-                bgcolor: isMobile
-                  ? "rgba(255, 255, 255, 0.5)"
-                  : "background.paper",
-                border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.6)" : "rgba(203, 213, 224, 1)"}`,
-              },
-              "&.Mui-focused": {
-                bgcolor: isMobile
-                  ? "rgba(255, 255, 255, 0.6)"
-                  : "background.paper",
-                border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.7)" : "#667eea"}`,
-                boxShadow: isMobile
-                  ? "0 0 0 2px rgba(255, 255, 255, 0.3)"
-                  : "0 0 0 3px rgba(102, 126, 234, 0.12)",
-              },
-              "& input": {
-                color: isMobile ? "white" : "text.primary",
-                fontSize: isMobile ? "0.9rem" : "0.875rem",
-                fontWeight: 500,
-                py: 1,
-                "&::placeholder": {
-                  color: isMobile
-                    ? "rgba(255, 255, 255, 0.8)"
-                    : "text.secondary",
-                  opacity: 1,
-                },
-              },
+        placeholder={placeholder}
+        variant="outlined"
+        size="small"
+        fullWidth
+        inputProps={{
+          "aria-label": "Szukaj książek",
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon
+                sx={{
+                  color: "text.secondary",
+                  fontSize: 20,
+                }}
+              />
+            </InputAdornment>
+          ),
+          endAdornment: searchTerm ? (
+            <InputAdornment position="end">
+              <IconButton
+                size="small"
+                aria-label="Wyczyść wyszukiwanie"
+                onClick={clearSearch}
+                edge="end"
+              >
+                <ClearIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </InputAdornment>
+          ) : undefined,
+          sx: {
+            bgcolor: "grey.50",
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "grey.200",
+            "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+            "&:hover": {
+              bgcolor: "background.paper",
+              borderColor: "grey.300",
             },
-          }}
-        />
-      </Box>
-    </Fade>
+            "&.Mui-focused": {
+              bgcolor: "background.paper",
+              borderColor: "primary.main",
+              boxShadow: "0 0 0 3px rgba(102, 126, 234, 0.12)",
+            },
+            "& input": {
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              py: 1,
+            },
+          },
+        }}
+      />
+    </Box>
   );
 };
 

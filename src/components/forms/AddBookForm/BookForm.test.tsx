@@ -2,22 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import BookForm from './BookForm';
 
-// type BookFormProps = {n
-//   handleBookSubmit: (e: React.ChangeEvent<HTMLFormElement>) => Promise<any>;
-//   handleStarClick: (index: number) => void;
-//   stars: number;
-//   handleFormVisibility: () => void;
-//   isFormVisible: boolean;
-// };
-// To run tests with Jest, use the following command in your terminal:
-// npx jest
-// or if you have it installed globally:
-// jest
-// This will execute all test files (e.g., *.test.tsx) using Jest.
-
 const mockOnSubmit = jest.fn();
-const mockBookModalOpen = jest.fn();
-const mockBookModalClose = jest.fn();
 
 describe('BookForm', () => {
   test('renders form fields', () => {
@@ -25,7 +10,6 @@ describe('BookForm', () => {
       <BookForm
         initialData={undefined}
         onSubmit={mockOnSubmit}
-        onClose={mockBookModalClose}
       />,
     );
 
@@ -38,7 +22,8 @@ describe('BookForm', () => {
     expect(screen.getByLabelText(/Przeczytane strony/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Liczba stron/i)).toBeInTheDocument();
 
-    expect(screen.getAllByRole('radio')).toHaveLength(11); // 10 stars + empty
+    // 5 stars with half-steps → empty + 10 half values
+    expect(screen.getAllByRole('radio')).toHaveLength(11);
     expect(screen.getByTestId('cover-input')).toBeInTheDocument();
 
     expect(

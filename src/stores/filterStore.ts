@@ -162,7 +162,7 @@ export const useFilterStore = create<FilterStore>()(
               showOnlyFavorites: false,
               author: "",
               searchTerm: "",
-              statsYear: new Date().getFullYear(),
+              statsYear: "all",
             },
             activeFilters: 0,
           },

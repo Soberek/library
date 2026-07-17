@@ -1,19 +1,24 @@
-import React, { useState, useCallback } from "react";
-import { Box, Typography } from "@mui/material";
+import React, { useCallback, useMemo } from "react";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { PageHeader } from "../components/ui";
+import PageError from "../components/ui/PageError";
 import {
   BookListEmpty,
   BookListLoading,
   BooksViewSwitcher,
+  AddBookFab,
 } from "../components/book";
 import BookForm from "../components/forms/AddBookForm/BookForm";
 import { useBooksQuery, useBookFilters } from "../hooks";
 import CustomModal from "../components/ui/CustomModal";
 import FilterStatisticsPanel from "../components/filters/FilterStatisticsPanel";
+import { useFilterStore, useUIStore } from "../stores";
 import type { Book } from "../types/Book";
 
 const Books: React.FC = () => {
-  // Hooks
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const {
     books,
     loading,
@@ -29,56 +34,85 @@ const Books: React.FC = () => {
   } = useBooksQuery(false);
 
   const filteredBooks = useBookFilters(books);
+  const activeFilters = useFilterStore((state) => state.activeFilters);
+  const resetFilters = useFilterStore((state) => state.resetFilters);
 
-  // Local state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBookId, setEditingBookId] = useState<string | null>(null);
-  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const storedViewMode = useUIStore((state) => state.viewMode);
+  const setViewMode = useUIStore((state) => state.setViewMode);
 
-  // Computed values
-  const editingBook = editingBookId
-    ? books.find((book) => book.id === editingBookId)
+  const [modalState, setModalState] = React.useState<{
+    open: boolean;
+    bookId: string | null;
+  }>({ open: false, bookId: null });
+  const [formDirty, setFormDirty] = React.useState(false);
+
+  const viewMode = isMobile ? "cards" : storedViewMode;
+
+  const editingBook = modalState.bookId
+    ? books.find((book) => book.id === modalState.bookId)
     : undefined;
 
-  // Callbacks
+  const hasFilters = activeFilters > 0;
+
+  const filteredReadCount = useMemo(
+    () => filteredBooks.filter((b) => b.read === "Przeczytana").length,
+    [filteredBooks],
+  );
+
   const handleBookModalOpen = useCallback(
     ({ bookId }: { bookId: string | null }) => {
-      setEditingBookId(bookId);
-      setIsModalOpen(true);
+      setFormDirty(false);
+      setModalState({ open: true, bookId });
     },
     [],
   );
 
   const handleBookModalClose = useCallback(() => {
-    setIsModalOpen(false);
-    setEditingBookId(null);
+    setFormDirty(false);
+    setModalState({ open: false, bookId: null });
   }, []);
 
   const handleFormSubmit = useCallback(
     async (data: Book) => {
-      if (editingBookId) {
-        await handleBookUpdate(editingBookId, data);
+      if (modalState.bookId) {
+        await handleBookUpdate(modalState.bookId, data);
       } else {
         await handleBookAdd(data);
       }
       handleBookModalClose();
     },
-    [editingBookId, handleBookUpdate, handleBookAdd, handleBookModalClose],
+    [modalState.bookId, handleBookUpdate, handleBookAdd, handleBookModalClose],
   );
 
-  const handleFilterPanelToggle = useCallback(() => {
-    setIsFilterPanelOpen((prev) => !prev);
-  }, []);
+  const handleDelete = useCallback(
+    async (bookId: string) => {
+      if (modalState.bookId === bookId) {
+        handleBookModalClose();
+      }
+      await handleBookDelete(bookId);
+    },
+    [modalState.bookId, handleBookDelete, handleBookModalClose],
+  );
 
-  // Error handling
-  if (error)
-    return <Typography color="error">Błąd: {error.message}</Typography>;
+  if (error) {
+    return (
+      <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+        <PageError message={error.message} />
+      </Box>
+    );
+  }
+
+  const modalTitle = modalState.bookId
+    ? editingBook
+      ? "Edytuj książkę"
+      : "Książka niedostępna"
+    : "Dodaj nową książkę";
 
   return (
     <Box
       sx={{
         p: { xs: 2, sm: 3, md: 4 },
+        pb: { xs: 10, md: 4 },
         width: "100%",
         minHeight: "calc(100vh - 64px)",
       }}
@@ -86,18 +120,19 @@ const Books: React.FC = () => {
       <Box sx={{ mb: 3 }}>
         <PageHeader
           bookCount={loading ? 0 : filteredBooks.length}
-          readCount={booksStats.read}
+          totalCount={loading ? 0 : books.length}
+          readCount={loading ? 0 : filteredReadCount}
           onAddBook={() => handleBookModalOpen({ bookId: null })}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          hideViewToggle={isMobile}
+          hideAddButton={isMobile}
         />
       </Box>
 
       <Box sx={{ mb: 3 }}>
         <FilterStatisticsPanel
           books={books}
-          isFilterOpen={isFilterPanelOpen}
-          onFilterToggle={handleFilterPanelToggle}
           booksStats={booksStats}
           additionalStats={additionalStats}
         />
@@ -107,13 +142,17 @@ const Books: React.FC = () => {
         {loading ? (
           <BookListLoading />
         ) : filteredBooks.length === 0 ? (
-          <BookListEmpty />
+          <BookListEmpty
+            hasFilters={hasFilters}
+            onAddBook={() => handleBookModalOpen({ bookId: null })}
+            onClearFilters={resetFilters}
+          />
         ) : (
           <BooksViewSwitcher
             books={filteredBooks}
             viewMode={viewMode}
             onEdit={(id: string) => handleBookModalOpen({ bookId: id })}
-            onDelete={handleBookDelete}
+            onDelete={handleDelete}
             onStatusChange={handleStatusChange}
             onToggleFavorite={handleToggleFavorite}
             onRatingChange={handleRatingChange}
@@ -121,16 +160,24 @@ const Books: React.FC = () => {
         )}
       </Box>
 
+      <AddBookFab onClick={() => handleBookModalOpen({ bookId: null })} />
+
       <CustomModal
-        isOpen={isModalOpen}
+        isOpen={modalState.open}
         onClose={handleBookModalClose}
-        title={editingBookId ? "Edytuj książkę" : "Dodaj nową książkę"}
+        title={modalTitle}
+        isDirty={formDirty}
       >
-        <BookForm
-          initialData={editingBook || undefined}
-          onSubmit={handleFormSubmit}
-          onClose={handleBookModalClose}
-        />
+        {modalState.bookId && !editingBook ? (
+          <PageError message="Ta książka nie istnieje lub została usunięta." />
+        ) : (
+          <BookForm
+            key={modalState.bookId ?? "new"}
+            initialData={editingBook || undefined}
+            onSubmit={handleFormSubmit}
+            onDirtyChange={setFormDirty}
+          />
+        )}
       </CustomModal>
     </Box>
   );

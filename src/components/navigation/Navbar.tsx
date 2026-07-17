@@ -1,62 +1,95 @@
-import React from 'react';
-import { AppBar, Toolbar, Box } from '@mui/material';
-import DesktopNavbar from './DesktopNavbar';
-import SearchBar from './SearchBar';
-import UserMenu from './UserMenu';
+import React from "react";
+import { AppBar, Toolbar, Box, Typography, ButtonBase } from "@mui/material";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import { useNavigate } from "react-router-dom";
+import SearchBar from "./SearchBar";
+import UserMenu from "./UserMenu";
 
-const NAVBAR_STYLES = {
-  secondaryBar: {
-    display: { xs: 'none', md: 'block' },
-    background: 'rgba(255, 255, 255, 0.92)',
-    borderBottom: '1px solid',
-    borderColor: 'grey.200',
-    boxShadow: '0 1px 0 rgba(102, 126, 234, 0.06), 0 4px 16px rgba(26, 32, 44, 0.04)',
-    backdropFilter: 'blur(12px)',
-  },
-  toolbar: {
-    justifyContent: 'space-between',
-    gap: 2,
-    minHeight: { md: 64 },
-    px: { md: 3, lg: 4 },
-    py: 1,
-  },
-  searchContainer: {
-    flex: 1,
-    display: 'flex',
-    justifyContent: 'center',
-    maxWidth: 560,
-    mx: 'auto',
-  },
-  userMenuContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    flexShrink: 0,
-    minWidth: { md: 200, lg: 280 },
-  },
-} as const;
-
-/**
- * Main Navbar component for desktop view
- * Combines the brand navbar with search and user menu bar
- */
 const Navbar: React.FC = () => {
-  return (
-    <>
-      <DesktopNavbar />
+  const navigate = useNavigate();
 
-      <AppBar position="sticky" elevation={0} color="transparent" sx={NAVBAR_STYLES.secondaryBar}>
-        <Toolbar sx={NAVBAR_STYLES.toolbar} disableGutters>
-          <Box sx={{ minWidth: { md: 200, lg: 280 }, flexShrink: 0 }} />
-          <Box sx={NAVBAR_STYLES.searchContainer}>
-            <SearchBar variant="desktop" />
+  return (
+    <AppBar
+      position="sticky"
+      elevation={0}
+      color="transparent"
+      sx={{
+        display: { xs: "none", md: "block" },
+        bgcolor: "rgba(255, 255, 255, 0.92)",
+        borderBottom: "1px solid",
+        borderColor: "grey.200",
+        boxShadow: "0 1px 2px rgba(26, 32, 44, 0.04)",
+        backdropFilter: "blur(12px)",
+      }}
+    >
+      <Toolbar
+        disableGutters
+        sx={{
+          gap: 2,
+          minHeight: 60,
+          px: { md: 3, lg: 4 },
+          py: 0.75,
+        }}
+      >
+        <ButtonBase
+          onClick={() => navigate("/")}
+          aria-label="MyLibrary — strona główna"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexShrink: 0,
+            minWidth: 140,
+            borderRadius: 1.5,
+            py: 0.5,
+            px: 0.5,
+            justifyContent: "flex-start",
+          }}
+        >
+          <Box
+            sx={{
+              width: 34,
+              height: 34,
+              borderRadius: 1.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "rgba(102, 126, 234, 0.1)",
+              color: "primary.main",
+            }}
+          >
+            <MenuBookOutlinedIcon sx={{ fontSize: 20 }} />
           </Box>
-          <Box sx={NAVBAR_STYLES.userMenuContainer}>
-            <UserMenu />
-          </Box>
-        </Toolbar>
-      </AppBar>
-    </>
+          <Typography
+            component="span"
+            sx={{
+              fontWeight: 800,
+              fontSize: "1.0625rem",
+              letterSpacing: "-0.02em",
+              color: "text.primary",
+            }}
+          >
+            MyLibrary
+          </Typography>
+        </ButtonBase>
+
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            maxWidth: 520,
+            mx: "auto",
+          }}
+        >
+          <SearchBar variant="desktop" />
+        </Box>
+
+        <Box sx={{ flexShrink: 0 }}>
+          <UserMenu />
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

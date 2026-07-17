@@ -62,8 +62,6 @@ interface AdditionalStats {
 interface FilterStatisticsPanelProps {
   books: Book[];
   onSortChange?: (sortBy: string, sortOrder: "asc" | "desc") => void;
-  isFilterOpen: boolean;
-  onFilterToggle: () => void;
   booksStats: BooksStats;
   additionalStats: AdditionalStats;
 }
@@ -117,8 +115,6 @@ const sectionLabelSx = {
 const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   books,
   onSortChange,
-  isFilterOpen,
-  onFilterToggle,
   booksStats,
   additionalStats,
 }) => {
@@ -132,7 +128,6 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
 
   const setFilter = useFilterStore((state) => state.setFilter);
   const toggleTab = useFilterStore((state) => state.toggleTab);
-  const setExpanded = useFilterStore((state) => state.setExpanded);
   const toggleAdvancedFiltersAction = useFilterStore(
     (state) => state.toggleAdvancedFilters,
   );
@@ -151,10 +146,6 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   }, [books]);
 
   useEffect(() => {
-    setExpanded(isFilterOpen);
-  }, [isFilterOpen, setExpanded]);
-
-  useEffect(() => {
     if (onSortChange) {
       onSortChange(filters.sortBy, filters.sortOrder);
     }
@@ -171,14 +162,10 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
 
   const handleTabClick = (tabId: "filters" | "sort" | "stats") => {
     if (activeTab === tabId && expanded) {
-      onFilterToggle();
       toggleExpandedAction();
       return;
     }
     toggleTab(tabId);
-    if (!expanded) {
-      onFilterToggle();
-    }
   };
 
   const handleSortFieldSelect = (value: SortField) => {
@@ -199,6 +186,18 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
 
   const renderFilterBadges = () => {
     const badges = [];
+
+    if (filters.searchTerm.trim()) {
+      badges.push(
+        <Chip
+          key="search"
+          label={`Szukaj: ${filters.searchTerm}`}
+          size="small"
+          onDelete={() => handleFilterChange("searchTerm", "")}
+          sx={chipSx}
+        />,
+      );
+    }
 
     if (filters.status !== "all") {
       badges.push(
@@ -246,6 +245,18 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           label={`Ocena: ${filters.ratingRange[0]}–${filters.ratingRange[1]}`}
           size="small"
           onDelete={() => handleFilterChange("ratingRange", [0, 10])}
+          sx={chipSx}
+        />,
+      );
+    }
+
+    if (filters.pagesRange[0] > 0 || filters.pagesRange[1] < 5000) {
+      badges.push(
+        <Chip
+          key="pages"
+          label={`Strony: ${filters.pagesRange[0]}–${filters.pagesRange[1]}`}
+          size="small"
+          onDelete={() => handleFilterChange("pagesRange", [0, 5000])}
           sx={chipSx}
         />,
       );
@@ -478,6 +489,52 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                     ) : null,
                   }}
                 />
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  onClick={() =>
+                    handleFilterChange(
+                      "showOnlyFavorites",
+                      !filters.showOnlyFavorites,
+                    )
+                  }
+                  startIcon={
+                    filters.showOnlyFavorites ? (
+                      <StarIcon sx={{ color: "warning.main" }} />
+                    ) : (
+                      <StarBorderIcon />
+                    )
+                  }
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "0.8125rem",
+                    px: 1.5,
+                    py: 0.75,
+                    borderRadius: 1.5,
+                    color: filters.showOnlyFavorites
+                      ? "warning.dark"
+                      : "text.secondary",
+                    bgcolor: filters.showOnlyFavorites
+                      ? "rgba(245, 158, 11, 0.1)"
+                      : "grey.50",
+                    border: "1px solid",
+                    borderColor: filters.showOnlyFavorites
+                      ? "rgba(245, 158, 11, 0.35)"
+                      : "grey.200",
+                    "&:hover": {
+                      bgcolor: filters.showOnlyFavorites
+                        ? "rgba(245, 158, 11, 0.16)"
+                        : "grey.100",
+                      borderColor: filters.showOnlyFavorites
+                        ? "warning.main"
+                        : "grey.300",
+                    },
+                  }}
+                >
+                  Tylko ulubione
+                </Button>
               </Box>
 
               <Box
@@ -731,59 +788,6 @@ const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                       </ToggleButton>
                     </ToggleButtonGroup>
                   </Box>
-
-                  <Box
-                    sx={{
-                      width: "1px",
-                      alignSelf: "stretch",
-                      bgcolor: "grey.200",
-                      display: { xs: "none", sm: "block" },
-                    }}
-                  />
-
-                  <Button
-                    onClick={() =>
-                      handleFilterChange(
-                        "showOnlyFavorites",
-                        !filters.showOnlyFavorites,
-                      )
-                    }
-                    startIcon={
-                      filters.showOnlyFavorites ? (
-                        <StarIcon sx={{ color: "warning.main" }} />
-                      ) : (
-                        <StarBorderIcon />
-                      )
-                    }
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 600,
-                      fontSize: "0.8125rem",
-                      px: 1.5,
-                      py: 0.75,
-                      borderRadius: 1.5,
-                      color: filters.showOnlyFavorites
-                        ? "warning.dark"
-                        : "text.secondary",
-                      bgcolor: filters.showOnlyFavorites
-                        ? "rgba(245, 158, 11, 0.1)"
-                        : "background.paper",
-                      border: "1px solid",
-                      borderColor: filters.showOnlyFavorites
-                        ? "rgba(245, 158, 11, 0.35)"
-                        : "grey.200",
-                      "&:hover": {
-                        bgcolor: filters.showOnlyFavorites
-                          ? "rgba(245, 158, 11, 0.16)"
-                          : "grey.100",
-                        borderColor: filters.showOnlyFavorites
-                          ? "warning.main"
-                          : "grey.300",
-                      },
-                    }}
-                  >
-                    Tylko ulubione
-                  </Button>
                 </Box>
 
                 <Typography

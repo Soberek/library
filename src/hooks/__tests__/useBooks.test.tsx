@@ -266,7 +266,7 @@ describe("useBooksQuery", () => {
     });
 
     await act(async () => {
-      await result.current.handleStatusChange("1", "W trakcie");
+      await result.current.handleStatusChange("1", "Przeczytana");
     });
 
     expect(booksService.updateBook).toHaveBeenCalledWith("1", {
@@ -299,7 +299,7 @@ describe("useBooksQuery", () => {
     });
 
     await act(async () => {
-      await result.current.handleStatusChange("1", "W trakcie");
+      await result.current.handleStatusChange("1", "Przeczytana");
     });
 
     expect(booksService.updateBook).toHaveBeenCalledWith("1", {

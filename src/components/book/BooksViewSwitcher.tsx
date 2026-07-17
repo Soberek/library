@@ -10,14 +10,9 @@ interface BooksViewSwitcherProps {
   onDelete: (bookId: string) => void;
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
-  onShare?: (book: Book) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
 }
 
-/**
- * Switches between grid and table views for books
- * Handles the conditional rendering and prop forwarding
- */
 export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
   books,
   viewMode,
@@ -25,7 +20,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
   onDelete,
   onStatusChange,
   onToggleFavorite,
-  onShare,
   onRatingChange,
 }) => {
   if (viewMode === "table") {
@@ -48,7 +42,6 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
       onDelete={onDelete}
       onStatusChange={onStatusChange}
       onToggleFavorite={onToggleFavorite}
-      onShare={onShare}
       onRatingChange={onRatingChange}
     />
   );

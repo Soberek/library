@@ -1,13 +1,22 @@
-import React from 'react';
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Divider } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import BookIcon from '@mui/icons-material/Book';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import InfoIcon from '@mui/icons-material/Info';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import React from "react";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Typography,
+  Divider,
+} from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { signOut } from "firebase/auth";
+import { auth } from "../../config/firebaseConfig";
 
 interface MobileDrawerProps {
   open: boolean;
@@ -16,117 +25,120 @@ interface MobileDrawerProps {
 
 const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
   const { user } = useAuth();
-  // const { logout } = useAuth(); // This line was removed as per the edit hint
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // const handleLogout = async () => { // This function was removed as per the edit hint
-  //   try {
-  //     await logout();
-  //     onClose(); // Close drawer after logout
-  //   } catch (_error) {
-  //     // Fehler beim Abmelden ignorieren oder protokollieren
-  //   }
-  // };
-
-  const menuItems = [
-    { text: 'Strona główna', icon: <HomeIcon />, path: '/' },
-    { text: 'Moje książki', icon: <BookIcon />, path: '/books' },
-    { text: 'Statystyki', icon: <BarChartIcon />, path: '/statistics' },
-    { text: 'O aplikacji', icon: <InfoIcon />, path: '/about' },
-  ];
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      onClose();
+      navigate("/sign-in", { replace: true });
+    } catch (_error) {
+      // Ignore sign-out errors
+    }
+  };
 
   return (
-    <Drawer anchor="left" open={open} onClose={onClose} PaperProps={{ sx: { width: 280 } }}>
+    <Drawer
+      anchor="left"
+      open={open}
+      onClose={onClose}
+      PaperProps={{ sx: { width: 280 } }}
+    >
       <Box
         sx={{
-          height: 120, // Erhöhte Höhe für bessere Optik
-          backgroundColor: 'primary.main',
-          color: 'white',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          pb: 2, // Abstand unten
-          pt: 4, // Abstand oben
+          px: 2.5,
+          py: 3,
+          bgcolor: "grey.50",
+          borderBottom: "1px solid",
+          borderColor: "grey.200",
         }}
       >
-        <Typography variant="h5" component="div" fontWeight={700}>
-          Book<Box component="span" fontWeight={300}>Wise</Box>
-        </Typography>
-        {user && (
-          <Typography variant="body2" mt={1}>
-            Witaj, {user.email}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "rgba(102, 126, 234, 0.1)",
+              color: "primary.main",
+            }}
+          >
+            <MenuBookOutlinedIcon sx={{ fontSize: 20 }} />
+          </Box>
+          <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em">
+            MyLibrary
+          </Typography>
+        </Box>
+        {user?.email && (
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {user.email}
           </Typography>
         )}
       </Box>
-      <Divider />
-      <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton 
-              component={Link} 
-              to={item.path} 
-              onClick={onClose}
-              selected={location.pathname === item.path}
-              sx={{
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                  borderLeft: '4px solid',
-                  borderColor: 'primary.main',
-                  color: 'primary.main',
-                  '& .MuiListItemIcon-root': { color: 'primary.main' },
-                },
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'text.secondary' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} sx={{ fontWeight: location.pathname === item.path ? 'bold' : 'normal' }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider sx={{ my: 1 }} />
-      <List>
+
+      <List sx={{ py: 1 }}>
         <ListItem disablePadding>
-          <ListItemButton 
-            component={Link} 
-            to="/settings" 
+          <ListItemButton
+            component={Link}
+            to="/"
             onClick={onClose}
-            selected={location.pathname === '/settings'}
+            selected={location.pathname === "/"}
             sx={{
-              '&.Mui-selected': {
-                backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                borderLeft: '4px solid',
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                '& .MuiListItemIcon-root': { color: 'primary.main' },
-              },
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+              mx: 1,
+              borderRadius: 1.5,
+              "&.Mui-selected": {
+                bgcolor: "rgba(102, 126, 234, 0.1)",
+                color: "primary.main",
               },
             }}
           >
-            <ListItemIcon sx={{ color: location.pathname === '/settings' ? 'primary.main' : 'text.secondary' }}>
-              <SettingsIcon />
+            <ListItemIcon
+              sx={{
+                minWidth: 36,
+                color:
+                  location.pathname === "/" ? "primary.main" : "text.secondary",
+              }}
+            >
+              <HomeIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText primary="Ustawienia" />
+            <ListItemText
+              primary="Moja biblioteka"
+              primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+            />
           </ListItemButton>
         </ListItem>
-        {user && (
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => {}}>
-              <ListItemIcon>
-                <ExitToAppIcon />
-              </ListItemIcon>
-              <ListItemText primary="Wyloguj się" />
-            </ListItemButton>
-          </ListItem>
-        )}
       </List>
+
+      {user && (
+        <>
+          <Divider sx={{ my: 1 }} />
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                  mx: 1,
+                  borderRadius: 1.5,
+                  color: "error.main",
+                  "&:hover": { bgcolor: "rgba(239, 68, 68, 0.08)" },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: "error.main" }}>
+                  <ExitToAppIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Wyloguj się"
+                  primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </>
+      )}
     </Drawer>
   );
 };

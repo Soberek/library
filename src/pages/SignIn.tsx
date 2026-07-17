@@ -4,16 +4,16 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { useAuth } from "../hooks/useAuth";
 import {
-  Box,
   Button,
   TextField,
   Typography,
-  Paper,
   Alert,
   Link,
   CircularProgress,
+  Stack,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
+import AuthLayout from "../components/ui/AuthLayout";
 
 type FormData = {
   email: string;
@@ -29,6 +29,7 @@ const SignIn: React.FC = () => {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
+  const userContext = useAuth();
 
   const onSubmit = async (data: FormData) => {
     setErrorMessage(null);
@@ -43,51 +44,40 @@ const SignIn: React.FC = () => {
         if (import.meta.env.DEV) {
           console.error("Login error:", error);
         }
-        setErrorMessage(error.message); // Zeigt detaillierteren Fehler in der Entwicklung an
+        setErrorMessage(error.message);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const userContext = useAuth();
-
   if (userContext.user) {
     return <Navigate to="/" replace />;
   }
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      sx={{
-        background: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)",
-      }}
+    <AuthLayout
+      title="Zaloguj się"
+      footer={
+        <Typography variant="body2" color="text.secondary">
+          Nie masz konta?{" "}
+          <Link
+            component={RouterLink}
+            to="/sign-up"
+            underline="hover"
+            color="primary"
+            fontWeight={600}
+          >
+            Zarejestruj się
+          </Link>
+        </Typography>
+      }
     >
-      <Paper
-        elevation={6}
-        sx={{
-          p: 4,
-          borderRadius: 3,
-          minWidth: 320,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
+      <Stack
         component="form"
+        spacing={2}
         onSubmit={handleSubmit(onSubmit)}
       >
-        <Typography
-          variant="h5"
-          fontWeight={700}
-          color="primary"
-          textAlign="center"
-          gutterBottom
-        >
-          Zaloguj się
-        </Typography>
         <TextField
           type="email"
           label="Email"
@@ -122,35 +112,19 @@ const SignIn: React.FC = () => {
           error={!!errors.password}
           helperText={errors.password?.message}
         />
+        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
         <Button
           type="submit"
           variant="contained"
           color="primary"
           disabled={loading}
           fullWidth
-          sx={{ py: 1.5, fontWeight: 600 }}
+          sx={{ py: 1.25, fontWeight: 600, textTransform: "none", borderRadius: 2 }}
         >
-          {loading ? <CircularProgress size={26} color="info" /> : "Zaloguj"}
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Zaloguj"}
         </Button>
-        {errorMessage && (
-          <Alert severity="error" sx={{ mt: -2 }}>
-            {errorMessage}
-          </Alert>
-        )}
-        <Typography variant="body2" textAlign="center" color="text.secondary">
-          Nie masz konta?{" "}
-          <Link
-            component={RouterLink}
-            to="/sign-up"
-            underline="none"
-            color="primary"
-            fontWeight={500}
-          >
-            Zarejestruj się
-          </Link>
-        </Typography>
-      </Paper>
-    </Box>
+      </Stack>
+    </AuthLayout>
   );
 };
 
