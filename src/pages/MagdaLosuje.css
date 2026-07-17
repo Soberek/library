@@ -1,0 +1,319 @@
+.magda-page {
+  --magda-ink: #1c1410;
+  --magda-paper: #f6efe4;
+  --magda-amber: #e08a2e;
+  --magda-burnt: #c45c26;
+  --magda-deep: #5c2418;
+  --magda-cream: #fff8ee;
+
+  position: relative;
+  min-height: calc(100vh - 60px);
+  overflow: hidden;
+  color: var(--magda-ink);
+  background:
+    radial-gradient(ellipse 80% 55% at 10% -10%, rgba(224, 138, 46, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 10%, rgba(196, 92, 38, 0.16), transparent 50%),
+    linear-gradient(165deg, #faf4eb 0%, #f0e4d4 42%, #e8d8c4 100%);
+}
+
+.magda-grain {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.magda-glow {
+  pointer-events: none;
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+}
+
+.magda-glow--left {
+  top: 12%;
+  left: -80px;
+  background: rgba(224, 138, 46, 0.45);
+  animation: magda-drift 12s ease-in-out infinite alternate;
+}
+
+.magda-glow--right {
+  bottom: 8%;
+  right: -60px;
+  background: rgba(92, 36, 24, 0.28);
+  animation: magda-drift 14s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes magda-drift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(24px, 18px);
+  }
+}
+
+.magda-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 3rem;
+}
+
+@media (min-width: 600px) {
+  .magda-inner {
+    padding: 2.5rem 2rem 4rem;
+  }
+}
+
+.magda-hero {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.magda-kicker {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--magda-burnt);
+}
+
+.magda-brand {
+  margin: 0;
+  font-family: var(--font-display, Fraunces, Georgia, serif);
+  font-size: clamp(2.4rem, 8vw, 4.25rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--magda-deep);
+  text-shadow: 0 1px 0 rgba(255, 248, 238, 0.8);
+}
+
+.magda-tagline {
+  margin: 0.85rem auto 0;
+  max-width: 28rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: rgba(28, 20, 16, 0.72);
+}
+
+.magda-controls {
+  background: rgba(255, 248, 238, 0.82);
+  border: 1px solid rgba(92, 36, 24, 0.12);
+  border-radius: 20px;
+  padding: 1.35rem 1.25rem 1.5rem;
+  box-shadow: 0 12px 40px rgba(92, 36, 24, 0.08);
+  backdrop-filter: blur(10px);
+  margin-bottom: 1.75rem;
+}
+
+.magda-rating-value {
+  color: var(--magda-burnt) !important;
+}
+
+.magda-draw-btn {
+  margin-top: 0.25rem !important;
+  min-height: 52px;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.02em;
+  text-transform: none !important;
+  background: linear-gradient(135deg, #c45c26 0%, #8f2f18 100%) !important;
+  box-shadow: 0 10px 28px rgba(196, 92, 38, 0.35) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.magda-draw-btn:hover:not(.Mui-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(196, 92, 38, 0.42) !important;
+}
+
+.magda-draw-btn:active:not(.Mui-disabled) {
+  transform: translateY(0);
+}
+
+.magda-result-slot {
+  min-height: 280px;
+  perspective: 900px;
+}
+
+.magda-empty,
+.magda-drawing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 280px;
+  border: 1.5px dashed rgba(92, 36, 24, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 248, 238, 0.45);
+  color: rgba(28, 20, 16, 0.55);
+}
+
+.magda-spinner-ring {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid rgba(196, 92, 38, 0.2);
+  border-top-color: var(--magda-burnt);
+  animation: magda-spin 0.75s linear infinite;
+}
+
+@keyframes magda-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.magda-drawing-text {
+  font-family: var(--font-display, Fraunces, Georgia, serif) !important;
+  font-weight: 600 !important;
+  font-size: 1.15rem !important;
+  color: var(--magda-deep) !important;
+}
+
+.magda-ticket {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--magda-cream);
+  border: 1px solid rgba(92, 36, 24, 0.14);
+  box-shadow: 0 18px 50px rgba(28, 20, 16, 0.12);
+}
+
+.magda-ticket-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  opacity: 0.18;
+  filter: saturate(1.1);
+}
+
+.magda-ticket-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(246, 239, 228, 0.2) 0%, rgba(246, 239, 228, 0.92) 55%, var(--magda-cream) 100%);
+}
+
+.magda-ticket-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+@media (min-width: 700px) {
+  .magda-ticket-body {
+    grid-template-columns: 200px 1fr;
+    gap: 1.75rem;
+    padding: 1.75rem;
+  }
+}
+
+.magda-poster-wrap {
+  justify-self: center;
+}
+
+.magda-poster {
+  display: block;
+  width: 180px;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(28, 20, 16, 0.28);
+  transform-origin: center bottom;
+  animation: magda-poster-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (min-width: 700px) {
+  .magda-poster {
+    width: 200px;
+  }
+}
+
+.magda-poster--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 270px;
+  background: rgba(92, 36, 24, 0.08);
+  color: var(--magda-deep);
+}
+
+@keyframes magda-poster-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.magda-movie-title {
+  margin: 0 !important;
+  font-family: var(--font-display, Fraunces, Georgia, serif) !important;
+  font-size: clamp(1.45rem, 3.5vw, 2rem) !important;
+  font-weight: 750 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em;
+  color: var(--magda-deep) !important;
+}
+
+.magda-original-title {
+  margin: 0.35rem 0 0 !important;
+  font-size: 0.9rem !important;
+  font-style: italic;
+  color: rgba(28, 20, 16, 0.55) !important;
+}
+
+.magda-chip {
+  background: rgba(196, 92, 38, 0.1) !important;
+  color: var(--magda-deep) !important;
+  font-weight: 600 !important;
+}
+
+.magda-chip .MuiChip-icon {
+  color: var(--magda-amber) !important;
+}
+
+.magda-overview {
+  margin: 0 0 1rem !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  color: rgba(28, 20, 16, 0.82) !important;
+}
+
+.magda-overview--muted {
+  font-style: italic;
+  color: rgba(28, 20, 16, 0.5) !important;
+}
+
+.magda-tmdb-link {
+  color: var(--magda-burnt) !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  padding-left: 0 !important;
+}
+
+.magda-credit {
+  margin: 1.5rem 0 0 !important;
+  text-align: center;
+  font-size: 0.75rem !important;
+  color: rgba(28, 20, 16, 0.45) !important;
+}

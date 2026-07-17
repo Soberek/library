@@ -8,3 +8,9 @@ export type {
   NetworkError, 
   ErrorType, 
 } from './Error';
+export type {
+  Movie,
+  MovieGenre,
+  MovieFilters,
+  MovieDiscoverResponse,
+} from './Movie';

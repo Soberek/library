@@ -5,6 +5,7 @@ import App from '../App';
 import SignUp from '../pages/SignUp';
 import SignIn from '../pages/SignIn';
 import Books from '../pages/Books';
+import MagdaLosuje from '../pages/MagdaLosuje';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <Books />,
+          },
+          {
+            path: 'magda-losuje',
+            element: <MagdaLosuje />,
           },
         ],
       },

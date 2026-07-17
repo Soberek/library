@@ -11,6 +11,7 @@ import {
   Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
+import ShuffleIcon from "@mui/icons-material/Shuffle";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -107,6 +108,38 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
             </ListItemIcon>
             <ListItemText
               primary="Moja biblioteka"
+              primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/magda-losuje"
+            onClick={onClose}
+            selected={location.pathname === "/magda-losuje"}
+            sx={{
+              mx: 1,
+              borderRadius: 1.5,
+              "&.Mui-selected": {
+                bgcolor: "rgba(196, 92, 38, 0.12)",
+                color: "#8f2f18",
+              },
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 36,
+                color:
+                  location.pathname === "/magda-losuje"
+                    ? "#c45c26"
+                    : "text.secondary",
+              }}
+            >
+              <ShuffleIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary="MAGDA LOSUJE"
               primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
             />
           </ListItemButton>

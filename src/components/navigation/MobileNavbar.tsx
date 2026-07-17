@@ -9,13 +9,15 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MobileDrawer from "./MobileDrawer";
 import SearchBar from "./SearchBar";
 
 const MobileNavbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMagdaPage = location.pathname === "/magda-losuje";
 
   const handleDrawerOpen = useCallback(() => setDrawerOpen(true), []);
   const handleDrawerClose = useCallback(() => setDrawerOpen(false), []);
@@ -84,9 +86,11 @@ const MobileNavbar: React.FC = () => {
           </IconButton>
         </Toolbar>
 
-        <Box sx={{ px: 2, pb: 1.5 }}>
-          <SearchBar variant="mobile" />
-        </Box>
+        {!isMagdaPage && (
+          <Box sx={{ px: 2, pb: 1.5 }}>
+            <SearchBar variant="mobile" />
+          </Box>
+        )}
       </AppBar>
 
       <MobileDrawer open={drawerOpen} onClose={handleDrawerClose} />

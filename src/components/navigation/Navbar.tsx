@@ -1,12 +1,15 @@
 import React from "react";
-import { AppBar, Toolbar, Box, Typography, ButtonBase } from "@mui/material";
+import { AppBar, Toolbar, Box, Typography, ButtonBase, Button } from "@mui/material";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import { useNavigate } from "react-router-dom";
+import ShuffleIcon from "@mui/icons-material/Shuffle";
+import { useLocation, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import UserMenu from "./UserMenu";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMagdaPage = location.pathname === "/magda-losuje";
 
   return (
     <AppBar
@@ -74,6 +77,29 @@ const Navbar: React.FC = () => {
           </Typography>
         </ButtonBase>
 
+        <Button
+          onClick={() => navigate("/magda-losuje")}
+          startIcon={<ShuffleIcon />}
+          sx={{
+            flexShrink: 0,
+            borderRadius: 999,
+            px: 1.75,
+            py: 0.75,
+            fontWeight: 700,
+            fontSize: "0.8125rem",
+            letterSpacing: "0.04em",
+            textTransform: "none",
+            color: isMagdaPage ? "#8f2f18" : "text.secondary",
+            bgcolor: isMagdaPage ? "rgba(196, 92, 38, 0.12)" : "transparent",
+            "&:hover": {
+              bgcolor: "rgba(196, 92, 38, 0.14)",
+              color: "#8f2f18",
+            },
+          }}
+        >
+          MAGDA LOSUJE
+        </Button>
+
         <Box
           sx={{
             flex: 1,
@@ -83,7 +109,7 @@ const Navbar: React.FC = () => {
             mx: "auto",
           }}
         >
-          <SearchBar variant="desktop" />
+          {!isMagdaPage && <SearchBar variant="desktop" />}
         </Box>
 
         <Box sx={{ flexShrink: 0 }}>

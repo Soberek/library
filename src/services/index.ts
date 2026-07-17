@@ -6,3 +6,13 @@ export {
   deleteBook, 
   updateBook, 
 } from './booksService';
+
+export {
+  hasTmdbApiKey,
+  fetchMovieGenres,
+  discoverMovies,
+  pickRandomMovie,
+  posterUrl,
+  backdropUrl,
+  releaseYear,
+} from './tmdbService';
