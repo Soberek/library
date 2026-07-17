@@ -25,6 +25,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { Movie, MovieFilters, MovieGenre } from '../types/Movie';
 import {
   backdropUrl,
+  countAdvancedFilters,
+  discoverMovies,
   fetchMovieGenres,
   hasTmdbApiKey,
   pickRandomMovie,
@@ -34,8 +36,8 @@ import {
 import MagdaIcon from '../components/ui/MagdaIcon';
 import WatchlistPanel from '../components/magda/WatchlistPanel';
 import MagdaAdvancedFilters from '../components/magda/MagdaAdvancedFilters';
+import MagdaDrawAnimation from '../components/magda/MagdaDrawAnimation';
 import { useWatchlistQuery } from '../hooks/useWatchlistQuery';
-import { countAdvancedFilters } from '../services/tmdbService';
 import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -73,6 +75,8 @@ const MagdaLosuje: React.FC = () => {
   const [recentIds, setRecentIds] = useState<number[]>([]);
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [drawing, setDrawing] = useState(false);
+  const [reelMovies, setReelMovies] = useState<Movie[]>([]);
+  const [spinWinner, setSpinWinner] = useState<Movie | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [watchlistActionError, setWatchlistActionError] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -148,21 +152,45 @@ const MagdaLosuje: React.FC = () => {
     setDrawing(true);
     setError(null);
     setWatchlistActionError(null);
+    setMovie(null);
+    setReelMovies([]);
+    setSpinWinner(null);
 
     try {
       const exclude = new Set([
         ...recentIds,
         ...watchlist.map((item) => item.tmdbId),
       ]);
-      const picked = await pickRandomMovie(filters, exclude);
-      setMovie(picked);
+
+      const [picked, reelPage] = await Promise.all([
+        pickRandomMovie(filters, exclude),
+        discoverMovies(filters, Math.floor(Math.random() * 5) + 1).catch(() => null),
+      ]);
+
+      const reelPool = (reelPage?.results ?? []).filter((m) => m.poster_path);
+      const pool =
+        reelPool.length > 0
+          ? reelPool
+          : [picked].filter((m) => m.poster_path);
+
+      setReelMovies(pool);
+      setSpinWinner(picked);
       setRecentIds((prev) => [picked.id, ...prev.filter((id) => id !== picked.id)].slice(0, 12));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Losowanie nie powiodło się.');
-    } finally {
       setDrawing(false);
+      setSpinWinner(null);
+      setReelMovies([]);
     }
   }, [filters, recentIds, watchlist]);
+
+  const handleSpinComplete = useCallback(() => {
+    if (!spinWinner) return;
+    setMovie(spinWinner);
+    setDrawing(false);
+    setSpinWinner(null);
+    setReelMovies([]);
+  }, [spinWinner]);
 
   const handleAddToWatchlist = useCallback(async () => {
     if (!movie) return;
@@ -439,16 +467,25 @@ const MagdaLosuje: React.FC = () => {
               </motion.div>
             )}
 
-            {drawing && (
+            {drawing && spinWinner && (
+              <MagdaDrawAnimation
+                key={`spin-${spinWinner.id}`}
+                reelMovies={reelMovies}
+                winner={spinWinner}
+                onComplete={handleSpinComplete}
+              />
+            )}
+
+            {drawing && !spinWinner && (
               <motion.div
-                key="drawing"
-                className="magda-drawing"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
+                key="drawing-load"
+                className="magda-drawing magda-drawing--loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
                 <div className="magda-spinner-ring" />
-                <Typography className="magda-drawing-text">Magda miesza kartotekę…</Typography>
+                <Typography className="magda-drawing-text">Ładuję taśmę…</Typography>
               </motion.div>
             )}
 
@@ -456,10 +493,10 @@ const MagdaLosuje: React.FC = () => {
               <motion.article
                 key={movie.id}
                 className="magda-ticket"
-                initial={{ opacity: 0, y: 28, rotateX: 8 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, scale: 0.88, y: 40, rotateX: 12, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
               >
                 {backdrop && (
                   <div
