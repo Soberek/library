@@ -460,22 +460,23 @@ const MagdaAdvancedFilters: React.FC<MagdaAdvancedFiltersProps> = ({
               <FormControl fullWidth size="small" disabled={disabled}>
                 <Select
                   displayEmpty
-                  value={filters.watchProviderId ?? ''}
+                  value={filters.watchProviderId != null ? String(filters.watchProviderId) : ''}
                   onChange={(e) => {
-                    const value = e.target.value;
+                    const value = String(e.target.value);
                     onChange({
                       watchProviderId: value === '' ? null : Number(value),
                     });
                   }}
                   renderValue={(selected) => {
-                    if (selected === '' || selected === undefined) return 'Dowolna';
-                    const provider = providers.find((p) => p.provider_id === Number(selected));
+                    const value = String(selected ?? '');
+                    if (!value) return 'Dowolna';
+                    const provider = providers.find((p) => p.provider_id === Number(value));
                     return provider?.provider_name ?? 'Wybrana platforma';
                   }}
                 >
                   <MenuItem value="">Dowolna</MenuItem>
                   {providers.map((p) => (
-                    <MenuItem key={p.provider_id} value={p.provider_id}>
+                    <MenuItem key={p.provider_id} value={String(p.provider_id)}>
                       <span className="magda-provider-option">
                         {providerLogoUrl(p.logo_path) && (
                           <img src={providerLogoUrl(p.logo_path)!} alt="" />
