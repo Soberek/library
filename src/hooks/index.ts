@@ -4,3 +4,4 @@ export { useSearch } from './useSearch';
 export { useAuth } from './useAuth';
 export { useBooksQuery, booksKeys } from './useBooksQuery';
 export { useBookFilters } from './useBookFilters';
+export { useWatchlistQuery, watchlistKeys } from './useWatchlistQuery';

@@ -16,3 +16,11 @@ export {
   backdropUrl,
   releaseYear,
 } from './tmdbService';
+
+export {
+  getUserWatchlist,
+  addToWatchlist,
+  setWatchlistWatched,
+  removeFromWatchlist,
+  movieToWatchlistInput,
+} from './watchlistService';

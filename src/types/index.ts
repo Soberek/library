@@ -14,3 +14,4 @@ export type {
   MovieFilters,
   MovieDiscoverResponse,
 } from './Movie';
+export type { WatchlistMovie, WatchlistMovieInput } from './WatchlistMovie';

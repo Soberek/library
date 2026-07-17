@@ -18,6 +18,10 @@ import ShuffleIcon from '@mui/icons-material/Shuffle';
 import LocalMoviesOutlinedIcon from '@mui/icons-material/LocalMoviesOutlined';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
+import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Movie, MovieFilters, MovieGenre } from '../types/Movie';
 import {
@@ -29,6 +33,8 @@ import {
   releaseYear,
 } from '../services/tmdbService';
 import MagdaIcon from '../components/ui/MagdaIcon';
+import WatchlistPanel from '../components/magda/WatchlistPanel';
+import { useWatchlistQuery } from '../hooks/useWatchlistQuery';
 import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -50,7 +56,22 @@ const MagdaLosuje: React.FC = () => {
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [drawing, setDrawing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [watchlistActionError, setWatchlistActionError] = useState<string | null>(null);
   const apiConfigured = hasTmdbApiKey();
+
+  const {
+    watchlist,
+    loading: watchlistLoading,
+    findByTmdbId,
+    addToWatchlist,
+    adding,
+    toggleWatched,
+    toggling,
+    removeFromWatchlist,
+    removing,
+  } = useWatchlistQuery();
+
+  const savedEntry = movie ? findByTmdbId(movie.id) : undefined;
 
   useEffect(() => {
     if (!apiConfigured) {
@@ -106,9 +127,13 @@ const MagdaLosuje: React.FC = () => {
   const handleDraw = useCallback(async () => {
     setDrawing(true);
     setError(null);
+    setWatchlistActionError(null);
 
     try {
-      const exclude = new Set(recentIds);
+      const exclude = new Set([
+        ...recentIds,
+        ...watchlist.map((item) => item.tmdbId),
+      ]);
       const picked = await pickRandomMovie(filters, exclude);
       setMovie(picked);
       setRecentIds((prev) => [picked.id, ...prev.filter((id) => id !== picked.id)].slice(0, 12));
@@ -117,7 +142,31 @@ const MagdaLosuje: React.FC = () => {
     } finally {
       setDrawing(false);
     }
-  }, [filters, recentIds]);
+  }, [filters, recentIds, watchlist]);
+
+  const handleAddToWatchlist = useCallback(async () => {
+    if (!movie) return;
+    setWatchlistActionError(null);
+    try {
+      await addToWatchlist(movie);
+    } catch (err) {
+      setWatchlistActionError(
+        err instanceof Error ? err.message : 'Nie udało się dodać do watchlisty.',
+      );
+    }
+  }, [movie, addToWatchlist]);
+
+  const handleToggleCurrentWatched = useCallback(async () => {
+    if (!savedEntry) return;
+    setWatchlistActionError(null);
+    try {
+      await toggleWatched({ entryId: savedEntry.id, watched: !savedEntry.watched });
+    } catch (err) {
+      setWatchlistActionError(
+        err instanceof Error ? err.message : 'Nie udało się zaktualizować statusu.',
+      );
+    }
+  }, [savedEntry, toggleWatched]);
 
   const genreName = (id: number) => genres.find((g) => g.id === id)?.name ?? '';
 
@@ -433,23 +482,110 @@ const MagdaLosuje: React.FC = () => {
                       </Typography>
                     )}
 
-                    <Button
-                      className="magda-tmdb-link"
-                      component="a"
-                      href={`https://www.themoviedb.org/movie/${movie.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      endIcon={<OpenInNewIcon />}
-                      size="small"
-                    >
-                      Zobacz w TMDB
-                    </Button>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} gap={1} flexWrap="wrap" mt={0.5}>
+                      {savedEntry ? (
+                        <>
+                          <Button
+                            className="magda-wl-btn magda-wl-btn--saved"
+                            variant="outlined"
+                            size="small"
+                            disabled
+                            startIcon={<BookmarkAddedIcon />}
+                          >
+                            Na watchliście
+                          </Button>
+                          <Button
+                            className={`magda-wl-btn${savedEntry.watched ? ' magda-wl-btn--done' : ''}`}
+                            variant="contained"
+                            size="small"
+                            disabled={toggling}
+                            onClick={() => void handleToggleCurrentWatched()}
+                            startIcon={
+                              toggling ? (
+                                <CircularProgress size={16} color="inherit" />
+                              ) : savedEntry.watched ? (
+                                <CheckCircleIcon />
+                              ) : (
+                                <CheckCircleOutlineIcon />
+                              )
+                            }
+                          >
+                            {savedEntry.watched ? 'Obejrzane' : 'Oznacz jako obejrzane'}
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          className="magda-wl-btn"
+                          variant="contained"
+                          size="small"
+                          disabled={adding}
+                          onClick={() => void handleAddToWatchlist()}
+                          startIcon={
+                            adding ? (
+                              <CircularProgress size={16} color="inherit" />
+                            ) : (
+                              <BookmarkAddOutlinedIcon />
+                            )
+                          }
+                        >
+                          Dodaj do watchlisty
+                        </Button>
+                      )}
+
+                      <Button
+                        className="magda-tmdb-link"
+                        component="a"
+                        href={`https://www.themoviedb.org/movie/${movie.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        endIcon={<OpenInNewIcon />}
+                        size="small"
+                      >
+                        Zobacz w TMDB
+                      </Button>
+                    </Stack>
                   </div>
                 </div>
               </motion.article>
             )}
           </AnimatePresence>
         </Box>
+
+        {watchlistActionError && (
+          <Alert
+            severity="error"
+            sx={{ mt: 2, borderRadius: 2 }}
+            onClose={() => setWatchlistActionError(null)}
+          >
+            {watchlistActionError}
+          </Alert>
+        )}
+
+        <WatchlistPanel
+          items={watchlist}
+          loading={watchlistLoading}
+          busy={toggling || removing}
+          onToggleWatched={async (entryId, watched) => {
+            setWatchlistActionError(null);
+            try {
+              await toggleWatched({ entryId, watched });
+            } catch (err) {
+              setWatchlistActionError(
+                err instanceof Error ? err.message : 'Nie udało się zaktualizować statusu.',
+              );
+            }
+          }}
+          onRemove={async (entryId) => {
+            setWatchlistActionError(null);
+            try {
+              await removeFromWatchlist(entryId);
+            } catch (err) {
+              setWatchlistActionError(
+                err instanceof Error ? err.message : 'Nie udało się usunąć filmu.',
+              );
+            }
+          }}
+        />
 
         <Typography className="magda-credit" component="p">
           Dane filmów: The Movie Database (TMDB)
