@@ -69,7 +69,7 @@ const initialFilters: FilterState = {
   showOnlyFavorites: false,
   author: "",
   searchTerm: "",
-  statsYear: new Date().getFullYear(),
+  statsYear: "all",
 };
 
 const initialState: AppState = {

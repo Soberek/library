@@ -15,7 +15,8 @@ import {
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -38,33 +39,25 @@ interface BookCardProps {
 
 const STATUS_STYLE: Record<
   BookStatus,
-  { color: string; bg: string; border: string; Icon: React.ElementType; short: string }
+  { bg: string; Icon: React.ElementType; short: string }
 > = {
   "Chcę przeczytać": {
-    color: "#1d4ed8",
-    bg: "rgba(59, 130, 246, 0.92)",
-    border: "rgba(255,255,255,0.35)",
+    bg: "#3b82f6",
     Icon: BookmarkAddOutlinedIcon,
     short: "Do przeczytania",
   },
   "W trakcie": {
-    color: "#b45309",
-    bg: "rgba(245, 158, 11, 0.95)",
-    border: "rgba(255,255,255,0.35)",
+    bg: "#f59e0b",
     Icon: AutoStoriesOutlinedIcon,
     short: "W trakcie",
   },
   Przeczytana: {
-    color: "#15803d",
-    bg: "rgba(34, 197, 94, 0.92)",
-    border: "rgba(255,255,255,0.35)",
+    bg: "#22c55e",
     Icon: CheckCircleOutlineIcon,
     short: "Przeczytana",
   },
   Porzucona: {
-    color: "#b91c1c",
-    bg: "rgba(239, 68, 68, 0.92)",
-    border: "rgba(255,255,255,0.35)",
+    bg: "#ef4444",
     Icon: HighlightOffOutlinedIcon,
     short: "Porzucona",
   },
@@ -75,6 +68,14 @@ const STATUS_ACCENT: Record<BookStatus, string> = {
   "W trakcie": "#f59e0b",
   Przeczytana: "#22c55e",
   Porzucona: "#ef4444",
+};
+
+const GOLD = {
+  soft: "#f8f1df",
+  mid: "#e8c872",
+  rich: "#c9a227",
+  deep: "#8a6a12",
+  glow: "rgba(201, 162, 39, 0.35)",
 };
 
 const BookCard: React.FC<BookCardProps> = ({
@@ -115,55 +116,35 @@ const BookCard: React.FC<BookCardProps> = ({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        borderRadius: 2.5,
-        position: "relative",
+        borderRadius: 3,
+        bgcolor: "#fff",
         border: "1px solid",
-        borderColor: isFavorite
-          ? "rgba(184, 149, 106, 0.55)"
-          : "grey.200",
-        bgcolor: isFavorite ? "#fffdf8" : "background.paper",
-        backgroundImage: isFavorite
-          ? "linear-gradient(165deg, #fffefb 0%, #fffdf8 45%, #ffffff 100%)"
-          : "none",
-        overflow: "hidden",
+        borderColor: isFavorite ? "rgba(201, 162, 39, 0.28)" : "rgba(15,23,42,0.08)",
         boxShadow: isFavorite
-          ? "0 1px 2px rgba(139, 105, 60, 0.06), 0 8px 24px rgba(139, 105, 60, 0.08)"
-          : "none",
-        transition:
-          "border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease",
-        ...(isFavorite && {
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 16,
-            right: 16,
-            height: 1,
-            background:
-              "linear-gradient(90deg, transparent, rgba(184, 149, 106, 0.7), transparent)",
-            zIndex: 2,
-            pointerEvents: "none",
-          },
-        }),
+          ? `0 8px 28px ${GOLD.glow}, 0 2px 8px rgba(15,23,42,0.04)`
+          : "0 2px 10px rgba(15,23,42,0.04)",
+        overflow: "hidden",
+        transition: "transform 0.25s ease, box-shadow 0.25s ease",
         "&:hover": {
-          borderColor: isFavorite
-            ? "rgba(184, 149, 106, 0.85)"
-            : "grey.300",
+          transform: "translateY(-3px)",
           boxShadow: isFavorite
-            ? "0 2px 4px rgba(139, 105, 60, 0.08), 0 12px 28px rgba(139, 105, 60, 0.12)"
-            : "0 4px 16px rgba(26, 32, 44, 0.06)",
+            ? `0 14px 36px ${GOLD.glow}, 0 6px 16px rgba(15,23,42,0.06)`
+            : "0 10px 28px rgba(15,23,42,0.08)",
           "& .card-actions": { opacity: 1 },
         },
       }}
     >
-      {/* Cover */}
+      {/* Cover — full width, mostly visible */}
       <Box
         sx={{
           position: "relative",
-          aspectRatio: "3 / 4",
-          maxHeight: 220,
-          bgcolor: "grey.100",
+          height: 240,
+          flexShrink: 0,
           overflow: "hidden",
+          bgcolor: isFavorite ? GOLD.soft : "#f1f5f9",
+          ...(isFavorite && {
+            boxShadow: `inset 0 0 0 2px ${GOLD.mid}, inset 0 0 0 5px rgba(248,241,223,0.95)`,
+          }),
         }}
       >
         {book.cover ? (
@@ -174,8 +155,8 @@ const BookCard: React.FC<BookCardProps> = ({
             sx={{
               width: "100%",
               height: "100%",
-              objectFit: "cover",
-              objectPosition: "center top",
+              objectFit: "contain",
+              objectPosition: "center center",
               display: "block",
             }}
           />
@@ -184,90 +165,100 @@ const BookCard: React.FC<BookCardProps> = ({
             sx={{
               height: "100%",
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 1,
-              background: `linear-gradient(160deg, ${accent}22 0%, ${accent}55 100%)`,
-              color: accent,
+              background: isFavorite
+                ? `linear-gradient(145deg, ${GOLD.soft}, #efe0b0)`
+                : `linear-gradient(145deg, ${accent}22, ${accent}44)`,
+              color: isFavorite ? GOLD.deep : accent,
             }}
           >
-            <MenuBookOutlinedIcon sx={{ fontSize: 40, opacity: 0.85 }} />
-            <Typography
-              sx={{
-                fontSize: "0.7rem",
-                fontWeight: 600,
-                opacity: 0.8,
-              }}
-            >
-              Brak okładki
-            </Typography>
+            <MenuBookOutlinedIcon sx={{ fontSize: 48 }} />
           </Box>
         )}
 
-        {/* Status + favorite overlay */}
+        {/* Status */}
+        <Tooltip title={`Zmień status → ${nextStatusLabel}`} arrow>
+          <Box
+            component="button"
+            type="button"
+            onClick={() => onStatusChange(book.id, book.read)}
+            sx={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              zIndex: 3,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1,
+              py: 0.4,
+              border: "none",
+              borderRadius: 999,
+              bgcolor: status.bg,
+              color: "#fff",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(15,23,42,0.18)",
+              "&:hover": { filter: "brightness(1.06)" },
+            }}
+          >
+            <StatusIcon sx={{ fontSize: 12 }} />
+            {status.short}
+          </Box>
+        </Tooltip>
+
+        {/* Favorite + optional gold medallion */}
         <Box
           sx={{
             position: "absolute",
-            inset: 0,
-            p: 1,
+            top: 8,
+            right: 8,
+            zIndex: 3,
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            background:
-              "linear-gradient(180deg, rgba(15,23,42,0.35) 0%, transparent 42%)",
-            pointerEvents: "none",
-            "& > *": { pointerEvents: "auto" },
+            alignItems: "center",
+            gap: 0.75,
           }}
         >
-          <Tooltip title={`Zmień status → ${nextStatusLabel}`} arrow>
+          {isFavorite && (
             <Box
-              component="button"
-              type="button"
-              onClick={() => onStatusChange(book.id, book.read)}
-              aria-label={`Status: ${book.read}. Kliknij, aby zmienić.`}
+              aria-hidden
               sx={{
-                display: "inline-flex",
+                position: "relative",
+                width: 34,
+                height: 34,
+                display: "flex",
                 alignItems: "center",
-                gap: 0.5,
-                maxWidth: "70%",
-                px: 0.875,
-                py: 0.4,
-                border: "1px solid",
-                borderColor: status.border,
-                borderRadius: 1.25,
-                bgcolor: status.bg,
-                color: "#fff",
-                fontSize: "0.6875rem",
-                fontWeight: 700,
-                letterSpacing: "0.01em",
-                lineHeight: 1.2,
-                cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(15, 23, 42, 0.22)",
-                backdropFilter: "blur(8px)",
-                transition: "transform 0.15s ease, filter 0.15s ease",
-                "&:hover": {
-                  transform: "translateY(-1px)",
-                  filter: "brightness(1.05)",
-                },
-                "&:active": {
-                  transform: "translateY(0)",
-                },
+                justifyContent: "center",
               }}
             >
-              <StatusIcon sx={{ fontSize: 13, flexShrink: 0 }} />
               <Box
-                component="span"
                 sx={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "50%",
+                  background: `conic-gradient(from 210deg, ${GOLD.deep}, ${GOLD.mid}, #f5e6a8, ${GOLD.mid}, ${GOLD.deep}, ${GOLD.rich}, ${GOLD.deep})`,
+                  boxShadow: `0 2px 10px ${GOLD.glow}`,
+                }}
+              />
+              <Box
+                sx={{
+                  position: "relative",
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  bgcolor: "#fffaf0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 0 0 1px rgba(201,162,39,0.3) inset",
                 }}
               >
-                {status.short}
+                <StarIcon sx={{ fontSize: 13, color: GOLD.rich }} />
               </Box>
             </Box>
-          </Tooltip>
+          )}
 
           <Tooltip
             title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
@@ -276,115 +267,69 @@ const BookCard: React.FC<BookCardProps> = ({
               size="small"
               onClick={() => onToggleFavorite(book.id, isFavorite)}
               sx={{
-                width: 30,
-                height: 30,
-                bgcolor: isFavorite
-                  ? "rgba(255, 252, 245, 0.95)"
-                  : "rgba(255,255,255,0.92)",
-                color: isFavorite ? "#a67c52" : "text.secondary",
+                width: 32,
+                height: 32,
+                bgcolor: isFavorite ? GOLD.rich : "rgba(255,255,255,0.95)",
+                color: isFavorite ? "#fff" : "#94a3b8",
                 border: "1px solid",
-                borderColor: isFavorite
-                  ? "rgba(184, 149, 106, 0.45)"
-                  : "rgba(255,255,255,0.5)",
+                borderColor: isFavorite ? GOLD.deep : "rgba(15,23,42,0.08)",
                 boxShadow: isFavorite
-                  ? "0 1px 6px rgba(139, 105, 60, 0.18)"
-                  : "0 1px 4px rgba(0,0,0,0.12)",
+                  ? `0 4px 12px ${GOLD.glow}`
+                  : "0 2px 6px rgba(15,23,42,0.08)",
                 "&:hover": {
-                  bgcolor: isFavorite
-                    ? "rgba(255, 250, 240, 1)"
-                    : "rgba(255,255,255,1)",
-                  borderColor: isFavorite
-                    ? "rgba(184, 149, 106, 0.7)"
-                    : "rgba(255,255,255,0.8)",
-                  color: isFavorite ? "#8b6914" : "text.primary",
+                  bgcolor: isFavorite ? GOLD.deep : "#fff",
+                  color: isFavorite ? "#fff" : "#ef4444",
                 },
               }}
             >
               {isFavorite ? (
-                <StarIcon sx={{ fontSize: 15 }} />
+                <FavoriteIcon sx={{ fontSize: 15 }} />
               ) : (
-                <BookmarkBorderIcon sx={{ fontSize: 16 }} />
+                <FavoriteBorderIcon sx={{ fontSize: 16 }} />
               )}
             </IconButton>
           </Tooltip>
         </Box>
-
-        {/* Progress strip on cover bottom */}
-        <Box
-          sx={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            px: 1,
-            py: 0.75,
-            background:
-              "linear-gradient(0deg, rgba(15,23,42,0.55) 0%, transparent 100%)",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 0.4,
-            }}
-          >
-            <Typography
-              sx={{
-                color: "#fff",
-                fontSize: "0.65rem",
-                fontWeight: 600,
-                textShadow: "0 1px 2px rgba(0,0,0,0.35)",
-              }}
-            >
-              {book.readPages}/{book.overallPages}
-            </Typography>
-            <Typography
-              sx={{
-                color: "#fff",
-                fontSize: "0.65rem",
-                fontWeight: 700,
-                textShadow: "0 1px 2px rgba(0,0,0,0.35)",
-              }}
-            >
-              {Math.round(progress)}%
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 3,
-              borderRadius: 2,
-              bgcolor: "rgba(255,255,255,0.25)",
-              "& .MuiLinearProgress-bar": {
-                bgcolor: "#fff",
-                borderRadius: 2,
-              },
-            }}
-          />
-        </Box>
       </Box>
 
-      {/* Body */}
+      {/* Content */}
       <Box
         sx={{
-          p: 1.5,
+          px: 2,
+          pb: 2,
+          pt: 0.5,
           display: "flex",
           flexDirection: "column",
-          gap: 1,
+          gap: 1.25,
           flex: 1,
         }}
       >
-        <Box sx={{ minHeight: 0 }}>
+        <Box sx={{ textAlign: "center" }}>
+          {isFavorite && (
+            <Typography
+              sx={{
+                mb: 0.5,
+                fontSize: "0.6rem",
+                fontWeight: 800,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                background: `linear-gradient(90deg, ${GOLD.deep}, ${GOLD.rich}, ${GOLD.deep})`,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Ulubiona
+            </Typography>
+          )}
           <Typography
             component="h2"
             sx={{
-              fontWeight: isFavorite ? 750 : 700,
-              fontSize: "0.9375rem",
+              fontWeight: 800,
+              fontSize: "1rem",
               lineHeight: 1.25,
-              letterSpacing: isFavorite ? "-0.01em" : "-0.015em",
-              color: isFavorite ? "#1c1917" : "text.primary",
+              letterSpacing: "-0.02em",
+              color: "#0f172a",
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
@@ -396,9 +341,9 @@ const BookCard: React.FC<BookCardProps> = ({
           </Typography>
           <Typography
             sx={{
-              fontSize: "0.75rem",
+              fontSize: "0.78rem",
               fontWeight: 500,
-              color: isFavorite ? "#78716c" : "text.secondary",
+              color: "#64748b",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -408,17 +353,70 @@ const BookCard: React.FC<BookCardProps> = ({
           </Typography>
         </Box>
 
+        {/* Progress */}
+        <Box
+          sx={{
+            px: 1.25,
+            py: 1,
+            borderRadius: 2,
+            bgcolor: isFavorite ? "rgba(248, 241, 223, 0.7)" : "#f8fafc",
+            border: "1px solid",
+            borderColor: isFavorite
+              ? "rgba(201, 162, 39, 0.2)"
+              : "rgba(15,23,42,0.05)",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 0.6,
+            }}
+          >
+            <Typography
+              sx={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b" }}
+            >
+              {book.readPages} / {book.overallPages}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "0.7rem",
+                fontWeight: 800,
+                color: isFavorite ? GOLD.deep : "#667eea",
+              }}
+            >
+              {Math.round(progress)}%
+            </Typography>
+          </Box>
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{
+              height: 5,
+              borderRadius: 999,
+              bgcolor: isFavorite ? "rgba(201,162,39,0.15)" : "#e2e8f0",
+              "& .MuiLinearProgress-bar": {
+                borderRadius: 999,
+                background: isFavorite
+                  ? `linear-gradient(90deg, ${GOLD.rich}, ${GOLD.mid})`
+                  : "linear-gradient(90deg, #667eea, #764ba2)",
+              },
+            }}
+          />
+        </Box>
+
+        {/* Rating + actions */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 1,
             mt: "auto",
-            pt: 0.5,
+            gap: 1,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
             <Rating
               name={`rating-${book.id}`}
               value={book.rating / 2}
@@ -430,22 +428,21 @@ const BookCard: React.FC<BookCardProps> = ({
                   onRatingChange(book.id, newValue * 2);
                 }
               }}
-              icon={<StarIcon sx={{ fontSize: 16 }} />}
+              icon={<StarIcon sx={{ fontSize: 17 }} />}
               emptyIcon={
-                <StarBorderIcon sx={{ fontSize: 16, color: "grey.300" }} />
+                <StarBorderIcon sx={{ fontSize: 17, color: "#cbd5e1" }} />
               }
               sx={{
-                "& .MuiRating-iconFilled": { color: "#f59e0b" },
-                "& .MuiRating-iconHover": { color: "#d97706" },
+                "& .MuiRating-iconFilled": {
+                  color: isFavorite ? GOLD.rich : "#f59e0b",
+                },
+                "& .MuiRating-iconHover": {
+                  color: isFavorite ? GOLD.deep : "#d97706",
+                },
               }}
             />
             <Typography
-              sx={{
-                fontSize: "0.7rem",
-                fontWeight: 700,
-                color: "text.secondary",
-                minWidth: 28,
-              }}
+              sx={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b" }}
             >
               {book.rating.toFixed(1)}
             </Typography>
@@ -456,7 +453,7 @@ const BookCard: React.FC<BookCardProps> = ({
             sx={{
               display: "flex",
               gap: 0.25,
-              opacity: { xs: 1, md: 0.55 },
+              opacity: { xs: 1, md: 0.45 },
               transition: "opacity 0.2s ease",
             }}
           >
@@ -466,10 +463,10 @@ const BookCard: React.FC<BookCardProps> = ({
                 onClick={() => onEdit(book.id)}
                 aria-label="Edytuj"
                 sx={{
-                  color: "text.secondary",
+                  color: "#94a3b8",
                   "&:hover": {
-                    color: "primary.main",
-                    bgcolor: "rgba(102, 126, 234, 0.08)",
+                    color: "#667eea",
+                    bgcolor: "rgba(102,126,234,0.08)",
                   },
                 }}
               >
@@ -482,10 +479,10 @@ const BookCard: React.FC<BookCardProps> = ({
                 onClick={() => setOpenDeleteDialog(true)}
                 aria-label="Usuń"
                 sx={{
-                  color: "text.secondary",
+                  color: "#94a3b8",
                   "&:hover": {
-                    color: "error.main",
-                    bgcolor: "rgba(239, 68, 68, 0.08)",
+                    color: "#ef4444",
+                    bgcolor: "rgba(239,68,68,0.08)",
                   },
                 }}
               >

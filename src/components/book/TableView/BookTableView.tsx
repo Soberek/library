@@ -14,7 +14,6 @@ interface BookTableViewProps {
 
 /**
  * Table view for displaying books in a data table format
- * Provides a compact, information-dense view of books
  */
 export const BookTableView: React.FC<BookTableViewProps> = ({
   books,
@@ -29,10 +28,12 @@ export const BookTableView: React.FC<BookTableViewProps> = ({
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 2,
+          borderRadius: 3,
           overflow: "hidden",
           border: "1px solid",
-          borderColor: "divider",
+          borderColor: "grey.200",
+          boxShadow: "0 1px 2px rgba(26, 32, 44, 0.04)",
+          bgcolor: "background.paper",
         }}
       >
         <BookTable

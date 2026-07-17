@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo, useState } from "react";
 import {
+  Box,
   Table,
   TableBody,
   TableCell,
@@ -9,18 +10,25 @@ import {
   Rating,
   IconButton,
   Tooltip,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
-
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-
-import type { Book, BookStatus } from '../../../types/Book';
-import { BOOK_STATUS_LABELS, getNextBookStatus } from '../../../constants/bookStatus';
+  Typography,
+  LinearProgress,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import type { Book, BookStatus } from "../../../types/Book";
+import { BOOK_STATUS_LABELS } from "../../../constants/bookStatus";
+import { formatBookCount } from "../../../utils/textHelpers";
 
 interface BookTableProps {
   books: Book[];
@@ -31,18 +39,46 @@ interface BookTableProps {
   handleDelete: (bookId: string) => void;
   handleShare?: (book: Book) => void;
   sortField?: string;
-  sortOrder?: 'asc' | 'desc';
-  onSortChange?: (field: string, order: 'asc' | 'desc') => void;
+  sortOrder?: "asc" | "desc";
+  onSortChange?: (field: string, order: "asc" | "desc") => void;
 }
 
-type SortField = 'title' | 'author' | 'rating' | 'pages' | 'status' | 'dateAdded' | null;
-type SortOrder = 'asc' | 'desc';
+type SortField =
+  | "title"
+  | "author"
+  | "rating"
+  | "pages"
+  | "status"
+  | "dateAdded"
+  | null;
+type SortOrder = "asc" | "desc";
 
-const statusColors: Record<BookStatus, { color: string; bg: string; text: string; border: string }> = {
-  'Chcę przeczytać': { color: 'info', bg: 'bg-blue-600', text: 'text-white', border: 'border-blue-300' },
-  'W trakcie': { color: 'warning', bg: 'bg-amber-600', text: 'text-white', border: 'border-amber-300' },
-  'Przeczytana': { color: 'success', bg: 'bg-green-600', text: 'text-white', border: 'border-green-300' },
-  'Porzucona': { color: 'error', bg: 'bg-red-600', text: 'text-white', border: 'border-red-300' },
+const STATUS_STYLE: Record<BookStatus, { bg: string; color: string }> = {
+  "Chcę przeczytać": { bg: "rgba(59, 130, 246, 0.12)", color: "#1d4ed8" },
+  "W trakcie": { bg: "rgba(245, 158, 11, 0.14)", color: "#b45309" },
+  Przeczytana: { bg: "rgba(34, 197, 94, 0.12)", color: "#15803d" },
+  Porzucona: { bg: "rgba(239, 68, 68, 0.12)", color: "#b91c1c" },
+};
+
+const GOLD = {
+  soft: "#f8f1df",
+  mid: "#e8c872",
+  rich: "#c9a227",
+  deep: "#8a6a12",
+};
+
+const nextStatusFromCurrent = (current: BookStatus): BookStatus => {
+  switch (current) {
+    case "Przeczytana":
+    case "Porzucona":
+      return "Chcę przeczytać";
+    case "W trakcie":
+      return "Przeczytana";
+    case "Chcę przeczytać":
+      return "W trakcie";
+    default:
+      return "Chcę przeczytać";
+  }
 };
 
 export default function BookTable({
@@ -56,238 +92,585 @@ export default function BookTable({
   sortOrder: externalSortOrder,
   onSortChange,
 }: BookTableProps) {
-  // Use external sort state if provided, otherwise use internal state
-  const [internalSortField, setInternalSortField] = React.useState<SortField>(null);
-  const [internalSortOrder, setInternalSortOrder] = React.useState<SortOrder>('asc');
-  const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(false);
-  
-  // Use external sort state if provided
-  const sortField = externalSortField as SortField || internalSortField;
+  const [internalSortField, setInternalSortField] =
+    useState<SortField>("title");
+  const [internalSortOrder, setInternalSortOrder] = useState<SortOrder>("asc");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const sortField =
+    (externalSortField as SortField) || internalSortField;
   const sortOrder = externalSortOrder || internalSortOrder;
 
+  const favoritesCount = useMemo(
+    () => books.filter((b) => b.isFavorite).length,
+    [books],
+  );
+
   const handleSort = (field: SortField) => {
-    const newOrder = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
-    
+    if (!field) return;
+    const newOrder =
+      sortField === field && sortOrder === "asc" ? "desc" : "asc";
+
     if (onSortChange) {
-      // Use external sort handling if provided
-      onSortChange(field || '', newOrder);
+      onSortChange(field, newOrder);
     } else {
-      // Otherwise use internal state
       setInternalSortField(field);
       setInternalSortOrder(newOrder);
     }
   };
 
-  // Filter by favorites
-  const filteredBooks = showFavoritesOnly 
-    ? books.filter(book => book.isFavorite) 
+  const filteredBooks = showFavoritesOnly
+    ? books.filter((book) => book.isFavorite)
     : books;
 
-  // Sort books
-  const sortedBooks = React.useMemo(() => {
+  const sortedBooks = useMemo(() => {
     if (!sortField) return filteredBooks;
 
     return [...filteredBooks].sort((a, b) => {
       let comparison = 0;
 
       switch (sortField) {
-        case 'title':
+        case "title":
           comparison = a.title.localeCompare(b.title);
           break;
-        case 'author':
+        case "author":
           comparison = a.author.localeCompare(b.author);
           break;
-        case 'rating':
+        case "rating":
           comparison = a.rating - b.rating;
           break;
-        case 'pages':
+        case "pages":
           comparison = a.overallPages - b.overallPages;
           break;
-        case 'status':
+        case "status":
           comparison = a.read.localeCompare(b.read);
+          break;
+        case "dateAdded":
+          comparison =
+            new Date(a.createdAt || 0).getTime() -
+            new Date(b.createdAt || 0).getTime();
           break;
       }
 
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOrder === "asc" ? comparison : -comparison;
     });
   }, [filteredBooks, sortField, sortOrder]);
 
-  const SortableHeader = ({ field, label }: { field: SortField; label: string }) => (
-    <TableCell 
-      className="p-4 font-bold text-left border-b-2 border-gray-300 bg-gradient-to-r from-blue-50 to-indigo-50 cursor-pointer hover:bg-blue-100 transition-colors select-none"
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center gap-2 text-gray-800">
-        <span className="text-sm uppercase tracking-wide">{label}</span>
-        {sortField === field && (
-          sortOrder === 'asc' 
-            ? <ArrowUpwardIcon fontSize="small" className="text-blue-600" /> 
-            : <ArrowDownwardIcon fontSize="small" className="text-blue-600" />
-        )}
-      </div>
-    </TableCell>
-  );
+  const deleteBook = books.find((b) => b.id === deleteId);
+
+  const SortableHeader = ({
+    field,
+    label,
+    align = "left",
+    width,
+  }: {
+    field: SortField;
+    label: string;
+    align?: "left" | "center" | "right";
+    width?: number | string;
+  }) => {
+    const active = sortField === field;
+    return (
+      <TableCell
+        align={align}
+        onClick={() => handleSort(field)}
+        sx={{
+          width,
+          py: 1.25,
+          px: 2,
+          cursor: "pointer",
+          userSelect: "none",
+          borderBottom: "1px solid",
+          borderColor: "grey.200",
+          bgcolor: "grey.50",
+          whiteSpace: "nowrap",
+          "&:hover": { bgcolor: "rgba(102, 126, 234, 0.06)" },
+        }}
+      >
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: active ? "primary.main" : "text.secondary",
+          }}
+        >
+          <Typography
+            component="span"
+            sx={{
+              fontSize: "0.6875rem",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+            }}
+          >
+            {label}
+          </Typography>
+          {active &&
+            (sortOrder === "asc" ? (
+              <ArrowUpwardIcon sx={{ fontSize: 14 }} />
+            ) : (
+              <ArrowDownwardIcon sx={{ fontSize: 14 }} />
+            ))}
+        </Box>
+      </TableCell>
+    );
+  };
 
   return (
-    <div className="mb-4">
-      {/* Compact header with filters and info */}
-      <div className="flex justify-between items-center mb-2">
-        <div className="text-sm font-medium text-gray-600">
-          {sortedBooks.length} z {books.length} książek
-          {sortField && <span className="ml-2 text-blue-600">• Sortowanie: {sortField} ({sortOrder === 'asc' ? '↑' : '↓'})</span>}
-        </div>
-        <FormControlLabel
-          control={
-            <Switch 
-              checked={showFavoritesOnly} 
-              onChange={(e) => setShowFavoritesOnly(e.target.checked)}
-              color="error"
-              size="small"
-            />
-          }
-          label={
-            <span className="text-xs font-medium text-gray-700 flex items-center gap-1">
-              <BookmarkIcon sx={{ fontSize: 14 }} className="text-red-500" />
-              Ulubione ({books.filter(b => b.isFavorite).length})
-            </span>
-          }
-          className="m-0"
-        />
-      </div>
+    <Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+          flexWrap: "wrap",
+          px: { xs: 1.5, sm: 2 },
+          py: 1.25,
+          borderBottom: "1px solid",
+          borderColor: "grey.100",
+          bgcolor: "grey.50",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+            color: "text.secondary",
+          }}
+        >
+          {formatBookCount(sortedBooks.length)}
+          {sortedBooks.length !== books.length && (
+            <Box component="span" sx={{ color: "grey.400", fontWeight: 500 }}>
+              {" "}
+              z {books.length}
+            </Box>
+          )}
+        </Typography>
 
-      <TableContainer className="overflow-x-auto rounded-lg shadow-sm border border-gray-200 bg-white">
-        <Table className="w-full border-collapse" size="small">
+        <Button
+          size="small"
+          onClick={() => setShowFavoritesOnly((v) => !v)}
+          startIcon={
+            showFavoritesOnly ? (
+              <FavoriteIcon sx={{ fontSize: "16px !important" }} />
+            ) : (
+              <FavoriteBorderIcon sx={{ fontSize: "16px !important" }} />
+            )
+          }
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: "0.75rem",
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 999,
+            color: showFavoritesOnly ? GOLD.deep : "text.secondary",
+            bgcolor: showFavoritesOnly ? GOLD.soft : "background.paper",
+            border: "1px solid",
+            borderColor: showFavoritesOnly
+              ? "rgba(201, 162, 39, 0.45)"
+              : "grey.200",
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: showFavoritesOnly ? "#f3e8c8" : "grey.100",
+              boxShadow: "none",
+              borderColor: showFavoritesOnly ? GOLD.mid : "grey.300",
+            },
+          }}
+        >
+          Ulubione ({favoritesCount})
+        </Button>
+      </Box>
+
+      <TableContainer sx={{ overflowX: "auto" }}>
+        <Table size="small" sx={{ minWidth: 720 }}>
           <TableHead>
             <TableRow>
               <SortableHeader field="title" label="Tytuł" />
-              <SortableHeader field="author" label="Autor" />
-              <SortableHeader field="status" label="Status" />
-              <SortableHeader field="rating" label="Ocena" />
-              <SortableHeader field="pages" label="Strony" />
-              <TableCell className="py-2 px-3 font-bold text-left border-b-2 border-gray-300 bg-gradient-to-r from-blue-50 to-indigo-50">
-                <span className="text-xs uppercase tracking-wide text-gray-800">Akcje</span>
+              <SortableHeader field="author" label="Autor" width={160} />
+              <SortableHeader field="status" label="Status" width={150} />
+              <SortableHeader field="rating" label="Ocena" width={160} />
+              <SortableHeader field="pages" label="Postęp" width={150} />
+              <TableCell
+                align="right"
+                sx={{
+                  py: 1.25,
+                  px: 2,
+                  borderBottom: "1px solid",
+                  borderColor: "grey.200",
+                  bgcolor: "grey.50",
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: "0.6875rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "text.secondary",
+                  }}
+                >
+                  Akcje
+                </Typography>
               </TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {sortedBooks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="p-8 text-center text-gray-500">
-                  {showFavoritesOnly ? 'Brak ulubionych książek' : 'Brak książek'}
+                <TableCell colSpan={6} sx={{ py: 6, textAlign: "center" }}>
+                  <Typography color="text.secondary" fontWeight={500}>
+                    {showFavoritesOnly
+                      ? "Brak ulubionych książek"
+                      : "Brak książek"}
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              sortedBooks.map((book, index) => {
-                const isFavorite = book.isFavorite ?? false;
-                const progress = book.overallPages > 0 ? (book.readPages || 0) / book.overallPages : 0;
-                const statusColor = statusColors[book.read];
+              sortedBooks.map((book) => {
+                const isFavorite = Boolean(book.isFavorite);
+                const progress =
+                  book.overallPages > 0
+                    ? Math.min(
+                        ((book.readPages || 0) / book.overallPages) * 100,
+                        100,
+                      )
+                    : 0;
+                const status = STATUS_STYLE[book.read];
+                const nextLabel =
+                  BOOK_STATUS_LABELS[nextStatusFromCurrent(book.read)];
 
                 return (
-                  <TableRow 
-                    key={book.id} 
-                    className={`
-                      transition-colors duration-150
-                      hover:bg-blue-50
-                      ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                      border-b border-gray-100
-                    `}
+                  <TableRow
+                    key={book.id}
+                    hover
+                    sx={{
+                      bgcolor: isFavorite ? "rgba(248, 241, 223, 0.45)" : "#fff",
+                      "&:hover": {
+                        bgcolor: isFavorite
+                          ? "rgba(248, 241, 223, 0.7)"
+                          : "rgba(102, 126, 234, 0.04)",
+                      },
+                      "& td": {
+                        borderBottom: "1px solid",
+                        borderColor: "grey.100",
+                        py: 1.25,
+                        px: 2,
+                      },
+                    }}
                   >
-                    <TableCell className="py-2 px-3">
-                      <div className="flex items-center gap-2">
-                        {book.cover && (
-                          <img 
-                            src={book.cover} 
-                            alt={book.title} 
-                            className="w-8 h-12 rounded object-cover border border-gray-200" 
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1">
-                            <Tooltip title={book.title}>
-                              <strong 
-                                className="cursor-pointer text-blue-700 hover:text-blue-900 hover:underline text-sm font-medium truncate max-w-[180px]" 
-                                onClick={() => handleEdit(book.id)}
-                              >
-                                {book.title}
-                              </strong>
-                            </Tooltip>
-                            {isFavorite && <BookmarkIcon sx={{ fontSize: 14 }} className="text-red-500" />}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-2 px-3">
-                      <span className="text-gray-700 text-sm truncate block max-w-[120px]">{book.author}</span>
-                    </TableCell>
-                    <TableCell className="py-2 px-3">
-                      <Tooltip title={`Zmień status: ${BOOK_STATUS_LABELS[getNextBookStatus(book.read)]}`}>
-                        <div 
-                          className={`
-                            inline-flex items-center px-2 py-1 rounded-full text-xs 
-                            cursor-pointer hover:brightness-95 transition-all
-                            ${statusColor.bg} ${statusColor.text}
-                          `}
-                          onClick={() => handleStatusChange(book.id, book.read)}
-                        >
-                          {BOOK_STATUS_LABELS[book.read]}
-                        </div>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell className="py-2 px-3">
-                      <div className="flex items-center gap-1">
-                        <Rating
-                          value={book.rating / 2}
-                          onChange={(_, newValue) => handleRatingChange(book.id, (newValue || 0) * 2)}
-                          precision={0.5}
-                          size="small"
-                          className="text-yellow-500"
-                        />
-                        <span className="text-xs text-gray-500">{book.rating}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-2 px-3">
-                      <div className="flex items-center gap-1">
-                        <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`
-                              h-full
-                              ${progress === 1 ? 'bg-green-500' : 
-                                progress > 0.5 ? 'bg-blue-500' : 
-                                'bg-amber-500'}
-                            `}
-                            style={{ width: `${progress * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-500 whitespace-nowrap">{(book.readPages || 0)}/{book.overallPages}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-1 px-2">
-                      <div className="flex gap-1 justify-end">
-                        <IconButton 
-                          onClick={() => handleToggleFavorite(book.id, isFavorite)} 
-                          size="small"
-                          sx={{ 
-                            padding: '2px',
-                            color: isFavorite ? 'red' : 'gray',
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                          minWidth: 0,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 36,
+                            height: 48,
+                            borderRadius: 1,
+                            overflow: "hidden",
+                            flexShrink: 0,
+                            bgcolor: isFavorite ? GOLD.soft : "grey.100",
+                            border: "1px solid",
+                            borderColor: isFavorite
+                              ? "rgba(201, 162, 39, 0.4)"
+                              : "grey.200",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                           }}
                         >
-                          <BookmarkIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                        <IconButton 
-                          onClick={() => handleEdit(book.id)} 
-                          size="small"
-                          sx={{ padding: '2px', color: '#2563eb' }}
+                          {book.cover ? (
+                            <Box
+                              component="img"
+                              src={book.cover}
+                              alt=""
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            <MenuBookOutlinedIcon
+                              sx={{
+                                fontSize: 18,
+                                color: isFavorite ? GOLD.rich : "grey.400",
+                              }}
+                            />
+                          )}
+                        </Box>
+
+                        <Box sx={{ minWidth: 0 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.75,
+                              minWidth: 0,
+                            }}
+                          >
+                            <Tooltip title={book.title}>
+                              <Typography
+                                onClick={() => handleEdit(book.id)}
+                                sx={{
+                                  fontWeight: 700,
+                                  fontSize: "0.875rem",
+                                  color: "text.primary",
+                                  cursor: "pointer",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: { xs: 140, sm: 220, md: 280 },
+                                  "&:hover": { color: "primary.main" },
+                                }}
+                              >
+                                {book.title}
+                              </Typography>
+                            </Tooltip>
+                            {isFavorite && (
+                              <Box
+                                sx={{
+                                  width: 18,
+                                  height: 18,
+                                  borderRadius: "50%",
+                                  flexShrink: 0,
+                                  background: `conic-gradient(from 210deg, ${GOLD.deep}, ${GOLD.mid}, #f5e6a8, ${GOLD.rich}, ${GOLD.deep})`,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: "50%",
+                                    bgcolor: "#fffaf0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  <FavoriteIcon
+                                    sx={{ fontSize: 8, color: GOLD.rich }}
+                                  />
+                                </Box>
+                              </Box>
+                            )}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell>
+                      <Typography
+                        sx={{
+                          fontSize: "0.8125rem",
+                          color: "text.secondary",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          maxWidth: 150,
+                        }}
+                      >
+                        {book.author}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell>
+                      <Tooltip title={`Zmień status → ${nextLabel}`}>
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() =>
+                            handleStatusChange(book.id, book.read)
+                          }
+                          sx={{
+                            border: "none",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            px: 1,
+                            py: 0.4,
+                            borderRadius: 999,
+                            bgcolor: status.bg,
+                            color: status.color,
+                            fontSize: "0.6875rem",
+                            fontWeight: 700,
+                            lineHeight: 1.2,
+                            whiteSpace: "nowrap",
+                            transition: "filter 0.15s ease",
+                            "&:hover": { filter: "brightness(0.96)" },
+                          }}
                         >
-                          <EditIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                        <IconButton 
-                          onClick={() => handleDelete(book.id)} 
+                          {BOOK_STATUS_LABELS[book.read]}
+                        </Box>
+                      </Tooltip>
+                    </TableCell>
+
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.75,
+                        }}
+                      >
+                        <Rating
+                          value={book.rating / 2}
+                          onChange={(_, newValue) =>
+                            handleRatingChange(
+                              book.id,
+                              (newValue || 0) * 2,
+                            )
+                          }
+                          precision={0.5}
                           size="small"
-                          sx={{ padding: '2px', color: '#dc2626' }}
+                          sx={{
+                            "& .MuiRating-iconFilled": {
+                              color: isFavorite ? GOLD.rich : "#f59e0b",
+                            },
+                          }}
+                        />
+                        <Typography
+                          sx={{
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            color: "text.secondary",
+                            minWidth: 24,
+                          }}
                         >
-                          <DeleteIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </div>
+                          {book.rating.toFixed(1)}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell>
+                      <Box sx={{ minWidth: 110 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mb: 0.4,
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              fontSize: "0.7rem",
+                              fontWeight: 600,
+                              color: "text.secondary",
+                            }}
+                          >
+                            {book.readPages || 0}/{book.overallPages}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: "0.7rem",
+                              fontWeight: 700,
+                              color: isFavorite ? GOLD.deep : "primary.main",
+                            }}
+                          >
+                            {Math.round(progress)}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={progress}
+                          sx={{
+                            height: 4,
+                            borderRadius: 999,
+                            bgcolor: isFavorite
+                              ? "rgba(201,162,39,0.15)"
+                              : "grey.200",
+                            "& .MuiLinearProgress-bar": {
+                              borderRadius: 999,
+                              background: isFavorite
+                                ? `linear-gradient(90deg, ${GOLD.rich}, ${GOLD.mid})`
+                                : "linear-gradient(90deg, #667eea, #764ba2)",
+                            },
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+
+                    <TableCell align="right">
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          gap: 0.25,
+                        }}
+                      >
+                        <Tooltip
+                          title={
+                            isFavorite
+                              ? "Usuń z ulubionych"
+                              : "Dodaj do ulubionych"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleToggleFavorite(book.id, isFavorite)
+                            }
+                            sx={{
+                              color: isFavorite ? GOLD.rich : "grey.400",
+                              "&:hover": {
+                                color: isFavorite ? GOLD.deep : "error.main",
+                                bgcolor: isFavorite
+                                  ? "rgba(201,162,39,0.1)"
+                                  : "rgba(239,68,68,0.06)",
+                              },
+                            }}
+                          >
+                            {isFavorite ? (
+                              <FavoriteIcon sx={{ fontSize: 18 }} />
+                            ) : (
+                              <FavoriteBorderIcon sx={{ fontSize: 18 }} />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edytuj">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEdit(book.id)}
+                            sx={{
+                              color: "grey.400",
+                              "&:hover": {
+                                color: "primary.main",
+                                bgcolor: "rgba(102,126,234,0.08)",
+                              },
+                            }}
+                          >
+                            <EditOutlinedIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Usuń">
+                          <IconButton
+                            size="small"
+                            onClick={() => setDeleteId(book.id)}
+                            sx={{
+                              color: "grey.400",
+                              "&:hover": {
+                                color: "error.main",
+                                bgcolor: "rgba(239,68,68,0.08)",
+                              },
+                            }}
+                          >
+                            <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 );
@@ -296,8 +679,36 @@ export default function BookTable({
           </TableBody>
         </Table>
       </TableContainer>
-      {/* Removed menu since we now have direct action buttons */}
-    </div>
+
+      <Dialog
+        open={Boolean(deleteId)}
+        onClose={() => setDeleteId(null)}
+        aria-labelledby="delete-book-table-title"
+      >
+        <DialogTitle id="delete-book-table-title">
+          Potwierdź usunięcie
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Czy na pewno chcesz usunąć
+            {deleteBook ? ` „${deleteBook.title}”` : " tę książkę"}? Tej
+            operacji nie można cofnąć.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteId(null)}>Anuluj</Button>
+          <Button
+            color="error"
+            autoFocus
+            onClick={() => {
+              if (deleteId) handleDelete(deleteId);
+              setDeleteId(null);
+            }}
+          >
+            Usuń
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
-

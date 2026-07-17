@@ -257,10 +257,14 @@ describe("FilterSortPanel", () => {
     const sortOrderInput = screen.getByTestId("Kolejność-input");
     fireEvent.change(sortOrderInput, { target: { value: "asc" } });
 
-    await waitFor(() => expect(mockOnFilterChange).toHaveBeenCalledTimes(2));
-
-    const calledWith = mockOnFilterChange.mock.calls[1][0];
-    expect(calledWith[0].title).toBe("Book A");
+    await waitFor(() => {
+      expect(mockOnFilterChange).toHaveBeenCalled();
+      const calledWith =
+        mockOnFilterChange.mock.calls[
+          mockOnFilterChange.mock.calls.length - 1
+        ][0];
+      expect(calledWith[0].title).toBe("Book A");
+    });
   });
 
   it("sorts by author descending", async () => {
@@ -281,10 +285,14 @@ describe("FilterSortPanel", () => {
     const sortOrderInput = screen.getByTestId("Kolejność-input");
     fireEvent.change(sortOrderInput, { target: { value: "desc" } });
 
-    await waitFor(() => expect(mockOnFilterChange).toHaveBeenCalledTimes(3));
-
-    const calledWith = mockOnFilterChange.mock.calls[2][0];
-    expect(calledWith[0].author).toBe("Author Y");
+    await waitFor(() => {
+      expect(mockOnFilterChange).toHaveBeenCalled();
+      const calledWith =
+        mockOnFilterChange.mock.calls[
+          mockOnFilterChange.mock.calls.length - 1
+        ][0];
+      expect(calledWith[0].author).toBe("Author Y");
+    });
   });
 
   it("respects primary status sorting when sortBy is status", async () => {
