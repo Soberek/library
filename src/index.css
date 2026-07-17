@@ -5,19 +5,14 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans, "Plus Jakarta Sans", system-ui, sans-serif);
   line-height: 1.5;
   font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* * {
-  outline: 1px solid red;
-} */
 
 @keyframes fadeIn {
   from {

@@ -65,8 +65,9 @@ const MobileNavbar: React.FC = () => {
               <MenuBookOutlinedIcon sx={{ fontSize: 18 }} />
             </Box>
             <Typography
-              fontWeight={800}
-              fontSize="1rem"
+              fontFamily="var(--font-display)"
+              fontWeight={700}
+              fontSize="1.0625rem"
               letterSpacing="-0.02em"
             >
               MyLibrary

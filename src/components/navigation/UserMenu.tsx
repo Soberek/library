@@ -9,10 +9,12 @@ import {
   ButtonBase,
   ListItemIcon,
   ListItemText,
+  Divider,
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
 
@@ -33,25 +35,24 @@ const UserMenu: React.FC = () => {
 
   if (!authContext.user) {
     return (
-      <Box
-        component="a"
-        href="/sign-in"
+      <ButtonBase
+        component={RouterLink}
+        to="/sign-in"
         sx={{
-          display: "inline-flex",
-          alignItems: "center",
           px: 2,
-          py: 0.75,
+          py: 1,
+          borderRadius: 2,
           bgcolor: "primary.main",
           color: "primary.contrastText",
-          borderRadius: 2,
           fontWeight: 600,
           fontSize: "0.8125rem",
-          textDecoration: "none",
+          fontFamily: "var(--font-sans)",
+          boxShadow: "0 2px 8px rgba(102, 126, 234, 0.28)",
           "&:hover": { bgcolor: "primary.dark" },
         }}
       >
         Zaloguj się
-      </Box>
+      </ButtonBase>
     );
   }
 
@@ -61,63 +62,104 @@ const UserMenu: React.FC = () => {
 
   return (
     <>
-      <Tooltip title="Menu użytkownika">
+      <Tooltip title={open ? "" : email} arrow>
         <ButtonBase
           onClick={(e) => setAnchorEl(e.currentTarget)}
           aria-controls={open ? "user-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
+          aria-label="Menu użytkownika"
           sx={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
             gap: 1,
             pl: 0.5,
-            pr: { xs: 0.5, sm: 1.25 },
+            pr: 1,
             py: 0.5,
-            borderRadius: 999,
+            maxWidth: 200,
+            borderRadius: 2.5,
             border: "1px solid",
-            borderColor: open ? "primary.light" : "grey.200",
-            bgcolor: open ? "rgba(102, 126, 234, 0.06)" : "grey.50",
+            borderColor: open ? "rgba(102, 126, 234, 0.35)" : "grey.200",
+            bgcolor: open ? "rgba(102, 126, 234, 0.06)" : "#fff",
+            boxShadow: open
+              ? "0 0 0 3px rgba(102, 126, 234, 0.1)"
+              : "0 1px 2px rgba(26, 32, 44, 0.04)",
+            transition: "border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease",
             "&:hover": {
-              bgcolor: "rgba(102, 126, 234, 0.06)",
-              borderColor: "primary.light",
+              borderColor: "rgba(102, 126, 234, 0.4)",
+              bgcolor: "rgba(102, 126, 234, 0.04)",
+              boxShadow: "0 2px 8px rgba(26, 32, 44, 0.06)",
             },
           }}
         >
           <Avatar
             sx={{
-              bgcolor: "primary.main",
-              width: 32,
-              height: 32,
-              fontSize: "0.8125rem",
+              width: 34,
+              height: 34,
+              fontSize: "0.875rem",
               fontWeight: 700,
+              fontFamily: "var(--font-display)",
+              color: "#fff",
+              background: "linear-gradient(145deg, #667eea 0%, #764ba2 100%)",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.2)",
             }}
           >
             {initial}
           </Avatar>
+
           <Box
-            textAlign="left"
-            sx={{ display: { xs: "none", sm: "block" }, minWidth: 0 }}
+            sx={{
+              display: { xs: "none", sm: "flex" },
+              flexDirection: "column",
+              alignItems: "flex-start",
+              minWidth: 0,
+              flex: 1,
+              textAlign: "left",
+            }}
           >
             <Typography
-              variant="body2"
               noWrap
               sx={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: "0.8125rem",
-                lineHeight: 1.2,
-                maxWidth: 130,
+                lineHeight: 1.25,
+                letterSpacing: "-0.015em",
+                color: "text.primary",
+                maxWidth: 110,
               }}
             >
               {displayName}
             </Typography>
             <Typography
-              variant="caption"
-              sx={{ color: "text.secondary", fontSize: "0.6875rem" }}
+              component="span"
+              sx={{
+                mt: 0.15,
+                px: 0.75,
+                py: 0.1,
+                borderRadius: 999,
+                fontSize: "0.625rem",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                color: "primary.dark",
+                bgcolor: "rgba(102, 126, 234, 0.1)",
+                lineHeight: 1.5,
+              }}
             >
               Czytelnik
             </Typography>
           </Box>
+
+          <KeyboardArrowDownIcon
+            sx={{
+              display: { xs: "none", sm: "block" },
+              fontSize: 18,
+              color: "text.secondary",
+              flexShrink: 0,
+              transition: "transform 0.2s ease",
+              transform: open ? "rotate(180deg)" : "none",
+            }}
+          />
         </ButtonBase>
       </Tooltip>
 
@@ -127,41 +169,100 @@ const UserMenu: React.FC = () => {
         open={open}
         onClose={() => setAnchorEl(null)}
         PaperProps={{
+          elevation: 0,
           sx: {
-            mt: 1,
-            minWidth: 220,
+            mt: 1.25,
+            minWidth: 260,
+            overflow: "visible",
             borderRadius: 2.5,
             border: "1px solid",
-            borderColor: "grey.100",
-            boxShadow: "0 12px 40px rgba(26, 32, 44, 0.1)",
+            borderColor: "grey.200",
+            boxShadow: "0 16px 48px rgba(26, 32, 44, 0.12)",
+            "&::before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 22,
+              width: 10,
+              height: 10,
+              bgcolor: "background.paper",
+              borderLeft: "1px solid",
+              borderTop: "1px solid",
+              borderColor: "grey.200",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
           },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-            {email}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Czytelnik
-          </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            px: 2,
+            py: 1.75,
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 40,
+              height: 40,
+              fontWeight: 700,
+              fontFamily: "var(--font-display)",
+              background: "linear-gradient(145deg, #667eea 0%, #764ba2 100%)",
+            }}
+          >
+            {initial}
+          </Avatar>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              noWrap
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.875rem",
+                letterSpacing: "-0.015em",
+              }}
+            >
+              {displayName}
+            </Typography>
+            <Typography
+              noWrap
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", maxWidth: 180 }}
+            >
+              {email}
+            </Typography>
+          </Box>
         </Box>
+
+        <Divider sx={{ borderColor: "grey.100" }} />
+
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
             handleLogout();
           }}
           sx={{
+            mx: 1,
+            my: 1,
+            py: 1.15,
+            borderRadius: 1.5,
             color: "error.main",
-            py: 1.25,
             "&:hover": { bgcolor: "rgba(239, 68, 68, 0.08)" },
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 36 }}>
             <LogoutIcon fontSize="small" color="error" />
           </ListItemIcon>
-          <ListItemText primary="Wyloguj" />
+          <ListItemText
+            primary="Wyloguj się"
+            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+          />
         </MenuItem>
       </Menu>
     </>

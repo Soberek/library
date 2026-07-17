@@ -53,7 +53,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         </Box>
         <Typography
           variant="h5"
-          sx={{ fontWeight: 800, letterSpacing: "-0.02em", mb: 0.5 }}
+          sx={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            mb: 0.5,
+          }}
         >
           MyLibrary
         </Typography>

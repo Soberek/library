@@ -69,7 +69,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
           >
             <MenuBookOutlinedIcon sx={{ fontSize: 20 }} />
           </Box>
-          <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em">
+          <Typography variant="h6" fontFamily="var(--font-display)" fontWeight={700} letterSpacing="-0.02em">
             MyLibrary
           </Typography>
         </Box>

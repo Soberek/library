@@ -63,10 +63,11 @@ const Navbar: React.FC = () => {
           <Typography
             component="span"
             sx={{
-              fontWeight: 800,
-              fontSize: "1.0625rem",
-              letterSpacing: "-0.02em",
-              color: "text.primary",
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '1.125rem',
+              letterSpacing: '-0.02em',
+              color: 'text.primary',
             }}
           >
             MyLibrary

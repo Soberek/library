@@ -35,14 +35,20 @@ const NotFound: React.FC = () => (
 
       <Typography
         variant="h4"
-        sx={{ fontWeight: 800, letterSpacing: "-0.02em", mb: 1 }}
+        sx={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          mb: 1,
+        }}
       >
         MyLibrary
       </Typography>
       <Typography
         variant="h2"
         sx={{
-          fontWeight: 800,
+          fontFamily: "var(--font-display)",
+          fontWeight: 700,
           fontSize: { xs: "3rem", sm: "4rem" },
           color: "primary.main",
           lineHeight: 1,
