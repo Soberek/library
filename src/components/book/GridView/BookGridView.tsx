@@ -68,7 +68,7 @@ export const BookGridView: React.FC<BookGridViewProps> = ({
             xl={2}
             sx={{
               display: "flex",
-              padding: { xs: 1, sm: 1.5, md: 2 },
+              padding: { xs: 0.75, sm: 1, md: 1.25 },
             }}
           >
             <Zoom

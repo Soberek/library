@@ -1,103 +1,397 @@
-# Library App - Krzysztof Palpuchowski Student AJP II rok
+# 📚 Library App - Aplikacja do zarządzania kolekcją książek
 
-## Description
+**Projekt zaliczeniowy** | Autor: Krzysztof Palpuchowski | II rok - AJP
 
-A modern, production-ready web application built with React and TypeScript to help you keep track of books you have read. Features a clean, intuitive interface with comprehensive error handling, validation, and performance optimizations.
+---
 
-## Live Demo
+## 📖 Opis projektu
 
-Try the app live here: [https://membib.netlify.app/](https://membib.netlify.app/)
+**Library App** to nowoczesna, w pełni funkcjonalna aplikacja webowa do zarządzania osobistą kolekcją książek. Pozwala użytkownikom na dodawanie, edytowanie i usuwanie książek, śledzenie postępu czytania, filtrowanie i wyszukiwanie pozycji w bibliotece.
 
-## Features
+Aplikacja wdrażana jest na platformie **Firebase** i dostępna jest pod adresem: [https://membib.netlify.app/](https://membib.netlify.app/)
 
-### Core Functionality
-- ✅ Add books with title, author, genre, reading status, rating
-- ✅ Search and filter books by title
-- ✅ Mark books as read, unread or dropped
-- ✅ View reading progress and statistics
-- ✅ Edit and delete books
-- ✅ Responsive design for mobile and desktop
+---
 
-### Technical Features
-- ✅ **Type Safety**: Strict TypeScript with union types and proper error handling
-- ✅ **Validation**: Zod schema validation for forms and API responses
-- ✅ **Error Handling**: Comprehensive error boundaries and user-friendly error messages
-- ✅ **Performance**: Memoized components and optimized re-renders
-- ✅ **Testing**: Unit tests for hooks, services, and utilities
-- ✅ **Accessibility**: ARIA labels and keyboard navigation support
-- ✅ **Code Quality**: ESLint, Prettier, and consistent code organization
+## ✨ Funkcjonalności
 
-### Database & Authentication
-- ✅ Firestore database integration
-- ✅ Firebase Authentication (email/password)
-- ✅ User-specific data isolation
+### Funkcje podstawowe
+- 📝 Dodawanie książek (tytuł, autor, gatunek, status czytania, ocena)
+- 🔍 Wyszukiwanie i filtrowanie książek po tytule
+- 📊 Śledzenie statusu czytania (W trakcie, Przeczytana, Porzucona)
+- 📈 Wyświetlanie statystyk i postępu czytania
+- ✏️ Edycja i usuwanie książek
+- 📱 Responsywny design (desktop, tablet, mobile)
 
-### TODO
-- [ ] Social authentication (Google, Facebook)
-- [ ] Book cover image upload
-- [ ] Reading progress tracking with dates
-- [ ] Book recommendations
-- [ ] Export/import functionality
+### Cechy techniczne
+- **Bezpieczeństwo typów**: TypeScript ze ścisłą walidacją typów
+- **Walidacja danych**: Zod - schematy walidacji dla formularzy
+- **Obsługa błędów**: Error boundaries i przyjazne komunikaty dla użytkownika
+- **Optymalizacja**: Memoizacja komponentów, zoptymalizowane re-rendy
+- **Testy jednostkowe**: Pokrycie testami hooks'ów, serwisów i funkcji
+- **Dostępność**: Etykiety ARIA i nawigacja klawiaturą
+- **Autentykacja**: Firebase Authentication (email/hasło)
+- **Baza danych**: Firestore - izolacja danych dla każdego użytkownika
 
-## Technologies Used
+---
+
+## 🛠️ Technologie
 
 ### Frontend
-- **React 19** - Modern React with hooks and functional components
-- **TypeScript** - Strict type safety and better developer experience
-- **Material-UI (MUI)** - Component library for consistent UI
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Hook Form** - Form handling with validation
-- **Zod** - Schema validation library
+| Technologia | Wersja | Zastosowanie |
+|-------------|--------|-------------|
+| **React** | 19 | Framework do budowania UI |
+| **TypeScript** | Latest | Statyczna typizacja i bezpieczeństwo |
+| **Material-UI (MUI)** | 5.15 | Biblioteka komponentów UI |
+| **Tailwind CSS** | 4.1 | Utility-first styling |
+| **React Hook Form** | 7.62 | Zarządzanie formularzami |
+| **Zod** | 4.1 | Walidacja schematów |
+| **Lucide React** | 0.544 | Biblioteka ikon |
 
-### Backend & Services
-- **Firebase Auth** - User authentication
-- **Firebase Firestore** - NoSQL database
-- **Vite** - Fast build tool and development server
+### Backend & Baza danych
+| Technologia | Wersja | Zastosowanie |
+|-------------|--------|-------------|
+| **Firebase Auth** | 12.1 | Autentykacja użytkowników |
+| **Firestore** | 12.1 | Baza danych NoSQL |
+| **Vite** | Latest | Build tool i dev server |
 
-### Development & Testing
-- **Jest** - Testing framework
-- **React Testing Library** - Component testing utilities
-- **ESLint** - Code linting and quality checks
-- **Prettier** - Code formatting
-- **TypeScript ESLint** - TypeScript-specific linting rules
+### Narzędzia deweloperskie
+| Narzędzie | Wersja | Zastosowanie |
+|-----------|--------|-------------|
+| **Jest** | Latest | Testing framework |
+| **React Testing Library** | 16.3 | Testy komponentów |
+| **ESLint** | 9.33 | Linting kodu |
+| **Prettier** | Latest | Formatowanie kodu |
+| **React Query** | 5.90 | Zarządzanie stanem asynchronicznym |
 
-## Project Structure
+---
+
+## 📁 Struktura projektu
 
 ```
-src/
-├── components/          # Reusable UI components
-│   ├── AddBookForm/     # Book form component
-│   ├── ErrorBoundary.tsx # Error boundary component
-│   ├── ErrorDisplay.tsx # Error message display
-│   ├── LoadingSpinner.tsx # Loading indicator
-│   └── index.ts         # Barrel exports
-├── constants/           # Application constants
-│   ├── bookStatus.ts    # Book status definitions
-│   ├── genres.ts        # Genre options
-│   ├── validation.ts    # Validation rules and messages
-│   └── index.ts         # Barrel exports
-├── hooks/               # Custom React hooks
-│   ├── useBooks.tsx     # Books data management
-│   ├── useDebounce.ts   # Debouncing utility
-│   ├── useLocalStorage.ts # Local storage hook
-│   └── index.ts         # Barrel exports
-├── pages/               # Page components
-├── providers/           # Context providers
-├── schemas/             # Zod validation schemas
-│   ├── bookSchema.ts    # Book validation schema
-│   └── index.ts         # Barrel exports
-├── services/            # API and external service integrations
-│   ├── booksService.ts  # Firestore operations
-│   └── index.ts         # Barrel exports
-├── types/               # TypeScript type definitions
-│   ├── Book.ts          # Book-related types
-│   ├── Error.ts         # Error type definitions
-│   ├── User.ts          # User type definitions
-│   └── index.ts         # Barrel exports
-└── utils/               # Utility functions
-    ├── validation.ts    # Validation helpers
-    └── index.ts         # Barrel exports
+library/
+├── public/                     # Pliki statyczne
+│   └── _redirects             # Konfiguracja routingu Netlify
+│
+├── src/
+│   ├── components/            # Komponenty UI
+│   │   ├── book/              # Komponenty do wyświetlania książek
+│   │   │   ├── BookCard.tsx   # Karta książki w widoku siatki
+│   │   │   ├── BookList.tsx   # Lista książek
+│   │   │   └── BooksHeader.tsx
+│   │   ├── forms/             # Formularze
+│   │   │   └── AddBookForm/   # Formularz dodawania książki
+│   │   ├── navigation/        # Komponenty nawigacji
+│   │   │   ├── Navbar.tsx     # Navbar desktopowy
+│   │   │   └── MobileNavbar.tsx # Navbar mobilny
+│   │   ├── statistics/        # Widgety statystyk
+│   │   ├── ui/                # Komponenty podstawowe
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   ├── LoadingSpinner.tsx
+│   │   │   └── ProtectedRoute.tsx
+│   │   └── index.ts           # Barrel exports
+│   │
+│   ├── constants/             # Stałe aplikacji
+│   │   ├── bookStatus.ts      # Statusy książek
+│   │   ├── genres.ts          # Dostępne gatunki
+│   │   └── validation.ts      # Reguły walidacji
+│   │
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── useBooks.tsx       # Zarządzanie danymi książek
+│   │   ├── useAuth.ts         # Autentykacja
+│   │   ├── useSearch.tsx      # Wyszukiwanie
+│   │   ├── useDebounce.ts     # Debouncing
+│   │   └── __tests__/         # Testy hooks'ów
+│   │
+│   ├── pages/                 # Strony aplikacji
+│   │   ├── Books.tsx          # Główna strona z książkami
+│   │   ├── SignIn.tsx         # Logowanie
+│   │   └── SignUp.tsx         # Rejestracja
+│   │
+│   ├── providers/             # Context providers
+│   │   ├── RouterProvider.tsx # Konfiguracja routingu
+│   │   └── SearchProvider.tsx # Kontekst wyszukiwania
+│   │
+│   ├── schemas/               # Zod schematy walidacji
+│   │   └── bookSchema.ts      # Walidacja danych książki
+│   │
+│   ├── services/              # Serwisy komunikacji z API
+│   │   ├── booksService.ts    # Operacje Firestore
+│   │   └── __tests__/
+│   │
+│   ├── stores/                # Zustand stores (state management)
+│   │   ├── filterStore.ts     # Stan filtrów
+│   │   └── uiStore.ts         # Stan UI
+│   │
+│   ├── types/                 # Typy TypeScript
+│   │   ├── Book.ts            # Typy książki
+│   │   ├── User.ts            # Typy użytkownika
+│   │   └── Error.ts           # Typy błędów
+│   │
+│   ├── utils/                 # Funkcje pomocnicze
+│   │   ├── validation.ts      # Funkcje walidacji
+│   │   └── textHelpers.ts
+│   │
+│   ├── App.tsx                # Główny komponent
+│   ├── main.tsx               # Punkt wejścia
+│   └── index.css              # Style globalne
+│
+├── index.html                 # HTML template
+├── package.json               # Dependencje projektu
+├── tsconfig.json              # Konfiguracja TypeScript
+├── vite.config.ts             # Konfiguracja Vite
+├── tailwind.config.js         # Konfiguracja Tailwind
+├── jest.config.cjs            # Konfiguracja Jest
+└── eslint.config.js           # Konfiguracja ESLint
 ```
+
+---
+
+## 🚀 Instalacja i uruchomienie
+
+### Wymagania
+- **Node.js** w wersji 16+ lub **pnpm** 8+
+- Konto Firebase (do konfiguracji bazy danych)
+- Klient Git
+
+### Krok 1: Klonowanie repozytorium
+
+```bash
+git clone https://github.com/Soberek/library.git
+cd library
+```
+
+### Krok 2: Instalacja zależności
+
+Użyj **pnpm** (zalecane):
+```bash
+pnpm install
+```
+
+Lub **npm**:
+```bash
+npm install
+```
+
+### Krok 3: Konfiguracja Firebase
+
+1. Stwórz projekt w [Firebase Console](https://console.firebase.google.com/)
+2. Utwórz plik `src/config/firebaseConfig.ts` z konfiguracją:
+
+```typescript
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+```
+
+### Krok 4: Uruchomienie serwera deweloperskiego
+
+```bash
+pnpm dev
+```
+
+Aplikacja będzie dostępna pod adresem: **http://localhost:5173**
+
+---
+
+## 📦 Dostępne komendy
+
+```bash
+# Uruchomienie serwera deweloperskiego
+pnpm dev
+
+# Build produkcyjny
+pnpm build
+
+# Preview build produkcyjnego
+pnpm preview
+
+# Uruchomienie testów jednostkowych
+pnpm test
+
+# Lint kodu (ESLint)
+pnpm lint
+
+# Formatowanie kodu (Prettier)
+pnpm format
+```
+
+---
+
+## 🧪 Testowanie
+
+Projekt zawiera testy jednostkowe napisane przy użyciu **Jest** i **React Testing Library**.
+
+Testy znajdują się w katalogach `__tests__/` obok implementacji:
+
+```bash
+# Uruchomienie wszystkich testów
+pnpm test
+
+# Uruchomienie testów z obserwacją zmian
+pnpm test --watch
+
+# Pokrycie testami
+pnpm test --coverage
+```
+
+Przykład test hook'u (`src/hooks/__tests__/useBooks.test.tsx`):
+```typescript
+describe('useBooks', () => {
+  it('should fetch books for user', async () => {
+    // Test implementation
+  });
+});
+```
+
+---
+
+## 📝 Model danych
+
+### Struktura książki w Firestore
+
+```typescript
+interface Book {
+  id: string;                    // ID dokumentu Firestore
+  userId: string;                // ID właściciela (izolacja danych)
+  title: string;                 // Tytuł książki
+  author: string;                // Autor
+  genre: string;                 // Gatunek (sci-fi, fantazja, itp.)
+  status: 'W trakcie' | 'Przeczytana' | 'Porzucona'; // Status czytania
+  rating: number;                // Ocena (1-5)
+  progress?: number;             // Procent przeczytania (0-100)
+  createdAt: Date;               // Data utworzenia
+  updatedAt: Date;               // Data ostatniej aktualizacji
+}
+```
+
+---
+
+## 🔐 Bezpieczeństwo
+
+- ✅ Autentykacja Firebase - każdy użytkownik loguje się osobnym kontem
+- ✅ Firestore Security Rules - dane izolowane na podstawie `userId`
+- ✅ Walidacja po stronie klienta - Zod schematy
+- ✅ Obsługa błędów - error boundaries i graceful degradation
+- ✅ Type-safe - TypeScript eliminuje błędy typowania
+
+### Firestore Security Rules
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /books/{document=**} {
+      allow read, write: if request.auth.uid == resource.data.userId;
+      allow create: if request.auth.uid == request.resource.data.userId;
+    }
+  }
+}
+```
+
+---
+
+## 📊 Architektura aplikacji
+
+### Przepływ danych
+
+```
+User Input
+    ↓
+React Component
+    ↓
+React Hook Form + Zod (Walidacja)
+    ↓
+Custom Hook (useBooks, etc.)
+    ↓
+Service Layer (booksService)
+    ↓
+Firebase Firestore
+    ↓
+Zustand Store (stan globalny)
+    ↓
+Komponenty (re-render)
+```
+
+### Wzorce stosowane
+
+- **Custom Hooks** - logika biznesowa oddzielona od UI
+- **Context API** - globalne stany (User, Search)
+- **Error Boundary** - obsługa błędów komponentów
+- **Protected Routes** - strony dostępne tylko zalogowanym użytkownikom
+- **Barrel Exports** - czysty import komponentów
+
+---
+
+## 🎨 Styling
+
+Projekt łączy dwa podejścia do stylowania:
+
+1. **Material-UI (MUI)** - komponenty systemowe, przyciski, karty
+2. **Tailwind CSS** - utility classes dla responsywności i spacingu
+
+Przykład:
+```typescript
+<Card className="p-4 rounded-lg shadow-md">
+  <CardContent>
+    {/* Tailwind classes + MUI components */}
+  </CardContent>
+</Card>
+```
+
+---
+
+## 🐛 Znane ograniczenia i TODO
+
+- [ ] Autentykacja społeczna (Google, Facebook)
+- [ ] Wgrywanie okładek książek
+- [ ] Śledzenie postępu czytania z datami
+- [ ] Rekomendacje książek
+- [ ] Export/import biblioteki (CSV, JSON)
+- [ ] Tryb ciemny / jasny
+
+---
+
+## 📚 Referencje i zasoby
+
+- [React Documentation](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Material-UI Docs](https://mui.com)
+- [Tailwind CSS Docs](https://tailwindcss.com)
+- [Zod Validation](https://zod.dev)
+
+---
+
+## 📄 Licencja
+
+Projekt jest publiczny. Możliwe do użytku w celach edukacyjnych i prywatnych.
+
+---
+
+## 👨‍💻 Autor
+
+**Krzysztof Palpuchowski**  
+Student II roku - kierunek AJP  
+Projekt zaliczeniowy - 2025/2026
+
+---
+
+## 📮 Kontakt
+
+W przypadku pytań dotyczących projektu, proszę otworzyć issue na GitHub lub kontaktować się bezpośrednio z autorem.
 
 ## Getting Started
 

@@ -1,7 +1,6 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import StatCard from "./StatCard";
-import BookIcon from "@mui/icons-material/Book";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -24,63 +23,187 @@ interface StatisticsGridProps {
   additionalStats: AdditionalStats;
 }
 
+const STATUS_SEGMENTS = [
+  { key: "wantToRead", label: "Chcę przeczytać", color: "#3b82f6" },
+  { key: "inProgress", label: "W trakcie", color: "#f59e0b" },
+  { key: "read", label: "Przeczytane", color: "#22c55e" },
+  { key: "dropped", label: "Porzucone", color: "#ef4444" },
+] as const;
+
 const StatisticsGrid: React.FC<StatisticsGridProps> = ({
   booksStats,
   additionalStats,
 }) => {
+  const total = Math.max(booksStats.total, 1);
+  const segments = STATUS_SEGMENTS.map((segment) => ({
+    ...segment,
+    value: booksStats[segment.key],
+    pct: (booksStats[segment.key] / total) * 100,
+  }));
+
   return (
-    <Grid container spacing={2} sx={{ mb: 3 }}>
-      <Grid item xs={6} sm={2.4}>
-        <StatCard
-          title="Wszystkich"
-          value={booksStats.total}
-          icon={<BookIcon sx={{ fontSize: 24, opacity: 0.9 }} />}
-          color="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-          chipLabel="Biblioteka"
-          delay={0}
-        />
-      </Grid>
-      <Grid item xs={6} sm={2.4}>
+    <Box>
+      <Box
+        sx={{
+          mb: 1.25,
+          px: 1.5,
+          py: 1.25,
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "grey.200",
+          bgcolor: "grey.50",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1.5,
+            mb: 1,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+            <Typography
+              sx={{
+                fontWeight: 800,
+                fontSize: "1.5rem",
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                color: "text.primary",
+              }}
+            >
+              {booksStats.total}
+            </Typography>
+            <Typography
+              sx={{
+                color: "text.secondary",
+                fontWeight: 500,
+                fontSize: "0.8rem",
+              }}
+            >
+              {booksStats.total === 1 ? "książka" : "książek"} ·{" "}
+              <Box
+                component="span"
+                sx={{ fontWeight: 700, color: "success.dark" }}
+              >
+                {additionalStats.completionRate}%
+              </Box>{" "}
+              ukończenia
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            height: 6,
+            borderRadius: 999,
+            overflow: "hidden",
+            bgcolor: "grey.200",
+            mb: 0.75,
+          }}
+        >
+          {booksStats.total === 0 ? (
+            <Box sx={{ width: "100%", bgcolor: "grey.200" }} />
+          ) : (
+            segments.map(
+              (segment) =>
+                segment.value > 0 && (
+                  <Box
+                    key={segment.key}
+                    title={`${segment.label}: ${segment.value}`}
+                    sx={{
+                      width: `${segment.pct}%`,
+                      bgcolor: segment.color,
+                      minWidth: segment.value > 0 ? 3 : 0,
+                    }}
+                  />
+                ),
+            )
+          )}
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: { xs: 1, sm: 1.5 },
+          }}
+        >
+          {segments.map((segment) => (
+            <Box
+              key={segment.key}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <Box
+                sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  bgcolor: segment.color,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 500,
+                  fontSize: "0.7rem",
+                  lineHeight: 1.2,
+                }}
+              >
+                {segment.label}{" "}
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 700, color: "text.primary" }}
+                >
+                  {segment.value}
+                </Box>
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr 1fr",
+            sm: "repeat(4, 1fr)",
+          },
+          gap: 1,
+        }}
+      >
         <StatCard
           title="Chcę przeczytać"
           value={booksStats.wantToRead}
-          icon={<BookmarkAddIcon sx={{ fontSize: 24, opacity: 0.9 }} />}
-          color="linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)"
-          chipLabel="Na liście"
-          delay={50}
+          icon={<BookmarkAddIcon />}
+          accent="#3b82f6"
         />
-      </Grid>
-      <Grid item xs={6} sm={2.4}>
         <StatCard
           title="W trakcie"
           value={booksStats.inProgress}
-          icon={<PauseCircleIcon sx={{ fontSize: 24, opacity: 0.9 }} />}
-          color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-          chipLabel="Aktywne"
-          delay={100}
+          icon={<PauseCircleIcon />}
+          accent="#f59e0b"
         />
-      </Grid>
-      <Grid item xs={6} sm={2.4}>
         <StatCard
           title="Przeczytane"
           value={booksStats.read}
-          icon={<CheckCircleIcon sx={{ fontSize: 24, opacity: 0.9 }} />}
-          color="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
-          chipLabel={`${additionalStats.completionRate}%`}
-          delay={150}
+          icon={<CheckCircleIcon />}
+          accent="#22c55e"
+          progress={additionalStats.completionRate}
         />
-      </Grid>
-      <Grid item xs={6} sm={2.4}>
         <StatCard
           title="Porzucone"
           value={booksStats.dropped}
-          icon={<CancelIcon sx={{ fontSize: 24, opacity: 0.9 }} />}
-          color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-          chipLabel="Do powrotu"
-          delay={200}
+          icon={<CancelIcon />}
+          accent="#ef4444"
         />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 };
 

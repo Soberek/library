@@ -83,40 +83,16 @@ const Books: React.FC = () => {
         minHeight: "calc(100vh - 64px)",
       }}
     >
-      {/* Header with title, add button, and view toggle */}
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "stretch", sm: "center" },
-          gap: 2,
-        }}
-      >
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            fontWeight: 700,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            mb: { xs: 2, sm: 0 },
-          }}
-        >
-          Moje Książki
-        </Typography>
-
+      <Box sx={{ mb: 3 }}>
         <PageHeader
+          bookCount={loading ? 0 : filteredBooks.length}
+          readCount={booksStats.read}
           onAddBook={() => handleBookModalOpen({ bookId: null })}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
       </Box>
 
-      {/* Filter Panel */}
       <Box sx={{ mb: 3 }}>
         <FilterStatisticsPanel
           books={books}
@@ -127,34 +103,7 @@ const Books: React.FC = () => {
         />
       </Box>
 
-      {/* Main Content - Full Width */}
       <Box sx={{ width: "100%" }}>
-        {/* Book Count */}
-        {!loading && filteredBooks.length > 0 && (
-          <Box
-            sx={{
-              mb: 3,
-              // p: 2,
-              bgcolor: "background.paper",
-              borderRadius: 2,
-              boxShadow: 1,
-            }}
-          >
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ fontWeight: 500, fontSize: "1.2rem", px: 2, py: 1 }}
-            >
-              Znaleziono: <strong>{filteredBooks.length}</strong>{" "}
-              {filteredBooks.length === 1
-                ? "książka"
-                : filteredBooks.length < 5
-                  ? "książki"
-                  : "książek"}
-            </Typography>
-          </Box>
-        )}
-
         {loading ? (
           <BookListLoading />
         ) : filteredBooks.length === 0 ? (

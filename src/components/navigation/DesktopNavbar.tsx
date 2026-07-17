@@ -15,35 +15,34 @@ const NAVBAR_STYLES = {
   },
   toolbar: {
     justifyContent: 'center',
-    py: 2,
+    minHeight: { md: 56 },
+    py: 1,
   },
   brandContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: 2,
+    gap: 1.5,
     cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
-      transform: 'scale(1.04)',
+      transform: 'translateY(-1px)',
       '& .brand-icon': {
-        transform: 'rotate(8deg) scale(1.12)',
+        transform: 'rotate(6deg)',
       },
     },
   },
   iconWrapper: {
-    p: 1.5,
-    borderRadius: 3,
-    background: 'rgba(255, 255, 255, 0.25)',
-    border: '1px solid #667eea',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.18)',
+    p: 1,
+    borderRadius: 2,
+    background: 'rgba(255, 255, 255, 0.18)',
+    border: '1px solid rgba(255, 255, 255, 0.28)',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   brandText: {
     color: '#f8fafc',
-    textShadow: '0 2px 8px rgba(102,126,234,0.25)',
-    letterSpacing: '-1px',
+    letterSpacing: '-0.5px',
     fontWeight: 800,
-    // Remove background gradient for better contrast
+    fontSize: '1.35rem',
   },
 } as const;
 
@@ -60,11 +59,11 @@ const DesktopNavbar: React.FC = () => {
         <Fade in timeout={800}>
           <Box sx={NAVBAR_STYLES.brandContainer} onClick={handleBrandClick}>
             <Box className="brand-icon" sx={NAVBAR_STYLES.iconWrapper}>
-              <MenuBookIcon sx={{ color: 'white', fontSize: 32 }} />
+              <MenuBookIcon sx={{ color: 'white', fontSize: 24 }} />
             </Box>
             <Typography
-              variant="h4"
-              fontWeight="800"
+              variant="h6"
+              component="span"
               sx={NAVBAR_STYLES.brandText}
             >
               MyLibrary

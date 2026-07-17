@@ -21,8 +21,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <Fade in timeout={1000}>
       <Box
         sx={{
-          width: isMobile ? "100%" : { md: 400, lg: 500 },
-          mx: isMobile ? 0 : 4,
+          width: "100%",
+          maxWidth: isMobile ? "100%" : 520,
         }}
       >
         <TextField
@@ -40,7 +40,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     color: isMobile
                       ? "rgba(255, 255, 255, 0.7)"
                       : "text.secondary",
-                    fontSize: isMobile ? 20 : 22,
+                    fontSize: isMobile ? 20 : 20,
                   }}
                 />
               </InputAdornment>
@@ -48,41 +48,34 @@ const SearchBar: React.FC<SearchBarProps> = ({
             sx: {
               bgcolor: isMobile
                 ? "rgba(255, 255, 255, 0.4)"
-                : "rgba(255, 255, 255, 0.95)",
-              borderRadius: 3,
-              backdropFilter: "blur(10px)",
-              border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.08)"}`,
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              boxShadow: isMobile
-                ? "0 4px 20px rgba(0, 0, 0, 0.1)"
-                : "0 2px 12px rgba(0, 0, 0, 0.08)",
+                : "grey.50",
+              borderRadius: 2.5,
+              border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.5)" : "rgba(226, 232, 240, 1)"}`,
+              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow: "none",
               "& .MuiOutlinedInput-notchedOutline": {
                 border: "none",
               },
               "&:hover": {
                 bgcolor: isMobile
                   ? "rgba(255, 255, 255, 0.5)"
-                  : "rgba(255, 255, 255, 0.98)",
-                border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.12)"}`,
-                boxShadow: isMobile
-                  ? "0 6px 24px rgba(0, 0, 0, 0.15)"
-                  : "0 4px 16px rgba(0, 0, 0, 0.12)",
-                transform: "translateY(-1px)",
+                  : "background.paper",
+                border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.6)" : "rgba(203, 213, 224, 1)"}`,
               },
               "&.Mui-focused": {
                 bgcolor: isMobile
                   ? "rgba(255, 255, 255, 0.6)"
-                  : "rgba(255, 255, 255, 1)",
-                border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.7)" : "primary.main"}`,
+                  : "background.paper",
+                border: `1px solid ${isMobile ? "rgba(255, 255, 255, 0.7)" : "#667eea"}`,
                 boxShadow: isMobile
                   ? "0 0 0 2px rgba(255, 255, 255, 0.3)"
-                  : "0 0 0 2px rgba(102, 126, 234, 0.2)",
-                transform: "translateY(-1px)",
+                  : "0 0 0 3px rgba(102, 126, 234, 0.12)",
               },
               "& input": {
                 color: isMobile ? "white" : "text.primary",
-                fontSize: isMobile ? "0.9rem" : "0.95rem",
+                fontSize: isMobile ? "0.9rem" : "0.875rem",
                 fontWeight: 500,
+                py: 1,
                 "&::placeholder": {
                   color: isMobile
                     ? "rgba(255, 255, 255, 0.8)"
