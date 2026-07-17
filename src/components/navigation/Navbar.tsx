@@ -1,10 +1,10 @@
 import React from "react";
 import { AppBar, Toolbar, Box, Typography, ButtonBase, Button } from "@mui/material";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import ShuffleIcon from "@mui/icons-material/Shuffle";
 import { useLocation, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import UserMenu from "./UserMenu";
+import MagdaIcon from "../ui/MagdaIcon";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ const Navbar: React.FC = () => {
 
         <Button
           onClick={() => navigate("/magda-losuje")}
-          startIcon={<ShuffleIcon />}
+          startIcon={<MagdaIcon size={22} alt="" />}
           sx={{
             flexShrink: 0,
             borderRadius: 999,
@@ -89,11 +89,12 @@ const Navbar: React.FC = () => {
             fontSize: "0.8125rem",
             letterSpacing: "0.04em",
             textTransform: "none",
-            color: isMagdaPage ? "#8f2f18" : "text.secondary",
-            bgcolor: isMagdaPage ? "rgba(196, 92, 38, 0.12)" : "transparent",
+            color: isMagdaPage ? "#8a6a12" : "text.secondary",
+            bgcolor: isMagdaPage ? "rgba(240, 180, 41, 0.16)" : "transparent",
+            "& .MuiButton-startIcon": { mr: 0.75 },
             "&:hover": {
-              bgcolor: "rgba(196, 92, 38, 0.14)",
-              color: "#8f2f18",
+              bgcolor: "rgba(240, 180, 41, 0.18)",
+              color: "#8a6a12",
             },
           }}
         >

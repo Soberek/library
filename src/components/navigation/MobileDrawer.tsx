@@ -11,13 +11,13 @@ import {
   Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import ShuffleIcon from "@mui/icons-material/Shuffle";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
+import MagdaIcon from "../ui/MagdaIcon";
 
 interface MobileDrawerProps {
   open: boolean;
@@ -122,21 +122,13 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
               mx: 1,
               borderRadius: 1.5,
               "&.Mui-selected": {
-                bgcolor: "rgba(196, 92, 38, 0.12)",
-                color: "#8f2f18",
+                bgcolor: "rgba(240, 180, 41, 0.16)",
+                color: "#8a6a12",
               },
             }}
           >
-            <ListItemIcon
-              sx={{
-                minWidth: 36,
-                color:
-                  location.pathname === "/magda-losuje"
-                    ? "#c45c26"
-                    : "text.secondary",
-              }}
-            >
-              <ShuffleIcon fontSize="small" />
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <MagdaIcon size={24} alt="" />
             </ListItemIcon>
             <ListItemText
               primary="MAGDA LOSUJE"

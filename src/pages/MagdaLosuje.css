@@ -157,6 +157,11 @@
   }
 }
 
+.magda-hero-icon {
+  margin: 0.15rem 0 1rem;
+  animation: magda-brand-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .magda-brand {
   margin: 0;
   display: flex;

@@ -28,6 +28,7 @@ import {
   posterUrl,
   releaseYear,
 } from '../services/tmdbService';
+import MagdaIcon from '../components/ui/MagdaIcon';
 import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -80,6 +81,28 @@ const MagdaLosuje: React.FC = () => {
     };
   }, [apiConfigured]);
 
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = 'MAGDA LOSUJE';
+
+    const favicon =
+      document.querySelector<HTMLLinkElement>("link[rel='icon']") ??
+      (() => {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+        return link;
+      })();
+    const previousHref = favicon.href;
+    favicon.href = '/magda-losuje-icon.png';
+    favicon.type = 'image/png';
+
+    return () => {
+      document.title = previousTitle;
+      favicon.href = previousHref;
+    };
+  }, []);
+
   const handleDraw = useCallback(async () => {
     setDrawing(true);
     setError(null);
@@ -123,6 +146,10 @@ const MagdaLosuje: React.FC = () => {
             <span className="magda-sprocket" />
             <span className="magda-sprocket" />
             <span className="magda-sprocket" />
+          </div>
+
+          <div className="magda-hero-icon">
+            <MagdaIcon size={88} />
           </div>
 
           <h1 className="magda-brand">
