@@ -578,10 +578,11 @@ const MagdaLosuje: React.FC = () => {
                         href={`https://www.themoviedb.org/movie/${movie.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        endIcon={<OpenInNewIcon />}
+                        variant="outlined"
                         size="small"
+                        endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
                       >
-                        Zobacz w TMDB
+                        TMDB
                       </Button>
                     </Stack>
                   </div>
