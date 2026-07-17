@@ -110,19 +110,29 @@ const MagdaLosuje: React.FC = () => {
       <Box className="magda-inner">
         <motion.header
           className="magda-hero"
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Typography className="magda-kicker" component="p">
-            losowanie filmów
-          </Typography>
-          <Typography className="magda-brand" component="h1">
-            MAGDA LOSUJE
-          </Typography>
-          <Typography className="magda-tagline" component="p">
-            Wybierz gatunek, ustaw ramy — a Magda wylosuje film na wieczór.
-          </Typography>
+          <div className="magda-marquee" aria-hidden>
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+            <span className="magda-sprocket" />
+          </div>
+
+          <h1 className="magda-brand">
+            <span className="magda-brand-line magda-brand-line--name">MAGDA</span>
+            <span className="magda-brand-line magda-brand-line--verb">LOSUJE</span>
+          </h1>
+
+          <p className="magda-tagline">
+            Gatunek, lata, ocena — resztę zostaw Magdzie.
+          </p>
         </motion.header>
 
         {!apiConfigured && (
@@ -251,7 +261,7 @@ const MagdaLosuje: React.FC = () => {
                   }))
                 }
                 sx={{
-                  color: '#c45c26',
+                  color: '#f0b429',
                   '& .MuiSlider-markLabel': { fontSize: '0.7rem' },
                 }}
               />
