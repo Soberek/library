@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Link as RouterLink, Navigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink, Navigate, useLocation } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { useAuth } from "../hooks/useAuth";
@@ -20,6 +20,16 @@ type FormData = {
   password: string;
 };
 
+function resolveRedirectTarget(from: unknown): string {
+  if (typeof from !== "string" || !from.startsWith("/") || from.startsWith("//")) {
+    return "/";
+  }
+  if (from === "/sign-in" || from === "/sign-up") {
+    return "/";
+  }
+  return from;
+}
+
 const SignIn: React.FC = () => {
   const {
     register,
@@ -29,14 +39,18 @@ const SignIn: React.FC = () => {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const userContext = useAuth();
+  const redirectTo = resolveRedirectTarget(
+    (location.state as { from?: unknown } | null)?.from,
+  );
 
   const onSubmit = async (data: FormData) => {
     setErrorMessage(null);
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      navigate("/", { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       const message = "Wystąpił błąd podczas logowania.";
       setErrorMessage(message);
@@ -52,7 +66,7 @@ const SignIn: React.FC = () => {
   };
 
   if (userContext.user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   return (
@@ -64,6 +78,7 @@ const SignIn: React.FC = () => {
           <Link
             component={RouterLink}
             to="/sign-up"
+            state={{ from: redirectTo === "/" ? undefined : redirectTo }}
             underline="hover"
             color="primary"
             fontWeight={600}

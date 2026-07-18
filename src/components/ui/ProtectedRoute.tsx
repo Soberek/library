@@ -1,10 +1,11 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Box } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import LoadingSpinner from "./LoadingSpinner";
 
 const ProtectedRoute = () => {
   const auth = useAuth();
+  const location = useLocation();
 
   if (auth.loading) {
     return (
@@ -22,7 +23,17 @@ const ProtectedRoute = () => {
     );
   }
 
-  return auth.user ? <Outlet /> : <Navigate to="/sign-in" />;
+  if (auth.user) {
+    return <Outlet />;
+  }
+
+  return (
+    <Navigate
+      to="/sign-in"
+      replace
+      state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+    />
+  );
 };
 
 export default ProtectedRoute;

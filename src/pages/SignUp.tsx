@@ -1,7 +1,7 @@
 import React from "react";
 import { auth } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Link as RouterLink, Navigate, useNavigate } from "react-router-dom";
+import { Link as RouterLink, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import {
   Button,
@@ -20,6 +20,16 @@ type FormData = {
   password: string;
 };
 
+function resolveRedirectTarget(from: unknown): string {
+  if (typeof from !== "string" || !from.startsWith("/") || from.startsWith("//")) {
+    return "/";
+  }
+  if (from === "/sign-in" || from === "/sign-up") {
+    return "/";
+  }
+  return from;
+}
+
 const SignUp: React.FC = () => {
   const {
     register,
@@ -30,9 +40,13 @@ const SignUp: React.FC = () => {
   const [error, setLocalError] = React.useState<string | null>(null);
   const authContext = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = resolveRedirectTarget(
+    (location.state as { from?: unknown } | null)?.from,
+  );
 
   if (authContext.user?.uid) {
-    return <Navigate to="/" />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   const onSubmit = async (data: FormData) => {
@@ -40,7 +54,7 @@ const SignUp: React.FC = () => {
     setLocalError(null);
     try {
       await createUserWithEmailAndPassword(auth, data.email, data.password);
-      navigate("/sign-in");
+      navigate(redirectTo, { replace: true });
     } catch (error: unknown) {
       if (error instanceof Error) {
         setLocalError(`Wystąpił błąd: ${error.message}`);
@@ -59,6 +73,7 @@ const SignUp: React.FC = () => {
           <Link
             component={RouterLink}
             to="/sign-in"
+            state={{ from: redirectTo === "/" ? undefined : redirectTo }}
             underline="hover"
             color="primary"
             fontWeight={600}
