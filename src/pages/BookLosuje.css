@@ -524,6 +524,30 @@
   color: rgba(61, 155, 122, 0.85);
 }
 
+.book-subject-group {
+  line-height: 2.2 !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: #3d9b7a !important;
+  background: #101814 !important;
+}
+
+.book-subject-menu {
+  background: #121a16 !important;
+  color: #e8f0ea !important;
+  border: 1px solid rgba(61, 155, 122, 0.25) !important;
+}
+
+.book-subject-menu .MuiMenuItem-root {
+  font-size: 0.9rem;
+}
+
+.book-subject-menu .MuiMenuItem-root.Mui-selected {
+  background: rgba(61, 155, 122, 0.22) !important;
+}
+
 .book-draw-btn {
   width: 100%;
   min-height: 56px;

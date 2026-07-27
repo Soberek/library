@@ -8,6 +8,7 @@ import {
   Collapse,
   FormControl,
   FormControlLabel,
+  ListSubheader,
   MenuItem,
   Select,
   Slider,
@@ -77,6 +78,33 @@ function formatLanguages(codes: string[] | undefined, preferred?: string): strin
   const shown = ordered.slice(0, 3).map(languageLabel);
   const extra = ordered.length > 3 ? ` +${ordered.length - 3}` : '';
   return shown.join(', ') + extra;
+}
+
+function subjectMenuItems() {
+  const items: React.ReactNode[] = [];
+  let lastGroup: string | undefined;
+
+  for (const s of BOOK_LOTTERY_SUBJECTS) {
+    if (s.group && s.group !== lastGroup) {
+      lastGroup = s.group;
+      items.push(
+        <ListSubheader
+          key={`group-${s.group}`}
+          className="book-subject-group"
+          disableSticky
+        >
+          {s.group}
+        </ListSubheader>,
+      );
+    }
+    items.push(
+      <MenuItem key={s.value || 'all'} value={s.value}>
+        {s.label}
+      </MenuItem>,
+    );
+  }
+
+  return items;
 }
 
 const BookLosuje: React.FC = () => {
@@ -268,12 +296,14 @@ const BookLosuje: React.FC = () => {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, subject: String(e.target.value) }))
                   }
+                  MenuProps={{
+                    PaperProps: {
+                      className: 'book-subject-menu',
+                      sx: { maxHeight: 360 },
+                    },
+                  }}
                 >
-                  {BOOK_LOTTERY_SUBJECTS.map((s) => (
-                    <MenuItem key={s.value || 'all'} value={s.value}>
-                      {s.label}
-                    </MenuItem>
-                  ))}
+                  {subjectMenuItems()}
                 </Select>
               </FormControl>
             </label>

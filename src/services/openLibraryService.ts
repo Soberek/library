@@ -7,24 +7,80 @@ import type {
 const SEARCH_URL = 'https://openlibrary.org/search.json';
 const COVER_BASE = 'https://covers.openlibrary.org/b/id';
 
-export const BOOK_LOTTERY_SUBJECTS: { value: string; label: string }[] = [
+export const BOOK_LOTTERY_SUBJECTS: {
+  value: string;
+  label: string;
+  group?: string;
+}[] = [
   { value: '', label: 'Wszystkie' },
-  { value: 'fantasy', label: 'Fantasy' },
-  { value: 'science fiction', label: 'Science fiction' },
-  { value: 'mystery', label: 'Kryminał / mystery' },
-  { value: 'thriller', label: 'Thriller' },
-  { value: 'romance', label: 'Romans' },
-  { value: 'horror', label: 'Horror' },
-  { value: 'historical fiction', label: 'Historyczna' },
-  { value: 'biography', label: 'Biografia' },
-  { value: 'poetry', label: 'Poezja' },
-  { value: 'philosophy', label: 'Filozofia' },
-  { value: 'psychology', label: 'Psychologia' },
-  { value: 'history', label: 'Historia' },
-  { value: 'adventure', label: 'Przygodowa' },
-  { value: 'young adult', label: 'Young adult' },
-  { value: 'classic literature', label: 'Klasyka' },
-  { value: 'humor', label: 'Humor' },
+
+  // Proza / fikcja
+  { value: 'literary fiction', label: 'Literatura piękna', group: 'Proza' },
+  { value: 'fiction', label: 'Fikcja (ogólna)', group: 'Proza' },
+  { value: 'Polish fiction', label: 'Proza polska', group: 'Proza' },
+  { value: 'Polish literature', label: 'Literatura polska', group: 'Proza' },
+  { value: 'classic literature', label: 'Klasyka', group: 'Proza' },
+  { value: 'short stories', label: 'Opowiadania', group: 'Proza' },
+  { value: 'novels', label: 'Powieść', group: 'Proza' },
+  { value: 'essays', label: 'Eseje', group: 'Proza' },
+  { value: 'drama', label: 'Dramat', group: 'Proza' },
+  { value: 'plays', label: 'Sztuki teatralne', group: 'Proza' },
+  { value: 'poetry', label: 'Poezja', group: 'Proza' },
+  { value: 'humor', label: 'Humor / satyra', group: 'Proza' },
+
+  // Gatunki fabularne
+  { value: 'fantasy', label: 'Fantasy', group: 'Gatunki' },
+  { value: 'science fiction', label: 'Science fiction', group: 'Gatunki' },
+  { value: 'mystery', label: 'Kryminał / mystery', group: 'Gatunki' },
+  { value: 'crime', label: 'Crime', group: 'Gatunki' },
+  { value: 'detective', label: 'Detektywistyczna', group: 'Gatunki' },
+  { value: 'thriller', label: 'Thriller', group: 'Gatunki' },
+  { value: 'suspense', label: 'Suspense', group: 'Gatunki' },
+  { value: 'horror', label: 'Horror', group: 'Gatunki' },
+  { value: 'romance', label: 'Romans', group: 'Gatunki' },
+  { value: 'historical fiction', label: 'Historyczna', group: 'Gatunki' },
+  { value: 'adventure', label: 'Przygodowa', group: 'Gatunki' },
+  { value: 'war stories', label: 'Wojenna', group: 'Gatunki' },
+  { value: 'dystopia', label: 'Dystopia', group: 'Gatunki' },
+  { value: 'magical realism', label: 'Realizm magiczny', group: 'Gatunki' },
+  { value: 'urban fantasy', label: 'Urban fantasy', group: 'Gatunki' },
+  { value: 'paranormal', label: 'Paranormal', group: 'Gatunki' },
+  { value: 'western', label: 'Western', group: 'Gatunki' },
+  { value: 'spy stories', label: 'Szpiegowska', group: 'Gatunki' },
+
+  // Dla młodszych
+  { value: 'young adult', label: 'Young adult', group: 'Dla młodszych' },
+  { value: 'juvenile fiction', label: 'Dla dzieci / młodzieży', group: 'Dla młodszych' },
+  { value: 'children', label: 'Children', group: 'Dla młodszych' },
+  { value: 'picture books', label: 'Obrazkowe', group: 'Dla młodszych' },
+  { value: 'comics', label: 'Komiks', group: 'Dla młodszych' },
+  { value: 'graphic novels', label: 'Powieść graficzna', group: 'Dla młodszych' },
+  { value: 'manga', label: 'Manga', group: 'Dla młodszych' },
+
+  // Non-fiction
+  { value: 'biography', label: 'Biografia', group: 'Non-fiction' },
+  { value: 'autobiography', label: 'Autobiografia', group: 'Non-fiction' },
+  { value: 'memoir', label: 'Memoir / wspomnienia', group: 'Non-fiction' },
+  { value: 'history', label: 'Historia', group: 'Non-fiction' },
+  { value: 'philosophy', label: 'Filozofia', group: 'Non-fiction' },
+  { value: 'psychology', label: 'Psychologia', group: 'Non-fiction' },
+  { value: 'religion', label: 'Religia', group: 'Non-fiction' },
+  { value: 'science', label: 'Nauka', group: 'Non-fiction' },
+  { value: 'politics', label: 'Polityka', group: 'Non-fiction' },
+  { value: 'sociology', label: 'Socjologia', group: 'Non-fiction' },
+  { value: 'economics', label: 'Ekonomia', group: 'Non-fiction' },
+  { value: 'business', label: 'Biznes', group: 'Non-fiction' },
+  { value: 'self-help', label: 'Self-help / rozwój', group: 'Non-fiction' },
+  { value: 'art', label: 'Sztuka', group: 'Non-fiction' },
+  { value: 'music', label: 'Muzyka', group: 'Non-fiction' },
+  { value: 'cooking', label: 'Kulinaria', group: 'Non-fiction' },
+  { value: 'travel', label: 'Podróże', group: 'Non-fiction' },
+  { value: 'nature', label: 'Przyroda', group: 'Non-fiction' },
+  { value: 'technology', label: 'Technologia', group: 'Non-fiction' },
+  { value: 'medicine', label: 'Medycyna', group: 'Non-fiction' },
+  { value: 'education', label: 'Edukacja', group: 'Non-fiction' },
+  { value: 'sports', label: 'Sport', group: 'Non-fiction' },
+  { value: 'true crime', label: 'True crime', group: 'Non-fiction' },
 ];
 
 export const BOOK_LOTTERY_LANGUAGES: { code: string; label: string }[] = [
