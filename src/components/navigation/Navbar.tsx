@@ -10,6 +10,8 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMagdaPage = location.pathname === "/magda-losuje";
+  const isBookLosujePage = location.pathname === "/losuj-ksiazke";
+  const hideSearch = isMagdaPage || isBookLosujePage;
 
   return (
     <AppBar
@@ -101,6 +103,30 @@ const Navbar: React.FC = () => {
           MAGDA LOSUJE
         </Button>
 
+        <Button
+          onClick={() => navigate("/losuj-ksiazke")}
+          startIcon={<MenuBookOutlinedIcon sx={{ fontSize: 18 }} />}
+          sx={{
+            flexShrink: 0,
+            borderRadius: 999,
+            px: 1.75,
+            py: 0.75,
+            fontWeight: 700,
+            fontSize: "0.8125rem",
+            letterSpacing: "0.02em",
+            textTransform: "none",
+            color: isBookLosujePage ? "#2f6f5e" : "text.secondary",
+            bgcolor: isBookLosujePage ? "rgba(47, 111, 94, 0.12)" : "transparent",
+            "& .MuiButton-startIcon": { mr: 0.75 },
+            "&:hover": {
+              bgcolor: "rgba(47, 111, 94, 0.14)",
+              color: "#2f6f5e",
+            },
+          }}
+        >
+          Losuj książkę
+        </Button>
+
         <Box
           sx={{
             flex: 1,
@@ -110,7 +136,7 @@ const Navbar: React.FC = () => {
             mx: "auto",
           }}
         >
-          {!isMagdaPage && <SearchBar variant="desktop" />}
+          {!hideSearch && <SearchBar variant="desktop" />}
         </Box>
 
         <Box sx={{ flexShrink: 0 }}>

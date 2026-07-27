@@ -18,6 +18,8 @@ const MobileNavbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMagdaPage = location.pathname === "/magda-losuje";
+  const hideSearch =
+    isMagdaPage || location.pathname === "/losuj-ksiazke";
 
   const handleDrawerOpen = useCallback(() => setDrawerOpen(true), []);
   const handleDrawerClose = useCallback(() => setDrawerOpen(false), []);
@@ -86,7 +88,7 @@ const MobileNavbar: React.FC = () => {
           </IconButton>
         </Toolbar>
 
-        {!isMagdaPage && (
+        {!hideSearch && (
           <Box sx={{ px: 2, pb: 1.5 }}>
             <SearchBar variant="mobile" />
           </Box>

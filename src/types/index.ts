@@ -18,3 +18,4 @@ export type {
   WatchProvider,
 } from './Movie';
 export type { WatchlistMovie, WatchlistMovieInput } from './WatchlistMovie';
+export type { LotteryBook, BookLotteryFilters } from './LotteryBook';

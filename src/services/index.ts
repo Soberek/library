@@ -23,6 +23,13 @@ export {
 } from './tmdbService';
 
 export {
+  searchLotteryBooks,
+  pickRandomLotteryBook,
+  BOOK_LOTTERY_SUBJECTS,
+  BOOK_LOTTERY_LANGUAGES,
+} from './openLibraryService';
+
+export {
   getUserWatchlist,
   addToWatchlist,
   setWatchlistWatched,

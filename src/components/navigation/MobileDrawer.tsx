@@ -136,6 +136,38 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
             />
           </ListItemButton>
         </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/losuj-ksiazke"
+            onClick={onClose}
+            selected={location.pathname === "/losuj-ksiazke"}
+            sx={{
+              mx: 1,
+              borderRadius: 1.5,
+              "&.Mui-selected": {
+                bgcolor: "rgba(47, 111, 94, 0.14)",
+                color: "#2f6f5e",
+              },
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 36,
+                color:
+                  location.pathname === "/losuj-ksiazke"
+                    ? "#2f6f5e"
+                    : "text.secondary",
+              }}
+            >
+              <MenuBookOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary="Losuj książkę"
+              primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
 
       {user && (

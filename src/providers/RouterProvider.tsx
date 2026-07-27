@@ -6,6 +6,7 @@ import SignUp from '../pages/SignUp';
 import SignIn from '../pages/SignIn';
 import Books from '../pages/Books';
 import MagdaLosuje from '../pages/MagdaLosuje';
+import BookLosuje from '../pages/BookLosuje';
 import PozycjeSeksualne from '../pages/PozycjeSeksualne';
 
 const router = createBrowserRouter([
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
           {
             path: 'magda-losuje',
             element: <MagdaLosuje />,
+          },
+          {
+            path: 'losuj-ksiazke',
+            element: <BookLosuje />,
           },
           {
             path: 'pozycje-seksualne',
