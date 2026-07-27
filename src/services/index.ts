@@ -25,8 +25,12 @@ export {
 export {
   searchLotteryBooks,
   pickRandomLotteryBook,
+  countLotteryBooks,
   BOOK_LOTTERY_SUBJECTS,
   BOOK_LOTTERY_LANGUAGES,
+  BOOK_RATING_COUNT_OPTIONS,
+  BOOK_EDITION_OPTIONS,
+  BOOK_PAGES_OPTIONS,
 } from './openLibraryService';
 
 export {

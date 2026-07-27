@@ -9,6 +9,7 @@ import {
   FormControlLabel,
   MenuItem,
   Select,
+  Slider,
   Stack,
   Switch,
   Typography,
@@ -17,11 +18,20 @@ import ShuffleIcon from '@mui/icons-material/Shuffle';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
+import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { BookLotteryFilters, LotteryBook } from '../types/LotteryBook';
 import {
+  BOOK_EDITION_OPTIONS,
   BOOK_LOTTERY_LANGUAGES,
   BOOK_LOTTERY_SUBJECTS,
+  BOOK_PAGES_OPTIONS,
+  BOOK_RATING_COUNT_OPTIONS,
+  countLotteryBooks,
+  ebookLabel,
+  languageLabel,
+  needsClientRatingFilter,
   pickRandomLotteryBook,
 } from '../services/openLibraryService';
 import BookDrawAnimation from '../components/book/BookDrawAnimation';
@@ -35,8 +45,32 @@ const DEFAULT_FILTERS: BookLotteryFilters = {
   language: 'pol',
   yearFrom: null,
   yearTo: null,
+  minRating: 3,
+  minRatingsCount: 5,
+  minEditions: 0,
+  minPages: 0,
   requireCover: true,
 };
+
+function formatAuthors(book: LotteryBook): string {
+  const names = book.authors?.length ? book.authors : [book.author];
+  if (names.length <= 2) return names.join(', ');
+  return `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
+}
+
+function formatLanguages(codes: string[] | undefined, preferred?: string): string | null {
+  if (!codes?.length) return null;
+  const ordered = preferred
+    ? [...codes].sort((a, b) => {
+        if (a === preferred) return -1;
+        if (b === preferred) return 1;
+        return 0;
+      })
+    : codes;
+  const shown = ordered.slice(0, 3).map(languageLabel);
+  const extra = ordered.length > 3 ? ` +${ordered.length - 3}` : '';
+  return shown.join(', ') + extra;
+}
 
 const BookLosuje: React.FC = () => {
   const [filters, setFilters] = useState<BookLotteryFilters>(DEFAULT_FILTERS);
@@ -47,6 +81,10 @@ const BookLosuje: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [poolSize, setPoolSize] = useState<number | null>(null);
+  const [poolLoading, setPoolLoading] = useState(false);
+
+  const ratingApprox = needsClientRatingFilter(filters);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -55,6 +93,28 @@ const BookLosuje: React.FC = () => {
       document.title = previousTitle;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setPoolLoading(true);
+      void countLotteryBooks(filters)
+        .then((count) => {
+          if (!cancelled) setPoolSize(count);
+        })
+        .catch(() => {
+          if (!cancelled) setPoolSize(null);
+        })
+        .finally(() => {
+          if (!cancelled) setPoolLoading(false);
+        });
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [filters]);
 
   const handleDraw = useCallback(async () => {
     setError(null);
@@ -65,10 +125,11 @@ const BookLosuje: React.FC = () => {
     setReelBooks([]);
 
     try {
-      const { winner, reel } = await pickRandomLotteryBook(
+      const { winner, reel, numFound } = await pickRandomLotteryBook(
         filters,
         new Set(recentIds),
       );
+      setPoolSize(numFound);
       setReelBooks(reel);
       setSpinWinner(winner);
       setRecentIds((prev) =>
@@ -89,6 +150,9 @@ const BookLosuje: React.FC = () => {
     setSpinWinner(null);
     setReelBooks([]);
   }, [spinWinner]);
+
+  const ebook = drawn ? ebookLabel(drawn.ebookAccess) : null;
+  const langs = drawn ? formatLanguages(drawn.languages, filters.language || undefined) : null;
 
   return (
     <Box className="book-losuje-page" component="main">
@@ -111,7 +175,7 @@ const BookLosuje: React.FC = () => {
             </span>
           </h1>
           <p className="book-losuje-tagline">
-            Gatunek, język, lata — resztę zostaw katalogowi.
+            Gatunek, ocena, język edycji — katalog losuje resztę.
           </p>
         </motion.header>
 
@@ -136,8 +200,27 @@ const BookLosuje: React.FC = () => {
               <p className="book-losuje-controls-kicker">filtry</p>
               <h2 className="book-losuje-controls-title">Co ma wpaść?</h2>
             </div>
-            <p className="book-losuje-controls-hint">Dane: Open Library</p>
+            <div className="book-pool-badge" aria-live="polite">
+              {poolLoading ? (
+                <span className="book-pool-badge-muted">Liczenie…</span>
+              ) : poolSize != null ? (
+                <>
+                  <strong>
+                    {ratingApprox ? '~' : ''}
+                    {poolSize.toLocaleString('pl-PL')}
+                  </strong>
+                  <span> w puli</span>
+                </>
+              ) : (
+                <span className="book-pool-badge-muted">Open Library</span>
+              )}
+            </div>
           </div>
+
+          <p className="book-losuje-api-note">
+            Ocena OL jest w skali ~1–5. Próg średniej filtrujemy lokalnie (API słabo
+            obsługuje ratings_average); głosy, edycje i strony idą w zapytaniu.
+          </p>
 
           <div className="book-losuje-grid">
             <label className="book-field">
@@ -160,7 +243,7 @@ const BookLosuje: React.FC = () => {
             </label>
 
             <label className="book-field">
-              <span className="book-field-label">Język</span>
+              <span className="book-field-label">Język edycji</span>
               <FormControl fullWidth size="small" disabled={drawing || loading}>
                 <Select
                   displayEmpty
@@ -179,7 +262,81 @@ const BookLosuje: React.FC = () => {
             </label>
 
             <div className="book-field book-field--span2">
-              <span className="book-field-label">Lata wydania</span>
+              <div className="book-field-label-row">
+                <span className="book-field-label">Minimalna ocena</span>
+                <span className="book-rating-pill">
+                  {filters.minRating <= 0 ? 'dowolna' : `${filters.minRating.toFixed(1)}+`}
+                </span>
+              </div>
+              <Slider
+                value={filters.minRating}
+                min={0}
+                max={5}
+                step={0.5}
+                disabled={drawing || loading}
+                onChange={(_, value) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    minRating: Array.isArray(value) ? value[0] : value,
+                  }))
+                }
+                className="book-rating-slider"
+                marks={[
+                  { value: 0, label: '0' },
+                  { value: 3, label: '3' },
+                  { value: 5, label: '5' },
+                ]}
+              />
+            </div>
+
+            <div className="book-field">
+              <span className="book-field-label">Min. liczba ocen</span>
+              <div className="book-seg" role="group" aria-label="Minimalna liczba ocen">
+                {BOOK_RATING_COUNT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={
+                      filters.minRatingsCount === opt.value
+                        ? 'book-seg-btn is-active'
+                        : 'book-seg-btn'
+                    }
+                    disabled={drawing || loading}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, minRatingsCount: opt.value }))
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="book-field">
+              <span className="book-field-label">Min. wydań</span>
+              <div className="book-seg" role="group" aria-label="Minimalna liczba wydań">
+                {BOOK_EDITION_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={
+                      filters.minEditions === opt.value
+                        ? 'book-seg-btn is-active'
+                        : 'book-seg-btn'
+                    }
+                    disabled={drawing || loading}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, minEditions: opt.value }))
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="book-field book-field--span2">
+              <span className="book-field-label">Lata pierwszego wydania</span>
               <div className="book-year-row">
                 <FormControl fullWidth size="small" disabled={drawing || loading}>
                   <Select
@@ -229,7 +386,26 @@ const BookLosuje: React.FC = () => {
               </div>
             </div>
 
-            <div className="book-field book-field--span2">
+            <div className="book-field">
+              <span className="book-field-label">Min. stron (mediana)</span>
+              <div className="book-seg" role="group" aria-label="Minimalna liczba stron">
+                {BOOK_PAGES_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={
+                      filters.minPages === opt.value ? 'book-seg-btn is-active' : 'book-seg-btn'
+                    }
+                    disabled={drawing || loading}
+                    onClick={() => setFilters((prev) => ({ ...prev, minPages: opt.value }))}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="book-field book-cover-row">
               <FormControlLabel
                 control={
                   <Switch
@@ -256,14 +432,23 @@ const BookLosuje: React.FC = () => {
                   '& .MuiFormControlLabel-label': { fontWeight: 600, fontSize: '0.9rem' },
                 }}
               />
+              <span className="book-cover-hint">
+                Wiele PL pozycji w OL nie ma cover_i — odznacz przy pustej puli.
+              </span>
             </div>
           </div>
+
+          {poolSize === 0 && !poolLoading && (
+            <Alert severity="warning" sx={{ mb: 1.5, borderRadius: 2 }}>
+              Pula jest pusta. Obniż ocenę/głosy, odznacz okładkę albo zmień język.
+            </Alert>
+          )}
 
           <Button
             className="book-draw-btn"
             variant="contained"
             size="large"
-            disabled={drawing || loading}
+            disabled={drawing || loading || poolSize === 0}
             onClick={() => void handleDraw()}
             startIcon={
               drawing || loading ? (
@@ -273,7 +458,13 @@ const BookLosuje: React.FC = () => {
               )
             }
           >
-            {loading ? 'Szukam w katalogu…' : drawing ? 'Losuję…' : drawn ? 'Losuj ponownie' : 'Losuj książkę'}
+            {loading
+              ? 'Szukam w katalogu…'
+              : drawing
+                ? 'Losuję…'
+                : drawn
+                  ? 'Losuj ponownie'
+                  : 'Losuj książkę'}
           </Button>
         </motion.section>
 
@@ -288,8 +479,8 @@ const BookLosuje: React.FC = () => {
                 exit={{ opacity: 0 }}
               >
                 <MenuBookOutlinedIcon sx={{ fontSize: 48, opacity: 0.45 }} />
-                <Typography textAlign="center" sx={{ opacity: 0.75 }}>
-                  Tu pojawi się wylosowana książka.
+                <Typography textAlign="center" sx={{ opacity: 0.75, maxWidth: 280 }}>
+                  Ustaw ocenę i filtry, potem losuj.
                 </Typography>
               </motion.div>
             )}
@@ -304,7 +495,7 @@ const BookLosuje: React.FC = () => {
               >
                 <CircularProgress size={36} sx={{ color: '#3d9b7a' }} />
                 <Typography textAlign="center" sx={{ opacity: 0.75 }}>
-                  Pobieram książki z Open Library…
+                  Pobieram losową próbkę z Open Library…
                 </Typography>
               </motion.div>
             )}
@@ -334,6 +525,7 @@ const BookLosuje: React.FC = () => {
                     ) : (
                       <div className="book-ticket-cover-fallback">
                         <MenuBookOutlinedIcon sx={{ fontSize: 40 }} />
+                        <span>Brak okładki w OL</span>
                       </div>
                     )}
                   </div>
@@ -343,25 +535,70 @@ const BookLosuje: React.FC = () => {
                       {drawn.title}
                     </Typography>
                     <Typography className="book-ticket-author" component="p">
-                      {drawn.author}
+                      {formatAuthors(drawn)}
                     </Typography>
 
-                    <Stack direction="row" flexWrap="wrap" gap={1} sx={{ my: 1.5 }}>
+                    <dl className="book-meta">
                       {drawn.year != null && (
-                        <Chip size="small" label={String(drawn.year)} className="book-chip" />
+                        <div>
+                          <dt>Rok</dt>
+                          <dd>{drawn.year}</dd>
+                        </div>
+                      )}
+                      {drawn.pages != null && (
+                        <div>
+                          <dt>Strony</dt>
+                          <dd>~{drawn.pages}</dd>
+                        </div>
+                      )}
+                      {drawn.editionCount != null && drawn.editionCount > 0 && (
+                        <div>
+                          <dt>Edycje</dt>
+                          <dd>{drawn.editionCount}</dd>
+                        </div>
                       )}
                       {drawn.rating != null && (
+                        <div>
+                          <dt>Ocena</dt>
+                          <dd>
+                            <StarRoundedIcon sx={{ fontSize: 16, verticalAlign: -3 }} />{' '}
+                            {drawn.rating.toFixed(1)}
+                            {drawn.ratingsCount != null && drawn.ratingsCount > 0 && (
+                              <span className="book-meta-sub"> ({drawn.ratingsCount})</span>
+                            )}
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+
+                    <Stack direction="row" flexWrap="wrap" gap={1} sx={{ my: 1.25 }}>
+                      {langs && (
                         <Chip
                           size="small"
-                          icon={<StarRoundedIcon />}
-                          label={drawn.rating.toFixed(1)}
+                          label={langs}
                           className="book-chip"
+                          title="Języki edycji w Open Library"
                         />
                       )}
-                      {drawn.subjects?.slice(0, 3).map((subject) => (
+                      {ebook && (
+                        <Chip
+                          size="small"
+                          icon={<AutoStoriesOutlinedIcon />}
+                          label={ebook}
+                          className="book-chip book-chip--accent"
+                        />
+                      )}
+                      {drawn.subjects?.map((subject) => (
                         <Chip key={subject} size="small" label={subject} className="book-chip" />
                       ))}
                     </Stack>
+
+                    {drawn.publishers && drawn.publishers.length > 0 && (
+                      <p className="book-publishers">
+                        <LibraryBooksOutlinedIcon sx={{ fontSize: 15, opacity: 0.7 }} />
+                        <span>{drawn.publishers.slice(0, 3).join(' · ')}</span>
+                      </p>
+                    )}
 
                     {drawn.openLibraryUrl && (
                       <Button
@@ -374,7 +611,7 @@ const BookLosuje: React.FC = () => {
                         size="small"
                         endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
                       >
-                        Open Library
+                        Zobacz w Open Library
                       </Button>
                     )}
                   </div>
@@ -385,7 +622,7 @@ const BookLosuje: React.FC = () => {
         </Box>
 
         <Typography className="book-credit" component="p">
-          Dane książek: Open Library (Internet Archive)
+          Dane: Open Library — oceny, ratings_count, edition_count, strony
         </Typography>
       </Box>
     </Box>
