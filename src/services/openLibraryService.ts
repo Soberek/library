@@ -47,6 +47,14 @@ export const BOOK_RATING_COUNT_OPTIONS: { value: number; label: string }[] = [
   { value: 25, label: '≥25' },
 ];
 
+/** Progi want_to_read_count (popularność w Open Library). */
+export const BOOK_POPULARITY_OPTIONS: { value: number; label: string }[] = [
+  { value: 0, label: 'Luźno' },
+  { value: 50, label: 'Środek' },
+  { value: 500, label: 'Znane' },
+  { value: 2000, label: 'Hity' },
+];
+
 export const BOOK_EDITION_OPTIONS: { value: number; label: string }[] = [
   { value: 0, label: 'Dowolnie' },
   { value: 2, label: '≥2' },
@@ -117,6 +125,7 @@ interface OpenLibraryDoc {
   ratings_count?: number;
   language?: string[];
   edition_count?: number;
+  want_to_read_count?: number;
   ebook_access?: string;
   number_of_pages_median?: number;
   publisher?: string[];
@@ -215,6 +224,9 @@ function pickScore(book: LotteryBook, filters: BookLotteryFilters): number {
     if (book.rating >= 4) score += 1;
   }
   if ((book.ratingsCount ?? 0) >= 10) score += 0.5;
+  if ((book.wantToReadCount ?? 0) >= filters.minPopularity) score += 1;
+  if ((book.wantToReadCount ?? 0) >= 500) score += 0.5;
+  if ((book.wantToReadCount ?? 0) >= 2000) score += 0.5;
   if (book.pages != null && book.pages >= 80) score += 0.5;
   return score;
 }
@@ -235,6 +247,7 @@ function mapDoc(doc: OpenLibraryDoc, preferredSubject?: string): LotteryBook | n
     ratingsCount: doc.ratings_count ?? null,
     pages: doc.number_of_pages_median ?? null,
     editionCount: doc.edition_count ?? null,
+    wantToReadCount: doc.want_to_read_count ?? null,
     ebookAccess: doc.ebook_access ?? null,
     languages: doc.language ?? [],
     publishers: doc.publisher?.slice(0, 8) ?? [],
@@ -272,6 +285,9 @@ function buildQuery(filters: BookLotteryFilters): string {
   if (minVotes > 0) {
     parts.push(`ratings_count:[${minVotes} TO *]`);
   }
+  if (filters.minPopularity > 0) {
+    parts.push(`want_to_read_count:[${filters.minPopularity} TO *]`);
+  }
   if (filters.minEditions > 0) {
     parts.push(`edition_count:[${filters.minEditions} TO *]`);
   }
@@ -296,6 +312,7 @@ const SEARCH_FIELDS = [
   'ratings_count',
   'language',
   'edition_count',
+  'want_to_read_count',
   'ebook_access',
   'number_of_pages_median',
   'publisher',
@@ -311,7 +328,7 @@ function passesClientFilters(book: LotteryBook, filters: BookLotteryFilters): bo
 export async function searchLotteryBooks(
   filters: BookLotteryFilters,
   limit = 24,
-  sort: 'random' | 'rating' = 'random',
+  sort: 'random' | 'rating' | 'want_to_read' = 'random',
 ): Promise<LotterySearchResult> {
   const params = new URLSearchParams({
     q: buildQuery(filters),
@@ -375,6 +392,9 @@ export async function pickRandomLotteryBook(
   ];
   if (needsClientRatingFilter(filters)) {
     requests.push(searchLotteryBooks(filters, pageSize, 'rating'));
+  }
+  if (filters.minPopularity >= 500) {
+    requests.push(searchLotteryBooks(filters, pageSize, 'want_to_read'));
   }
 
   const batches = await Promise.all(requests);

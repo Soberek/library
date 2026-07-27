@@ -299,11 +299,20 @@
   cursor: not-allowed;
 }
 
+.book-field-hint-inline {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(184, 201, 190, 0.4);
+}
+
 .book-meta-sub {
   font-weight: 500;
   font-size: 0.78rem;
   color: rgba(184, 201, 190, 0.55);
 }
+
 
 .book-losuje-api-note code {
   font-size: 0.72em;

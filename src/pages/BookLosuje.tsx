@@ -27,6 +27,7 @@ import {
   BOOK_LOTTERY_LANGUAGES,
   BOOK_LOTTERY_SUBJECTS,
   BOOK_PAGES_OPTIONS,
+  BOOK_POPULARITY_OPTIONS,
   BOOK_RATING_COUNT_OPTIONS,
   countLotteryBooks,
   ebookLabel,
@@ -47,6 +48,7 @@ const DEFAULT_FILTERS: BookLotteryFilters = {
   yearTo: null,
   minRating: 3,
   minRatingsCount: 5,
+  minPopularity: 50,
   minEditions: 0,
   minPages: 0,
   requireCover: true,
@@ -287,6 +289,32 @@ const BookLosuje: React.FC = () => {
                   { value: 5, label: '5' },
                 ]}
               />
+            </div>
+
+            <div className="book-field book-field--span2">
+              <div className="book-field-label-row">
+                <span className="book-field-label">Popularność</span>
+                <span className="book-field-hint-inline">want to read w OL</span>
+              </div>
+              <div className="book-seg" role="group" aria-label="Popularność">
+                {BOOK_POPULARITY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={
+                      filters.minPopularity === opt.value
+                        ? 'book-seg-btn is-active'
+                        : 'book-seg-btn'
+                    }
+                    disabled={drawing || loading}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, minPopularity: opt.value }))
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="book-field">
@@ -566,6 +594,15 @@ const BookLosuje: React.FC = () => {
                             {drawn.ratingsCount != null && drawn.ratingsCount > 0 && (
                               <span className="book-meta-sub"> ({drawn.ratingsCount})</span>
                             )}
+                          </dd>
+                        </div>
+                      )}
+                      {drawn.wantToReadCount != null && drawn.wantToReadCount > 0 && (
+                        <div>
+                          <dt>Popularność</dt>
+                          <dd>
+                            {drawn.wantToReadCount.toLocaleString('pl-PL')}
+                            <span className="book-meta-sub"> want</span>
                           </dd>
                         </div>
                       )}

@@ -12,6 +12,8 @@ export interface LotteryBook {
   ratingsCount?: number | null;
   pages?: number | null;
   editionCount?: number | null;
+  /** „Chcę przeczytać” w Open Library — proxy popularności. */
+  wantToReadCount?: number | null;
   ebookAccess?: EbookAccess | null;
   languages?: string[];
   publishers?: string[];
@@ -27,6 +29,8 @@ export interface BookLotteryFilters {
   minRating: number;
   /** Min. liczba ocen w OL — działa w zapytaniu Solr. */
   minRatingsCount: number;
+  /** Min. want_to_read_count — popularność w OL. */
+  minPopularity: number;
   /** Min. liczba wydań — działa w zapytaniu Solr. */
   minEditions: number;
   /** Min. mediany stron; 0 = bez limitu. */
