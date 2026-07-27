@@ -26,6 +26,7 @@ export {
   searchLotteryBooks,
   pickRandomLotteryBook,
   countLotteryBooks,
+  countAdvancedBookFilters,
   BOOK_LOTTERY_SUBJECTS,
   BOOK_LOTTERY_LANGUAGES,
   BOOK_RATING_COUNT_OPTIONS,

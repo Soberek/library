@@ -189,6 +189,16 @@ export function ebookLabel(access: string | null | undefined): string | null {
   return null;
 }
 
+/** Liczba filtrów schowanych w „Więcej”. */
+export function countAdvancedBookFilters(filters: BookLotteryFilters): number {
+  let n = 0;
+  if (filters.minRatingsCount > 0) n += 1;
+  if (filters.minEditions > 0) n += 1;
+  if (filters.minPages > 0) n += 1;
+  if (filters.yearFrom != null || filters.yearTo != null) n += 1;
+  return n;
+}
+
 /** OL Solr nie filtruje wiarygodnie po ratings_average — średnia jest lokalnie. */
 export function needsClientRatingFilter(filters: BookLotteryFilters): boolean {
   return filters.minRating > 0;

@@ -5,6 +5,7 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Collapse,
   FormControl,
   FormControlLabel,
   MenuItem,
@@ -20,6 +21,9 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { BookLotteryFilters, LotteryBook } from '../types/LotteryBook';
 import {
@@ -29,6 +33,7 @@ import {
   BOOK_PAGES_OPTIONS,
   BOOK_POPULARITY_OPTIONS,
   BOOK_RATING_COUNT_OPTIONS,
+  countAdvancedBookFilters,
   countLotteryBooks,
   ebookLabel,
   languageLabel,
@@ -85,8 +90,11 @@ const BookLosuje: React.FC = () => {
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [poolSize, setPoolSize] = useState<number | null>(null);
   const [poolLoading, setPoolLoading] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const ratingApprox = needsClientRatingFilter(filters);
+  const advancedCount = countAdvancedBookFilters(filters);
+  const busy = drawing || loading;
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -153,23 +161,41 @@ const BookLosuje: React.FC = () => {
     setReelBooks([]);
   }, [spinWinner]);
 
+  const resetAdvanced = () => {
+    setFilters((prev) => ({
+      ...prev,
+      minRatingsCount: 0,
+      minEditions: 0,
+      minPages: 0,
+      yearFrom: null,
+      yearTo: null,
+    }));
+  };
+
   const ebook = drawn ? ebookLabel(drawn.ebookAccess) : null;
   const langs = drawn ? formatLanguages(drawn.languages, filters.language || undefined) : null;
+  const subjectLabel =
+    BOOK_LOTTERY_SUBJECTS.find((s) => s.value === filters.subject)?.label ?? 'Wszystkie';
+  const langLabel =
+    BOOK_LOTTERY_LANGUAGES.find((l) => l.code === filters.language)?.label ?? 'Dowolny';
+  const popLabel =
+    BOOK_POPULARITY_OPTIONS.find((p) => p.value === filters.minPopularity)?.label ?? 'Luźno';
 
   return (
     <Box className="book-losuje-page" component="main">
       <div className="book-losuje-grain" aria-hidden />
       <div className="book-losuje-glow book-losuje-glow--left" aria-hidden />
       <div className="book-losuje-glow book-losuje-glow--right" aria-hidden />
+      <div className="book-losuje-shelf" aria-hidden />
 
       <Box className="book-losuje-inner">
         <motion.header
           className="book-losuje-hero"
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="book-losuje-kicker">Open Library</p>
+          <p className="book-losuje-kicker">katalog · open library</p>
           <h1 className="book-losuje-brand">
             <span className="book-losuje-brand-line">LOSUJ</span>
             <span className="book-losuje-brand-line book-losuje-brand-line--accent">
@@ -177,14 +203,14 @@ const BookLosuje: React.FC = () => {
             </span>
           </h1>
           <p className="book-losuje-tagline">
-            Gatunek, ocena, język edycji — katalog losuje resztę.
+            Ustaw gatunek i próg jakości — resztę wybierze katalog.
           </p>
         </motion.header>
 
         {error && (
           <Alert
             severity="error"
-            sx={{ mb: 2.5, borderRadius: 2 }}
+            sx={{ mb: 2, borderRadius: 2 }}
             onClose={() => setError(null)}
           >
             {error}
@@ -193,16 +219,19 @@ const BookLosuje: React.FC = () => {
 
         <motion.section
           className="book-losuje-controls"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.06 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
         >
           <div className="book-losuje-controls-head">
             <div>
               <p className="book-losuje-controls-kicker">filtry</p>
               <h2 className="book-losuje-controls-title">Co ma wpaść?</h2>
             </div>
-            <div className="book-pool-badge" aria-live="polite">
+            <div
+              className={`book-pool-badge${poolSize === 0 && !poolLoading ? ' is-empty' : ''}`}
+              aria-live="polite"
+            >
               {poolLoading ? (
                 <span className="book-pool-badge-muted">Liczenie…</span>
               ) : poolSize != null ? (
@@ -219,15 +248,20 @@ const BookLosuje: React.FC = () => {
             </div>
           </div>
 
-          <p className="book-losuje-api-note">
-            Ocena OL jest w skali ~1–5. Próg średniej filtrujemy lokalnie (API słabo
-            obsługuje ratings_average); głosy, edycje i strony idą w zapytaniu.
-          </p>
+          <div className="book-summary-chips" aria-label="Aktywne filtry">
+            <span className="book-summary-chip">{subjectLabel}</span>
+            <span className="book-summary-chip">{langLabel}</span>
+            <span className="book-summary-chip">
+              {filters.minRating <= 0 ? 'ocena dowolna' : `ocena ${filters.minRating.toFixed(1)}+`}
+            </span>
+            <span className="book-summary-chip">{popLabel}</span>
+            {filters.requireCover && <span className="book-summary-chip">okładka</span>}
+          </div>
 
           <div className="book-losuje-grid">
             <label className="book-field">
-              <span className="book-field-label">Gatunek / temat</span>
-              <FormControl fullWidth size="small" disabled={drawing || loading}>
+              <span className="book-field-label">Gatunek</span>
+              <FormControl fullWidth size="small" disabled={busy}>
                 <Select
                   displayEmpty
                   value={filters.subject}
@@ -246,7 +280,7 @@ const BookLosuje: React.FC = () => {
 
             <label className="book-field">
               <span className="book-field-label">Język edycji</span>
-              <FormControl fullWidth size="small" disabled={drawing || loading}>
+              <FormControl fullWidth size="small" disabled={busy}>
                 <Select
                   displayEmpty
                   value={filters.language}
@@ -275,7 +309,7 @@ const BookLosuje: React.FC = () => {
                 min={0}
                 max={5}
                 step={0.5}
-                disabled={drawing || loading}
+                disabled={busy}
                 onChange={(_, value) =>
                   setFilters((prev) => ({
                     ...prev,
@@ -294,9 +328,9 @@ const BookLosuje: React.FC = () => {
             <div className="book-field book-field--span2">
               <div className="book-field-label-row">
                 <span className="book-field-label">Popularność</span>
-                <span className="book-field-hint-inline">want to read w OL</span>
+                <span className="book-field-hint-inline">„chcę przeczytać”</span>
               </div>
-              <div className="book-seg" role="group" aria-label="Popularność">
+              <div className="book-seg book-seg--joined" role="group" aria-label="Popularność">
                 {BOOK_POPULARITY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
@@ -306,7 +340,7 @@ const BookLosuje: React.FC = () => {
                         ? 'book-seg-btn is-active'
                         : 'book-seg-btn'
                     }
-                    disabled={drawing || loading}
+                    disabled={busy}
                     onClick={() =>
                       setFilters((prev) => ({ ...prev, minPopularity: opt.value }))
                     }
@@ -317,128 +351,12 @@ const BookLosuje: React.FC = () => {
               </div>
             </div>
 
-            <div className="book-field">
-              <span className="book-field-label">Min. liczba ocen</span>
-              <div className="book-seg" role="group" aria-label="Minimalna liczba ocen">
-                {BOOK_RATING_COUNT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={
-                      filters.minRatingsCount === opt.value
-                        ? 'book-seg-btn is-active'
-                        : 'book-seg-btn'
-                    }
-                    disabled={drawing || loading}
-                    onClick={() =>
-                      setFilters((prev) => ({ ...prev, minRatingsCount: opt.value }))
-                    }
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="book-field">
-              <span className="book-field-label">Min. wydań</span>
-              <div className="book-seg" role="group" aria-label="Minimalna liczba wydań">
-                {BOOK_EDITION_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={
-                      filters.minEditions === opt.value
-                        ? 'book-seg-btn is-active'
-                        : 'book-seg-btn'
-                    }
-                    disabled={drawing || loading}
-                    onClick={() =>
-                      setFilters((prev) => ({ ...prev, minEditions: opt.value }))
-                    }
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="book-field book-field--span2">
-              <span className="book-field-label">Lata pierwszego wydania</span>
-              <div className="book-year-row">
-                <FormControl fullWidth size="small" disabled={drawing || loading}>
-                  <Select
-                    displayEmpty
-                    value={filters.yearFrom ?? ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFilters((prev) => ({
-                        ...prev,
-                        yearFrom: value === '' ? null : Number(value),
-                      }));
-                    }}
-                    inputProps={{ 'aria-label': 'Od roku' }}
-                  >
-                    <MenuItem value="">Od zawsze</MenuItem>
-                    {YEAR_OPTIONS.map((year) => (
-                      <MenuItem key={year} value={year}>
-                        {year}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <span className="book-year-sep" aria-hidden>
-                  →
-                </span>
-                <FormControl fullWidth size="small" disabled={drawing || loading}>
-                  <Select
-                    displayEmpty
-                    value={filters.yearTo ?? ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFilters((prev) => ({
-                        ...prev,
-                        yearTo: value === '' ? null : Number(value),
-                      }));
-                    }}
-                    inputProps={{ 'aria-label': 'Do roku' }}
-                  >
-                    <MenuItem value="">Do dziś</MenuItem>
-                    {YEAR_OPTIONS.map((year) => (
-                      <MenuItem key={year} value={year}>
-                        {year}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
-            </div>
-
-            <div className="book-field">
-              <span className="book-field-label">Min. stron (mediana)</span>
-              <div className="book-seg" role="group" aria-label="Minimalna liczba stron">
-                {BOOK_PAGES_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={
-                      filters.minPages === opt.value ? 'book-seg-btn is-active' : 'book-seg-btn'
-                    }
-                    disabled={drawing || loading}
-                    onClick={() => setFilters((prev) => ({ ...prev, minPages: opt.value }))}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="book-field book-cover-row">
+            <div className="book-field book-field--span2 book-cover-row">
               <FormControlLabel
                 control={
                   <Switch
                     checked={filters.requireCover}
-                    disabled={drawing || loading}
+                    disabled={busy}
                     onChange={(e) =>
                       setFilters((prev) => ({
                         ...prev,
@@ -456,19 +374,177 @@ const BookLosuje: React.FC = () => {
                 label="Tylko z okładką"
                 sx={{
                   m: 0,
-                  color: 'rgba(232, 236, 232, 0.85)',
-                  '& .MuiFormControlLabel-label': { fontWeight: 600, fontSize: '0.9rem' },
+                  color: 'rgba(232, 236, 232, 0.88)',
+                  '& .MuiFormControlLabel-label': { fontWeight: 650, fontSize: '0.92rem' },
                 }}
               />
-              <span className="book-cover-hint">
-                Wiele PL pozycji w OL nie ma cover_i — odznacz przy pustej puli.
-              </span>
             </div>
           </div>
 
+          <div className="book-advanced">
+            <button
+              type="button"
+              className={`book-advanced-toggle${advancedOpen ? ' is-open' : ''}${advancedCount > 0 ? ' has-active' : ''}`}
+              disabled={busy}
+              aria-expanded={advancedOpen}
+              onClick={() => setAdvancedOpen((v) => !v)}
+            >
+              <span className="book-advanced-toggle-start">
+                <TuneRoundedIcon className="book-advanced-icon" fontSize="small" />
+                <span className="book-advanced-toggle-label">Więcej filtrów</span>
+                {advancedCount > 0 && (
+                  <span className="book-advanced-count" aria-label={`${advancedCount} aktywne`}>
+                    {advancedCount}
+                  </span>
+                )}
+              </span>
+              <ExpandMoreIcon className="book-advanced-chevron" fontSize="small" />
+            </button>
+
+            <Collapse in={advancedOpen}>
+              <div className="book-advanced-body">
+                <div className="book-losuje-grid">
+                  <div className="book-field">
+                    <span className="book-field-label">Min. liczba ocen</span>
+                    <div className="book-seg book-seg--wrap" role="group">
+                      {BOOK_RATING_COUNT_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={
+                            filters.minRatingsCount === opt.value
+                              ? 'book-seg-btn is-active'
+                              : 'book-seg-btn'
+                          }
+                          disabled={busy}
+                          onClick={() =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              minRatingsCount: opt.value,
+                            }))
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="book-field">
+                    <span className="book-field-label">Min. wydań</span>
+                    <div className="book-seg book-seg--wrap" role="group">
+                      {BOOK_EDITION_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={
+                            filters.minEditions === opt.value
+                              ? 'book-seg-btn is-active'
+                              : 'book-seg-btn'
+                          }
+                          disabled={busy}
+                          onClick={() =>
+                            setFilters((prev) => ({ ...prev, minEditions: opt.value }))
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="book-field book-field--span2">
+                    <span className="book-field-label">Lata pierwszego wydania</span>
+                    <div className="book-year-row">
+                      <FormControl fullWidth size="small" disabled={busy}>
+                        <Select
+                          displayEmpty
+                          value={filters.yearFrom ?? ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setFilters((prev) => ({
+                              ...prev,
+                              yearFrom: value === '' ? null : Number(value),
+                            }));
+                          }}
+                          inputProps={{ 'aria-label': 'Od roku' }}
+                        >
+                          <MenuItem value="">Od zawsze</MenuItem>
+                          {YEAR_OPTIONS.map((year) => (
+                            <MenuItem key={year} value={year}>
+                              {year}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <span className="book-year-sep" aria-hidden>
+                        →
+                      </span>
+                      <FormControl fullWidth size="small" disabled={busy}>
+                        <Select
+                          displayEmpty
+                          value={filters.yearTo ?? ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setFilters((prev) => ({
+                              ...prev,
+                              yearTo: value === '' ? null : Number(value),
+                            }));
+                          }}
+                          inputProps={{ 'aria-label': 'Do roku' }}
+                        >
+                          <MenuItem value="">Do dziś</MenuItem>
+                          {YEAR_OPTIONS.map((year) => (
+                            <MenuItem key={year} value={year}>
+                              {year}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </div>
+                  </div>
+
+                  <div className="book-field book-field--span2">
+                    <span className="book-field-label">Min. stron</span>
+                    <div className="book-seg book-seg--joined" role="group">
+                      {BOOK_PAGES_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={
+                            filters.minPages === opt.value
+                              ? 'book-seg-btn is-active'
+                              : 'book-seg-btn'
+                          }
+                          disabled={busy}
+                          onClick={() =>
+                            setFilters((prev) => ({ ...prev, minPages: opt.value }))
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {advancedCount > 0 && (
+                  <button
+                    type="button"
+                    className="book-reset-advanced"
+                    disabled={busy}
+                    onClick={resetAdvanced}
+                  >
+                    Wyczyść dodatkowe
+                  </button>
+                )}
+              </div>
+            </Collapse>
+          </div>
+
           {poolSize === 0 && !poolLoading && (
-            <Alert severity="warning" sx={{ mb: 1.5, borderRadius: 2 }}>
-              Pula jest pusta. Obniż ocenę/głosy, odznacz okładkę albo zmień język.
+            <Alert severity="warning" sx={{ mb: 1.25, borderRadius: 2 }}>
+              Pula pusta — obniż ocenę/popularność, odznacz okładkę albo zmień język.
             </Alert>
           )}
 
@@ -476,14 +552,10 @@ const BookLosuje: React.FC = () => {
             className="book-draw-btn"
             variant="contained"
             size="large"
-            disabled={drawing || loading || poolSize === 0}
+            disabled={busy || poolSize === 0}
             onClick={() => void handleDraw()}
             startIcon={
-              drawing || loading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <ShuffleIcon />
-              )
+              busy ? <CircularProgress size={20} color="inherit" /> : <ShuffleIcon />
             }
           >
             {loading
@@ -506,10 +578,13 @@ const BookLosuje: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <MenuBookOutlinedIcon sx={{ fontSize: 48, opacity: 0.45 }} />
-                <Typography textAlign="center" sx={{ opacity: 0.75, maxWidth: 280 }}>
-                  Ustaw ocenę i filtry, potem losuj.
-                </Typography>
+                <div className="book-empty-icon" aria-hidden>
+                  <MenuBookOutlinedIcon sx={{ fontSize: 36 }} />
+                </div>
+                <p className="book-empty-title">Półka czeka</p>
+                <p className="book-empty-text">
+                  Wybierz gatunek i naciśnij losuj — wylosowana pozycja pojawi się tutaj.
+                </p>
               </motion.div>
             )}
 
@@ -521,10 +596,9 @@ const BookLosuje: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <CircularProgress size={36} sx={{ color: '#3d9b7a' }} />
-                <Typography textAlign="center" sx={{ opacity: 0.75 }}>
-                  Pobieram losową próbkę z Open Library…
-                </Typography>
+                <CircularProgress size={34} sx={{ color: '#3d9b7a' }} />
+                <p className="book-empty-title">Kartkuję katalog…</p>
+                <p className="book-empty-text">Pobieram próbkę z Open Library</p>
               </motion.div>
             )}
 
@@ -541,11 +615,12 @@ const BookLosuje: React.FC = () => {
               <motion.article
                 key={drawn.id}
                 className="book-ticket"
-                initial={{ opacity: 0, scale: 0.9, y: 28 }}
+                initial={{ opacity: 0, scale: 0.92, y: 24 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               >
+                <div className="book-ticket-ribbon">Wylosowano</div>
                 <div className="book-ticket-body">
                   <div className="book-ticket-cover">
                     {drawn.cover ? (
@@ -553,7 +628,7 @@ const BookLosuje: React.FC = () => {
                     ) : (
                       <div className="book-ticket-cover-fallback">
                         <MenuBookOutlinedIcon sx={{ fontSize: 40 }} />
-                        <span>Brak okładki w OL</span>
+                        <span>Brak okładki</span>
                       </div>
                     )}
                   </div>
@@ -589,10 +664,10 @@ const BookLosuje: React.FC = () => {
                         <div>
                           <dt>Ocena</dt>
                           <dd>
-                            <StarRoundedIcon sx={{ fontSize: 16, verticalAlign: -3 }} />{' '}
+                            <StarRoundedIcon sx={{ fontSize: 15, verticalAlign: -2 }} />{' '}
                             {drawn.rating.toFixed(1)}
                             {drawn.ratingsCount != null && drawn.ratingsCount > 0 && (
-                              <span className="book-meta-sub"> ({drawn.ratingsCount})</span>
+                              <span className="book-meta-sub"> · {drawn.ratingsCount}</span>
                             )}
                           </dd>
                         </div>
@@ -601,20 +676,20 @@ const BookLosuje: React.FC = () => {
                         <div>
                           <dt>Popularność</dt>
                           <dd>
+                            <TrendingUpIcon sx={{ fontSize: 14, verticalAlign: -2, opacity: 0.8 }} />{' '}
                             {drawn.wantToReadCount.toLocaleString('pl-PL')}
-                            <span className="book-meta-sub"> want</span>
                           </dd>
                         </div>
                       )}
                     </dl>
 
-                    <Stack direction="row" flexWrap="wrap" gap={1} sx={{ my: 1.25 }}>
+                    <Stack direction="row" flexWrap="wrap" gap={0.85} sx={{ my: 1.2 }}>
                       {langs && (
                         <Chip
                           size="small"
                           label={langs}
                           className="book-chip"
-                          title="Języki edycji w Open Library"
+                          title="Języki edycji"
                         />
                       )}
                       {ebook && (
@@ -625,32 +700,44 @@ const BookLosuje: React.FC = () => {
                           className="book-chip book-chip--accent"
                         />
                       )}
-                      {drawn.subjects?.map((subject) => (
+                      {drawn.subjects?.slice(0, 3).map((subject) => (
                         <Chip key={subject} size="small" label={subject} className="book-chip" />
                       ))}
                     </Stack>
 
                     {drawn.publishers && drawn.publishers.length > 0 && (
                       <p className="book-publishers">
-                        <LibraryBooksOutlinedIcon sx={{ fontSize: 15, opacity: 0.7 }} />
+                        <LibraryBooksOutlinedIcon sx={{ fontSize: 15, opacity: 0.65 }} />
                         <span>{drawn.publishers.slice(0, 3).join(' · ')}</span>
                       </p>
                     )}
 
-                    {drawn.openLibraryUrl && (
+                    <div className="book-ticket-actions">
                       <Button
-                        className="book-ol-link"
-                        component="a"
-                        href={drawn.openLibraryUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                        size="small"
-                        endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                        className="book-draw-again"
+                        variant="contained"
+                        size="medium"
+                        disabled={busy || poolSize === 0}
+                        onClick={() => void handleDraw()}
+                        startIcon={<ShuffleIcon />}
                       >
-                        Zobacz w Open Library
+                        Losuj ponownie
                       </Button>
-                    )}
+                      {drawn.openLibraryUrl && (
+                        <Button
+                          className="book-ol-link"
+                          component="a"
+                          href={drawn.openLibraryUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="outlined"
+                          size="medium"
+                          endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                        >
+                          Open Library
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.article>
@@ -659,7 +746,7 @@ const BookLosuje: React.FC = () => {
         </Box>
 
         <Typography className="book-credit" component="p">
-          Dane: Open Library — oceny, ratings_count, edition_count, strony
+          Dane: Open Library · język = edycja w tym języku · ocena ~1–5
         </Typography>
       </Box>
     </Box>
