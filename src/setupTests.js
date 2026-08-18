@@ -12,13 +12,20 @@ Object.defineProperty(globalThis, 'import', {
         VITE_MESSAGING_SENDER_ID: '123456789',
         VITE_APP_ID: 'test-app-id',
         VITE_MEASUREMENT_ID: 'G-TEST123',
+        VITE_TMDB_API_KEY: 'test-tmdb-key',
       },
     },
   },
 });
+
+// Mock env config
+jest.mock('./config/env', () => ({
+  TMDB_API_KEY: 'test-tmdb-key',
+}));
 
 // Mock Firebase config
 jest.mock('./config/firebaseConfig', () => ({
   auth: {},
   db: {},
 }));
+
