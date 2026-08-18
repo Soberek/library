@@ -1,32 +1,54 @@
-import React from "react";
-import {
-  TextField,
-  InputAdornment,
-  Box,
-  IconButton,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
+import React, { useRef, useEffect } from "react";
+import { Search, X } from "lucide-react";
 import { useFilterStore } from "../../stores";
+import { cn } from "../../lib/utils";
 
 interface SearchBarProps {
   variant?: "desktop" | "mobile";
   placeholder?: string;
+  className?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
+export const SearchBar: React.FC<SearchBarProps> = ({
   variant = "desktop",
-  placeholder = "Szukaj książek...",
+  placeholder = "Szukaj książek (tytuł, autor)...",
+  className,
 }) => {
   const searchTerm = useFilterStore((state) => state.filters.searchTerm);
   const setFilter = useFilterStore((state) => state.setFilter);
+  const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = variant === "mobile";
 
-  const clearSearch = () => setFilter("searchTerm", "");
+  const clearSearch = () => {
+    setFilter("searchTerm", "");
+    inputRef.current?.focus();
+  };
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Focus search on '/' when not in input/textarea
+      if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
 
   return (
-    <Box sx={{ width: "100%", maxWidth: isMobile ? "100%" : 520 }}>
-      <TextField
+    <div className={cn("relative w-full", !isMobile && "max-w-md", className)}>
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+        <Search className="h-4 w-4" />
+      </div>
+      <input
+        ref={inputRef}
+        type="text"
         value={searchTerm}
         onChange={(e) => setFilter("searchTerm", e.target.value)}
         onKeyDown={(e) => {
@@ -36,59 +58,28 @@ const SearchBar: React.FC<SearchBarProps> = ({
           }
         }}
         placeholder={placeholder}
-        variant="outlined"
-        size="small"
-        fullWidth
-        inputProps={{
-          "aria-label": "Szukaj książek",
-        }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon
-                sx={{
-                  color: "text.secondary",
-                  fontSize: 20,
-                }}
-              />
-            </InputAdornment>
-          ),
-          endAdornment: searchTerm ? (
-            <InputAdornment position="end">
-              <IconButton
-                size="small"
-                aria-label="Wyczyść wyszukiwanie"
-                onClick={clearSearch}
-                edge="end"
-              >
-                <ClearIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </InputAdornment>
-          ) : undefined,
-          sx: {
-            bgcolor: "grey.50",
-            borderRadius: 2,
-            border: "1px solid",
-            borderColor: "grey.200",
-            "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-            "&:hover": {
-              bgcolor: "background.paper",
-              borderColor: "grey.300",
-            },
-            "&.Mui-focused": {
-              bgcolor: "background.paper",
-              borderColor: "primary.main",
-              boxShadow: "0 0 0 3px rgba(102, 126, 234, 0.12)",
-            },
-            "& input": {
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              py: 1,
-            },
-          },
-        }}
+        aria-label="Szukaj książek"
+        className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/90 pl-10 pr-10 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-3 focus:ring-indigo-500/15"
       />
-    </Box>
+      {searchTerm ? (
+        <button
+          type="button"
+          onClick={clearSearch}
+          aria-label="Wyczyść wyszukiwanie"
+          className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : (
+        !isMobile && (
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-400 bg-slate-100 border border-slate-200 rounded">
+              /
+            </kbd>
+          </div>
+        )
+      )}
+    </div>
   );
 };
 

@@ -5,10 +5,14 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "types": ["jest", "@testing-library/jest-dom"],
     "lib": ["dom", "esnext"],
     "strict": true
   }
+
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Typography } from '@mui/material';
-import LocalMoviesOutlinedIcon from '@mui/icons-material/LocalMoviesOutlined';
+import { Film } from 'lucide-react';
 import type { Movie } from '../../types/Movie';
 import { posterUrl } from '../../services/tmdbService';
 
@@ -8,7 +7,6 @@ const FRAME_W = 156;
 const FRAME_GAP = 16;
 const FRAME_STRIDE = FRAME_W + FRAME_GAP;
 const PREVIEW_COUNT = 5;
-/** Całość spina ≈ 2 s */
 const SLIDE_MS = 140;
 const HOLD_MS = 200;
 
@@ -82,7 +80,6 @@ function animateTranslateX(
     }
 
     const start = performance.now();
-    let raf = 0;
 
     const tick = (now: number) => {
       if (signal.cancelled) {
@@ -93,19 +90,17 @@ function animateTranslateX(
       const x = from + (to - from) * easeInOutCubic(t);
       el.style.transform = `translate3d(${x}px, 0, 0)`;
       if (t < 1) {
-        raf = requestAnimationFrame(tick);
+        requestAnimationFrame(tick);
       } else {
         resolve();
       }
     };
 
-    raf = requestAnimationFrame(tick);
-    // store raf on element for cleanup via signal — cancelled stops next frame
-    void raf;
+    requestAnimationFrame(tick);
   });
 }
 
-const MagdaDrawAnimation: React.FC<MagdaDrawAnimationProps> = ({
+export const MagdaDrawAnimation: React.FC<MagdaDrawAnimationProps> = ({
   reelMovies,
   winner,
   onComplete,
@@ -141,7 +136,6 @@ const MagdaDrawAnimation: React.FC<MagdaDrawAnimationProps> = ({
       for (let i = 1; i <= winnerIndex; i++) {
         if (signal.cancelled) return;
 
-        // Chwila na obejrzenie bieżącego plakatu
         await delay(HOLD_MS, signal);
         if (signal.cancelled) return;
 
@@ -153,7 +147,6 @@ const MagdaDrawAnimation: React.FC<MagdaDrawAnimationProps> = ({
         setActiveIndex(i);
       }
 
-      // Domknięcie na zwycięzcy
       await delay(HOLD_MS, signal);
       if (signal.cancelled || completedRef.current) return;
 
@@ -219,7 +212,7 @@ const MagdaDrawAnimation: React.FC<MagdaDrawAnimationProps> = ({
                         <img src={src} alt="" draggable={false} />
                       ) : (
                         <div className="magda-film-frame-fallback">
-                          <LocalMoviesOutlinedIcon />
+                          <Film className="w-8 h-8 text-amber-400 opacity-60" />
                         </div>
                       )}
                     </div>
@@ -243,9 +236,9 @@ const MagdaDrawAnimation: React.FC<MagdaDrawAnimationProps> = ({
       </div>
 
       <div className="magda-drawing-copy">
-        <Typography className="magda-drawing-text" key={phraseIndex}>
+        <p className="magda-drawing-text" key={phraseIndex}>
           {PHRASES[phraseIndex]}
-        </Typography>
+        </p>
       </div>
     </div>
   );

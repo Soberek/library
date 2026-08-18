@@ -1,34 +1,21 @@
 import React from "react";
-import { Fab, Tooltip, useMediaQuery, useTheme } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Plus } from "lucide-react";
 
 interface AddBookFabProps {
   onClick: () => void;
 }
 
-const AddBookFab: React.FC<AddBookFabProps> = ({ onClick }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  if (!isMobile) return null;
-
+export const AddBookFab: React.FC<AddBookFabProps> = ({ onClick }) => {
   return (
-    <Tooltip title="Dodaj książkę" placement="left">
-      <Fab
-        color="primary"
-        aria-label="Dodaj książkę"
-        onClick={onClick}
-        sx={{
-          position: "fixed",
-          bottom: 24,
-          right: 20,
-          zIndex: theme.zIndex.speedDial,
-          boxShadow: "0 8px 24px rgba(102, 126, 234, 0.35)",
-        }}
-      >
-        <AddIcon />
-      </Fab>
-    </Tooltip>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Dodaj książkę"
+      title="Dodaj książkę"
+      className="md:hidden fixed bottom-6 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-500/35 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+    >
+      <Plus className="h-6 w-6" />
+    </button>
   );
 };
 

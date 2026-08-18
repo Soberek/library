@@ -1182,25 +1182,30 @@ VITE_FIREBASE_APP_ID=...
 
 ### Mapa Przyszłych Funkcji
 
+#### Zrealizowane i wdrożone
+- [x] **Dark Mode**: Pełny motyw ciemny/jasny z dynamicznym przełączaniem w Navbarze, szufladzie i menu oraz persystencją w localStorage.
+- [x] **Eksport i Import**: Eksport do JSON i CSV (z UTF-8 BOM) oraz import wsadowy z podglądem i walidacją Zod.
+- [x] **Open Library API**: Wyszukiwarka książek z autouzupełnianiem w formularzu dodawania książek oraz losownik książek (Book Losuje).
+- [x] **Szybki postęp**: Przyciski `+10`, `+50`, `✓` na kartach i w tabeli do natychmiastowej aktualizacji przeczytanych stron.
+- [x] **Katalog pozycji**: 35 pozycji z filtrami trudności, wyszukiwarką, zakładkami ulubionych i animowanym losownikiem.
+- [x] **Podział kodu (Code Splitting)**: Lazy loading stron w `RouterProvider` z komponentem `PageLoader`.
+- [x] **Kompleksowe testy**: 11 zestawów testowych (93 testy jednostkowe) z pełną izolacją i mockowaniem serwisów.
+
 #### Krótkoterminowe (1-2 tygodnie)
-- [ ] Eksport biblioteki (CSV/PDF)
 - [ ] Udostępnianie biblioteki innym użytkownikom
 - [ ] Notyfikacje o nowych wydaniach
-- [ ] Integracja z API książek (Google Books)
+- [ ] Wgrywanie własnych okładek książek do chmury
 
 #### Średnioterminowe (1-2 miesiące)
-- [ ] Aplikacja mobilna (React Native)
+- [ ] Aplikacja mobilna (React Native / PWA)
 - [ ] Offline mode (Service Workers)
 - [ ] Social features (recenzje, oceny)
-- [ ] Advanced analytics
-- [ ] Dark mode (w pełni zaimplementowany)
+- [ ] Advanced reading goals & analytics
 
 #### Długoterminowe (3+ miesiące)
-- [ ] AI rekomendacje książek
-- [ ] Integracja z bibliotekami
-- [ ] Synchronizacja z Goodreads
-- [ ] Multiplayer challenges
-- [ ] Subscription features
+- [ ] AI rekomendacje książek oparte na przeczytanych pozycjach
+- [ ] Synchronizacja z zewnętrznymi serwisami (Goodreads, LubimyCzytać)
+
 
 ### Proces Dodawania Nowej Funkcji
 

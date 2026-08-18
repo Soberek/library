@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, LinearProgress } from "@mui/material";
+import { Progress } from "../ui/progress";
 
 interface MetricCardProps {
   title: string;
@@ -10,91 +10,39 @@ interface MetricCardProps {
   progressValue?: number;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({
+export const MetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   icon,
-  accent = "#667eea",
+  accent = "#4f46e5",
   showProgress = false,
   progressValue = 0,
 }) => {
   return (
-    <Box
-      sx={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        px: 1.25,
-        py: 1,
-        borderRadius: 1.5,
-        bgcolor: "grey.50",
-        border: "1px solid",
-        borderColor: "grey.200",
-      }}
-    >
+    <div className="flex items-center gap-3.5 p-4 rounded-2xl border border-slate-200/90 bg-white shadow-2xs hover:shadow-xs transition-all">
       {icon && (
-        <Box
-          sx={{
-            width: 28,
-            height: 28,
-            borderRadius: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            bgcolor: "background.paper",
-            border: "1px solid",
-            borderColor: "grey.200",
-            color: accent,
-            "& .MuiSvgIcon-root": { fontSize: 15 },
-          }}
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
+          style={{ backgroundColor: `${accent}15`, color: accent }}
         >
           {icon}
-        </Box>
+        </div>
       )}
 
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          sx={{
-            fontWeight: 800,
-            fontSize: "1rem",
-            letterSpacing: "-0.02em",
-            lineHeight: 1.1,
-            color: "text.primary",
-          }}
-        >
+      <div className="min-w-0 flex-1">
+        <div className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">
           {value}
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 600,
-            fontSize: "0.7rem",
-            lineHeight: 1.2,
-          }}
-        >
+        </div>
+        <div className="text-xs font-semibold text-slate-500 truncate mt-0.5">
           {title}
-        </Typography>
+        </div>
         {showProgress && (
-          <LinearProgress
-            variant="determinate"
-            value={Math.min(Math.max(progressValue, 0), 100)}
-            sx={{
-              mt: 0.5,
-              height: 2.5,
-              borderRadius: 2,
-              bgcolor: "grey.200",
-              "& .MuiLinearProgress-bar": {
-                bgcolor: accent,
-                borderRadius: 2,
-              },
-            }}
-          />
+          <div className="mt-2">
+            <Progress value={progressValue} />
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

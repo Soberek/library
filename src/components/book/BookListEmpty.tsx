@@ -1,96 +1,50 @@
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import FilterAltOffOutlinedIcon from "@mui/icons-material/FilterAltOffOutlined";
-import AddIcon from "@mui/icons-material/Add";
+import { BookOpen, Plus, FilterX } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface BookListEmptyProps {
-  hasFilters?: boolean;
-  onAddBook?: () => void;
-  onClearFilters?: () => void;
+  hasFilters: boolean;
+  onAddBook: () => void;
+  onClearFilters: () => void;
 }
 
 export const BookListEmpty: React.FC<BookListEmptyProps> = ({
-  hasFilters = false,
+  hasFilters,
   onAddBook,
   onClearFilters,
 }) => {
-  const title = hasFilters
-    ? "Brak książek pasujących do filtrów"
-    : "Twoja biblioteka jest pusta";
-  const subtitle = hasFilters
-    ? "Spróbuj zmienić kryteria wyszukiwania lub wyczyść filtry."
-    : "Dodaj pierwszą książkę, aby zacząć śledzić swoją lekturę.";
-
   return (
-    <Box
-      sx={{
-        py: { xs: 8, sm: 10 },
-        px: 3,
-        textAlign: "center",
-        borderRadius: 3,
-        border: "1px dashed",
-        borderColor: "grey.300",
-        bgcolor: "background.paper",
-      }}
-    >
-      <Box
-        sx={{
-          width: 64,
-          height: 64,
-          borderRadius: 2,
-          mx: "auto",
-          mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "rgba(102, 126, 234, 0.08)",
-          color: "primary.main",
-        }}
-      >
-        <MenuBookOutlinedIcon sx={{ fontSize: 32 }} />
-      </Box>
+    <div className="py-16 sm:py-20 px-4 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-white/70 backdrop-blur-xs">
+      <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200/60 shadow-xs">
+        <BookOpen className="w-8 h-8" />
+      </div>
 
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-        {title}
-      </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ mb: 3, maxWidth: 360, mx: "auto" }}
-      >
-        {subtitle}
-      </Typography>
+      <h3 className="text-xl font-bold text-slate-900 mb-1 font-display">
+        {hasFilters ? "Brak wyników wyszukiwania" : "Twoja biblioteka jest pusta"}
+      </h3>
+      <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
+        {hasFilters
+          ? "Żadna książka nie pasuje do wybranych filtrów. Spróbuj zresetować filtry lub zmień kryteria."
+          : "Nie dodałeś jeszcze żadnych książek. Zacznij budować swoją kolekcję już teraz!"}
+      </p>
 
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1.5,
-          justifyContent: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        {hasFilters && onClearFilters && (
-          <Button
-            variant="outlined"
-            startIcon={<FilterAltOffOutlinedIcon />}
-            onClick={onClearFilters}
-            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
-          >
-            Wyczyść filtry
-          </Button>
-        )}
-        {onAddBook && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onAddBook}
-            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
-          >
-            Dodaj książkę
-          </Button>
-        )}
-      </Box>
-    </Box>
+      {hasFilters ? (
+        <Button
+          variant="outline"
+          onClick={onClearFilters}
+          className="gap-2 shadow-xs"
+        >
+          <FilterX className="w-4 h-4" />
+          <span>Wyczyść filtry</span>
+        </Button>
+      ) : (
+        <Button onClick={onAddBook} className="gap-2 shadow-md">
+          <Plus className="w-4 h-4" />
+          <span>Dodaj pierwszą książkę</span>
+        </Button>
+      )}
+    </div>
   );
 };
+
+export default BookListEmpty;

@@ -15,22 +15,28 @@ Aplikacja wdrażana jest na platformie **Firebase** i dostępna jest pod adresem
 ## ✨ Funkcjonalności
 
 ### Funkcje podstawowe
-- 📝 Dodawanie książek (tytuł, autor, gatunek, status czytania, ocena)
-- 🔍 Wyszukiwanie i filtrowanie książek po tytule
-- 📊 Śledzenie statusu czytania (W trakcie, Przeczytana, Porzucona)
-- 📈 Wyświetlanie statystyk i postępu czytania
-- ✏️ Edycja i usuwanie książek
-- 📱 Responsywny design (desktop, tablet, mobile)
+- 📝 Dodawanie książek z autouzupełnianiem z **Open Library API** (tytuł, autor, okładka, liczba stron, gatunek, ocena)
+- 🌓 **Tryb Ciemny / Jasny (Dark Mode)** z pełną paletą MUI & Tailwind i zapamiętywaniem preferencji
+- 💾 **Eksport i Import biblioteki** – obsługa formatów **JSON** i **CSV** (z UTF-8 BOM) oraz walidacja wsadowa
+- ⚡ **Szybki postęp czytania** – przyciski `+10`, `+50`, `✓` na kartach i w tabeli z automatycznym oznaczaniem jako przeczytana
+- 🔍 Zaawansowane wyszukiwanie i filtrowanie (status, gatunek, ocena, strony, ulubione, sortowanie)
+- 📊 Śledzenie statusu czytania (W trakcie, Przeczytana, Chcę przeczytać, Porzucona)
+- 📈 Wyświetlanie statystyk i postępu czytania w czasie rzeczywistym
+- 🎲 **Book Losuje** – losownik książek z Open Library z filtrami i natychmiastowym dodawaniem do biblioteki
+- 🎬 **Magda Losuje** – zaawansowany losownik filmów z API TMDB, dostawcami VOD i Watchlistą
+- 💖 **Pozycje Seksualne** – interaktywny katalog 35 pozycji z wyszukiwaniem, filtrem trudności, ulubionymi i animowanym losownikiem
+- 📱 W pełni responsywny design (desktop, tablet, mobile)
 
 ### Cechy techniczne
 - **Bezpieczeństwo typów**: TypeScript ze ścisłą walidacją typów
-- **Walidacja danych**: Zod - schematy walidacji dla formularzy
+- **Walidacja danych**: Zod - schematy walidacji dla formularzy oraz importu plików
+- **Code-Splitting & Lazy Loading**: Dynamiczny import tras z preloaderem `PageLoader`
 - **Obsługa błędów**: Error boundaries i przyjazne komunikaty dla użytkownika
-- **Optymalizacja**: Memoizacja komponentów, zoptymalizowane re-rendy
-- **Testy jednostkowe**: Pokrycie testami hooks'ów, serwisów i funkcji
-- **Dostępność**: Etykiety ARIA i nawigacja klawiaturą
+- **Optymalizacja**: React Query z optymistycznymi aktualizacjami cache i Zustand
+- **Testy jednostkowe**: 11 zestawów testowych (93 testy jednostkowe z pokryciem serwisów, store'ów i hooków)
 - **Autentykacja**: Firebase Authentication (email/hasło)
 - **Baza danych**: Firestore - izolacja danych dla każdego użytkownika
+
 
 ---
 
@@ -355,12 +361,17 @@ Przykład:
 
 ## 🐛 Znane ograniczenia i TODO
 
+- [x] Tryb ciemny / jasny (Dark Mode) z przełącznikiem i persystencją w localStorage
+- [x] Export/import biblioteki (CSV z UTF-8 BOM, JSON)
+- [x] Integracja wyszukiwania i autouzupełniania z Open Library API
+- [x] Szybka aktualizacja postępu stron (+10, +50, ✓)
+- [x] Katalog pozycji (35 pozycji, filtry, ulubione, losownik)
+- [x] Podział kodu (Code-splitting) tras React.lazy
 - [ ] Autentykacja społeczna (Google, Facebook)
-- [ ] Wgrywanie okładek książek
-- [ ] Śledzenie postępu czytania z datami
-- [ ] Rekomendacje książek
-- [ ] Export/import biblioteki (CSV, JSON)
-- [ ] Tryb ciemny / jasny
+- [ ] Wgrywanie własnych okładek książek do Firebase Storage
+- [ ] Śledzenie postępu czytania z historycznymi datami
+- [ ] Rekomendacje książek oparte na AI
+
 
 ---
 

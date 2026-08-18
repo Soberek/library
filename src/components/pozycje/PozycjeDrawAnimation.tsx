@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Typography } from '@mui/material';
 import type { SexualPosition } from '../../constants/sexualPositions';
 
 const FRAME_W = 156;
@@ -99,7 +98,7 @@ function animateTranslateX(
   });
 }
 
-const PozycjeDrawAnimation: React.FC<PozycjeDrawAnimationProps> = ({
+export const PozycjeDrawAnimation: React.FC<PozycjeDrawAnimationProps> = ({
   reel,
   winner,
   onComplete,
@@ -217,9 +216,9 @@ const PozycjeDrawAnimation: React.FC<PozycjeDrawAnimationProps> = ({
       </div>
 
       <div className="pozycje-drawing-copy">
-        <Typography className="pozycje-drawing-text" key={phraseIndex}>
+        <p className="pozycje-drawing-text" key={phraseIndex}>
           {PHRASES[phraseIndex]}
-        </Typography>
+        </p>
       </div>
     </div>
   );

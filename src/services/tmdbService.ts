@@ -11,7 +11,15 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE = 'https://image.tmdb.org/t/p';
 
 function getApiKey(): string {
-  const key = import.meta.env.VITE_TMDB_API_KEY as string | undefined;
+  let key: string | undefined;
+  try {
+    const metaEnv = new Function('return import.meta.env')() as Record<string, string | undefined>;
+    key = metaEnv?.VITE_TMDB_API_KEY;
+  } catch {
+    // Fallback if import.meta is unavailable in CJS test runner
+    const globalEnv = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } })?.process?.env;
+    key = globalEnv?.VITE_TMDB_API_KEY;
+  }
   if (!key?.trim()) {
     throw new Error(
       'Brak klucza TMDB. Dodaj VITE_TMDB_API_KEY do pliku .env (darmowy klucz: themoviedb.org/settings/api).',
@@ -21,8 +29,18 @@ function getApiKey(): string {
 }
 
 export function hasTmdbApiKey(): boolean {
-  return Boolean((import.meta.env.VITE_TMDB_API_KEY as string | undefined)?.trim());
+  try {
+    const metaEnv = new Function('return import.meta.env')() as Record<string, string | undefined>;
+    if (metaEnv?.VITE_TMDB_API_KEY?.trim()) return true;
+  } catch {
+    // Ignore
+  }
+  const globalEnv = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } })?.process?.env;
+  return Boolean(globalEnv?.VITE_TMDB_API_KEY?.trim());
 }
+
+
+
 
 export function posterUrl(path: string | null, size: 'w342' | 'w500' | 'w780' = 'w500'): string | null {
   if (!path) return null;

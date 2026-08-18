@@ -27,6 +27,8 @@ export {
   pickRandomLotteryBook,
   countLotteryBooks,
   countAdvancedBookFilters,
+  searchOpenLibraryBooksByQuery,
+  type OpenLibraryQuickBook,
   BOOK_LOTTERY_SUBJECTS,
   BOOK_LOTTERY_LANGUAGES,
   BOOK_RATING_COUNT_OPTIONS,
@@ -42,3 +44,12 @@ export {
   removeFromWatchlist,
   movieToWatchlistInput,
 } from './watchlistService';
+
+export {
+  exportBooksToJson,
+  exportBooksToCsv,
+  parseBooksFromJson,
+  parseBooksFromCsv,
+  type ExportImportStats,
+} from './exportImportService';
+

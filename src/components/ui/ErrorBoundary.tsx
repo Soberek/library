@@ -1,15 +1,12 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
-import { Box, Typography, Button, Paper } from "@mui/material";
+import { AlertCircle, RotateCcw, RefreshCw } from "lucide-react";
 import { ERROR_MESSAGES } from "../../constants/validation";
+import { Button } from "./button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./card";
 
-/**
- * Props for the ErrorBoundary component
- */
 interface Props {
-  /** Child components to wrap with error boundary */
   children: ReactNode;
-  /** Optional custom fallback UI to display when an error occurs */
   fallback?: ReactNode;
 }
 
@@ -19,18 +16,7 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
-/**
- * React Error Boundary component that catches JavaScript errors anywhere in the child component tree,
- * logs those errors, and displays a fallback UI instead of the component tree that crashed.
- *
- * @example
- * ```tsx
- * <ErrorBoundary>
- *   <MyComponent />
- * </ErrorBoundary>
- * ```
- */
-class ErrorBoundary extends Component<Props, State> {
+export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
@@ -55,61 +41,36 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "50vh",
-            p: 2,
-          }}
-        >
-          <Paper
-            elevation={3}
-            sx={{
-              p: 4,
-              maxWidth: 500,
-              textAlign: "center",
-            }}
-          >
-            <Typography variant="h5" color="error" gutterBottom>
-              Oops! Coś poszło nie tak
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              {ERROR_MESSAGES.UNKNOWN_ERROR}
-            </Typography>
-            {import.meta.env.DEV && this.state.error && (
-              <Box
-                sx={{
-                  backgroundColor: "grey.100",
-                  p: 2,
-                  borderRadius: 1,
-                  mb: 3,
-                  textAlign: "left",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  component="pre"
-                  sx={{ fontSize: "0.75rem" }}
-                >
+        <div className="flex min-h-[50vh] items-center justify-center p-4">
+          <Card className="w-full max-w-md shadow-xl text-center bg-white border-slate-200">
+            <CardHeader className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-2">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <CardTitle className="text-red-600">
+                Oops! Coś poszło nie tak
+              </CardTitle>
+              <CardDescription>{ERROR_MESSAGES.UNKNOWN_ERROR}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {this.state.error && (
+                <div className="p-3 bg-slate-100 rounded-xl text-left overflow-x-auto text-xs text-slate-700 font-mono">
                   {this.state.error.toString()}
-                </Typography>
-              </Box>
-            )}
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={this.handleReset}
-              sx={{ mr: 2 }}
-            >
-              Spróbuj ponownie
-            </Button>
-            <Button variant="outlined" onClick={() => window.location.reload()}>
-              Odśwież stronę
-            </Button>
-          </Paper>
-        </Box>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex gap-2 justify-center">
+              <Button variant="default" onClick={this.handleReset} className="gap-1.5">
+                <RotateCcw className="w-4 h-4" />
+                <span>Spróbuj ponownie</span>
+              </Button>
+              <Button variant="outline" onClick={() => window.location.reload()} className="gap-1.5">
+                <RefreshCw className="w-4 h-4" />
+                <span>Odśwież</span>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       );
     }
 

@@ -11,6 +11,7 @@ interface BooksViewSwitcherProps {
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
+  onPagesChange?: (bookId: string, newReadPages: number, overallPages?: number) => void;
 }
 
 export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
@@ -21,6 +22,7 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
   onStatusChange,
   onToggleFavorite,
   onRatingChange,
+  onPagesChange,
 }) => {
   if (viewMode === "table") {
     return (
@@ -31,6 +33,7 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
         onStatusChange={onStatusChange}
         onToggleFavorite={onToggleFavorite}
         onRatingChange={onRatingChange}
+        onPagesChange={onPagesChange}
       />
     );
   }
@@ -43,8 +46,10 @@ export const BooksViewSwitcher: React.FC<BooksViewSwitcherProps> = ({
       onStatusChange={onStatusChange}
       onToggleFavorite={onToggleFavorite}
       onRatingChange={onRatingChange}
+      onPagesChange={onPagesChange}
     />
   );
 };
+
 
 export default BooksViewSwitcher;

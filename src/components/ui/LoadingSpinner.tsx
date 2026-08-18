@@ -1,64 +1,39 @@
 import React from 'react';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Loader2 } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
-/**
- * Props for the LoadingSpinner component
- */
-interface LoadingSpinnerProps {
-  /** Optional message to display below the spinner */
+export interface LoadingSpinnerProps {
   message?: string;
-  /** Size of the spinner in pixels */
-  size?: number;
-  /** Whether to display as a full-screen overlay */
+  size?: number | string;
   fullScreen?: boolean;
+  className?: string;
 }
 
-/**
- * Reusable loading spinner component
- */
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = 'Ładowanie...',
-  size = 40,
+  size = 32,
   fullScreen = false,
+  className,
 }) => {
   const content = (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 2,
-        p: 2,
-      }}
-    >
-      <CircularProgress size={size} />
+    <div className={cn("flex flex-col items-center justify-center gap-3 p-4", className)}>
+      <Loader2
+        style={{ width: size, height: size }}
+        className="animate-spin text-indigo-600"
+      />
       {message && (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm font-medium text-slate-500 animate-pulse">
           {message}
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   );
 
   if (fullScreen) {
     return (
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          zIndex: 9999,
-        }}
-      >
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
         {content}
-      </Box>
+      </div>
     );
   }
 

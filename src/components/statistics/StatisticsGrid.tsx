@@ -1,10 +1,6 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
 import StatCard from "./StatCard";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
+import { CheckCircle2, BookOpen, BookmarkPlus, XCircle } from "lucide-react";
 
 interface BooksStats {
   total: number;
@@ -24,13 +20,13 @@ interface StatisticsGridProps {
 }
 
 const STATUS_SEGMENTS = [
-  { key: "wantToRead", label: "Chcę przeczytać", color: "#3b82f6" },
-  { key: "inProgress", label: "W trakcie", color: "#f59e0b" },
-  { key: "read", label: "Przeczytane", color: "#22c55e" },
-  { key: "dropped", label: "Porzucone", color: "#ef4444" },
+  { key: "read", label: "Przeczytane", color: "#059669", bg: "bg-emerald-50" },
+  { key: "inProgress", label: "W trakcie", color: "#d97706", bg: "bg-amber-50" },
+  { key: "wantToRead", label: "Chcę przeczytać", color: "#2563eb", bg: "bg-blue-50" },
+  { key: "dropped", label: "Porzucone", color: "#e11d48", bg: "bg-rose-50" },
 ] as const;
 
-const StatisticsGrid: React.FC<StatisticsGridProps> = ({
+export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
   booksStats,
   additionalStats,
 }) => {
@@ -42,168 +38,105 @@ const StatisticsGrid: React.FC<StatisticsGridProps> = ({
   }));
 
   return (
-    <Box>
-      <Box
-        sx={{
-          mb: 1.25,
-          px: 1.5,
-          py: 1.25,
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "grey.200",
-          bgcolor: "grey.50",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 1,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
-            <Typography
-              sx={{
-                fontWeight: 800,
-                fontSize: "1.5rem",
-                letterSpacing: "-0.03em",
-                lineHeight: 1,
-                color: "text.primary",
-              }}
-            >
+    <div className="space-y-3.5">
+      {/* Overview Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-gradient-to-r from-slate-50 via-indigo-50/20 to-slate-50 shadow-2xs">
+        <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-display">
               {booksStats.total}
-            </Typography>
-            <Typography
-              sx={{
-                color: "text.secondary",
-                fontWeight: 500,
-                fontSize: "0.8rem",
-              }}
-            >
-              {booksStats.total === 1 ? "książka" : "książek"} ·{" "}
-              <Box
-                component="span"
-                sx={{ fontWeight: 700, color: "success.dark" }}
-              >
-                {additionalStats.completionRate}%
-              </Box>{" "}
-              ukończenia
-            </Typography>
-          </Box>
-        </Box>
+            </span>
+            <span className="text-xs text-slate-600 font-bold">
+              {booksStats.total === 1 ? "pozycja w kolekcji" : "pozycji w kolekcji"}
+            </span>
+          </div>
 
-        <Box
-          sx={{
-            display: "flex",
-            height: 6,
-            borderRadius: 999,
-            overflow: "hidden",
-            bgcolor: "grey.200",
-            mb: 0.75,
-          }}
-        >
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-xs font-extrabold">{additionalStats.completionRate}% przeczytane</span>
+          </div>
+        </div>
+
+        {/* Multi-segment Progress bar */}
+        <div className="flex h-3 rounded-full overflow-hidden bg-slate-200/80 mb-3.5 shadow-inner p-0.5">
           {booksStats.total === 0 ? (
-            <Box sx={{ width: "100%", bgcolor: "grey.200" }} />
+            <div className="w-full bg-slate-200 rounded-full" />
           ) : (
             segments.map(
               (segment) =>
                 segment.value > 0 && (
-                  <Box
+                  <div
                     key={segment.key}
-                    title={`${segment.label}: ${segment.value}`}
-                    sx={{
+                    title={`${segment.label}: ${segment.value} (${Math.round(segment.pct)}%)`}
+                    style={{
                       width: `${segment.pct}%`,
-                      bgcolor: segment.color,
-                      minWidth: segment.value > 0 ? 3 : 0,
+                      backgroundColor: segment.color,
+                      minWidth: segment.value > 0 ? 8 : 0,
                     }}
+                    className="h-full rounded-full transition-all duration-300 first:rounded-l-full last:rounded-r-full"
                   />
-                ),
+                )
             )
           )}
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: { xs: 1, sm: 1.5 },
-          }}
-        >
+        {/* Status Legend Pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
           {segments.map((segment) => (
-            <Box
+            <div
               key={segment.key}
-              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+              className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs"
             >
-              <Box
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  bgcolor: segment.color,
-                  flexShrink: 0,
-                }}
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: segment.color }}
               />
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 500,
-                  fontSize: "0.7rem",
-                  lineHeight: 1.2,
-                }}
-              >
-                {segment.label}{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: 700, color: "text.primary" }}
-                >
+              <div className="min-w-0 flex-1 flex justify-between items-baseline gap-1">
+                <span className="text-[11px] font-semibold text-slate-600 truncate">
+                  {segment.label}
+                </span>
+                <span className="text-xs font-black text-slate-900">
                   {segment.value}
-                </Box>
-              </Typography>
-            </Box>
+                </span>
+              </div>
+            </div>
           ))}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr 1fr",
-            sm: "repeat(4, 1fr)",
-          },
-          gap: 1,
-        }}
-      >
+      {/* 4 Status Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
-          title="Chcę przeczytać"
-          value={booksStats.wantToRead}
-          icon={<BookmarkAddIcon />}
-          accent="#3b82f6"
+          title="Przeczytane"
+          value={booksStats.read}
+          percentage={(booksStats.read / total) * 100}
+          icon={<CheckCircle2 className="w-4 h-4" />}
+          accent="#059669"
+          progress={additionalStats.completionRate}
         />
         <StatCard
           title="W trakcie"
           value={booksStats.inProgress}
-          icon={<PauseCircleIcon />}
-          accent="#f59e0b"
+          percentage={(booksStats.inProgress / total) * 100}
+          icon={<BookOpen className="w-4 h-4" />}
+          accent="#d97706"
         />
         <StatCard
-          title="Przeczytane"
-          value={booksStats.read}
-          icon={<CheckCircleIcon />}
-          accent="#22c55e"
-          progress={additionalStats.completionRate}
+          title="Chcę przeczytać"
+          value={booksStats.wantToRead}
+          percentage={(booksStats.wantToRead / total) * 100}
+          icon={<BookmarkPlus className="w-4 h-4" />}
+          accent="#2563eb"
         />
         <StatCard
           title="Porzucone"
           value={booksStats.dropped}
-          icon={<CancelIcon />}
-          accent="#ef4444"
+          percentage={(booksStats.dropped / total) * 100}
+          icon={<XCircle className="w-4 h-4" />}
+          accent="#e11d48"
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

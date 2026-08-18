@@ -1,15 +1,20 @@
-/* Global design tokens */
+/* Global design tokens — 100% Light Theme */
 :root {
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Fraunces", "Times New Roman", Georgia, serif;
   --color-bg: #f8fafc;
-  --color-text: #1a202c;
-  --color-primary: #667eea;
-  --color-primary-soft: rgba(102, 126, 234, 0.45);
-  --color-primary-strong: rgba(102, 126, 234, 0.7);
-  --color-selection: rgba(102, 126, 234, 0.22);
-  --radius-sm: 8px;
-  --transition-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --color-text: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-card-bg: #ffffff;
+  --color-card-border: rgba(226, 232, 240, 0.9);
+  --color-primary: #4f46e5;
+  --color-primary-soft: rgba(79, 70, 229, 0.15);
+  --color-primary-strong: #4338ca;
+  --color-selection: rgba(79, 70, 229, 0.18);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition-smooth: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -21,6 +26,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  background-color: #f8fafc;
 }
 
 body {
@@ -32,7 +38,11 @@ body {
   font-feature-settings: "ss01" on, "cv11" on;
   letter-spacing: -0.011em;
   color: var(--color-text);
-  background: var(--color-bg);
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(99, 102, 241, 0.05), transparent 60%),
+    radial-gradient(ellipse 50% 30% at 100% 20%, rgba(244, 63, 94, 0.03), transparent 50%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -49,36 +59,31 @@ h3,
 .font-display {
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  font-feature-settings: "SOFT" 1, "WONK" 0.5;
   letter-spacing: -0.02em;
 }
 
 ::selection {
   background: var(--color-selection);
-  color: var(--color-text);
+  color: #1e1b4b;
 }
 
-/* Scrollbar */
+/* Custom modern scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary-soft);
+  background: #cbd5e1;
   border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-strong);
-  background-clip: padding-box;
-  border: 2px solid transparent;
+  background: #94a3b8;
 }
 
 /* Focus */
@@ -87,24 +92,8 @@ h3,
   outline-offset: 2px;
 }
 
-button:focus:not(:focus-visible),
-.MuiButton-root:focus:not(:focus-visible),
-.MuiIconButton-root:focus:not(:focus-visible) {
+button:focus:not(:focus-visible) {
   outline: none;
-}
-
-/* Soft transitions for interactive MUI surfaces */
-.MuiButton-root,
-.MuiIconButton-root,
-.MuiFab-root,
-.MuiChip-root,
-.MuiToggleButton-root {
-  transition:
-    background-color var(--transition-smooth),
-    box-shadow var(--transition-smooth),
-    border-color var(--transition-smooth),
-    color var(--transition-smooth),
-    transform var(--transition-smooth) !important;
 }
 
 /* Utility */
@@ -117,16 +106,16 @@ button:focus:not(:focus-visible),
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 @keyframes pulse {
@@ -142,7 +131,7 @@ button:focus:not(:focus-visible),
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -155,19 +144,7 @@ button:focus:not(:focus-visible),
 }
 
 .fade-in-up {
-  animation: fadeInUp 0.5s ease-out;
-}
-
-@media (max-width: 600px) {
-  .hide-mobile {
-    display: none !important;
-  }
-}
-
-@media (min-width: 601px) {
-  .hide-desktop {
-    display: none !important;
-  }
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media print {
@@ -177,24 +154,5 @@ button:focus:not(:focus-visible),
 
   body {
     background: white !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .pulse,
-  .fade-in-up {
-    animation: none !important;
-  }
-
-  .MuiButton-root,
-  .MuiIconButton-root,
-  .MuiFab-root,
-  .MuiChip-root,
-  .MuiToggleButton-root {
-    transition: none !important;
   }
 }

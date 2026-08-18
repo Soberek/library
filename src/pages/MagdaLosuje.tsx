@@ -1,26 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  FormControl,
-  Link,
-  MenuItem,
-  Select,
-  Slider,
-  Stack,
-  Typography,
-} from '@mui/material';
-import ShuffleIcon from '@mui/icons-material/Shuffle';
-import LocalMoviesOutlinedIcon from '@mui/icons-material/LocalMoviesOutlined';
-import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+  Shuffle,
+  Film,
+  Star,
+  ExternalLink,
+  BookmarkPlus,
+  BookmarkCheck,
+  CheckCircle2,
+  Circle,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Movie, MovieFilters, MovieGenre } from '../types/Movie';
 import {
@@ -38,6 +28,10 @@ import WatchlistPanel from '../components/magda/WatchlistPanel';
 import MagdaAdvancedFilters from '../components/magda/MagdaAdvancedFilters';
 import MagdaDrawAnimation from '../components/magda/MagdaDrawAnimation';
 import { useWatchlistQuery } from '../hooks/useWatchlistQuery';
+import { Slider } from '../components/ui/slider';
+import { Select } from '../components/ui/select';
+import { Button } from '../components/ui/button';
+import { cn } from '../lib/utils';
 import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -68,7 +62,7 @@ const DEFAULT_FILTERS: MovieFilters = {
   certificationCountry: 'US',
 };
 
-const MagdaLosuje: React.FC = () => {
+export const MagdaLosuje: React.FC = () => {
   const [genres, setGenres] = useState<MovieGenre[]>([]);
   const [filters, setFilters] = useState<MovieFilters>(DEFAULT_FILTERS);
   const [movie, setMovie] = useState<Movie | null>(null);
@@ -222,12 +216,11 @@ const MagdaLosuje: React.FC = () => {
   const poster = movie ? posterUrl(movie.poster_path, 'w500') : null;
 
   return (
-    <Box className="magda-page" component="main">
-      <div className="magda-grain" aria-hidden />
+    <main className="magda-page">
       <div className="magda-glow magda-glow--left" aria-hidden />
       <div className="magda-glow magda-glow--right" aria-hidden />
 
-      <Box className="magda-inner">
+      <div className="magda-inner">
         <motion.header
           className="magda-hero"
           initial={{ opacity: 0, y: 22 }}
@@ -242,11 +235,10 @@ const MagdaLosuje: React.FC = () => {
             <span className="magda-sprocket" />
             <span className="magda-sprocket" />
             <span className="magda-sprocket" />
-            <span className="magda-sprocket" />
           </div>
 
           <div className="magda-hero-icon">
-            <MagdaIcon size={88} />
+            <MagdaIcon size={84} />
           </div>
 
           <h1 className="magda-brand">
@@ -260,24 +252,26 @@ const MagdaLosuje: React.FC = () => {
         </motion.header>
 
         {!apiConfigured && (
-          <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
+          <div className="p-4 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold mb-4">
             Brakuje klucza API TMDB. Załóż darmowe konto na{' '}
-            <Link
+            <a
               href="https://www.themoviedb.org/settings/api"
               target="_blank"
               rel="noopener noreferrer"
+              className="underline font-bold"
             >
               themoviedb.org/settings/api
-            </Link>
+            </a>
             , dodaj <code>VITE_TMDB_API_KEY=...</code> do pliku <code>.env</code> i zrestartuj{' '}
             <code>npm run dev</code>.
-          </Alert>
+          </div>
         )}
 
         {error && (
-          <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
+          <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 mb-4 shadow-2xs">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            <span>{error}</span>
+          </div>
         )}
 
         <motion.section
@@ -297,77 +291,68 @@ const MagdaLosuje: React.FC = () => {
           <div className="magda-controls-grid">
             <label className="magda-field magda-field--genre">
               <span className="magda-field-label">Gatunek</span>
-              <FormControl fullWidth size="small" disabled={!apiConfigured || loadingGenres}>
-                <Select
-                  displayEmpty
-                  value={filters.genreId ?? ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFilters((prev) => ({
-                      ...prev,
-                      genreId: value === '' ? null : Number(value),
-                    }));
-                  }}
-                  inputProps={{ 'aria-label': 'Gatunek' }}
-                >
-                  <MenuItem value="">Wszystkie gatunki</MenuItem>
-                  {genres.map((genre) => (
-                    <MenuItem key={genre.id} value={genre.id}>
-                      {genre.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Select
+                value={filters.genreId ?? ''}
+                disabled={!apiConfigured || loadingGenres}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilters((prev) => ({
+                    ...prev,
+                    genreId: value === '' ? null : Number(value),
+                  }));
+                }}
+              >
+                <option value="">Wszystkie gatunki</option>
+                {genres.map((genre) => (
+                  <option key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </option>
+                ))}
+              </Select>
             </label>
 
             <div className="magda-field magda-field--years">
               <span className="magda-field-label">Lata premiery</span>
-              <div className="magda-year-row">
-                <FormControl fullWidth size="small" disabled={!apiConfigured}>
-                  <Select
-                    displayEmpty
-                    value={filters.yearFrom ?? ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFilters((prev) => ({
-                        ...prev,
-                        yearFrom: value === '' ? null : Number(value),
-                      }));
-                    }}
-                    inputProps={{ 'aria-label': 'Od roku' }}
-                  >
-                    <MenuItem value="">Od zawsze</MenuItem>
-                    {YEAR_OPTIONS.map((year) => (
-                      <MenuItem key={year} value={year}>
-                        {year}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+              <div className="magda-year-row flex items-center gap-2">
+                <Select
+                  value={filters.yearFrom ?? ''}
+                  disabled={!apiConfigured}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFilters((prev) => ({
+                      ...prev,
+                      yearFrom: value === '' ? null : Number(value),
+                    }));
+                  }}
+                >
+                  <option value="">Od zawsze</option>
+                  {YEAR_OPTIONS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </Select>
                 <span className="magda-year-sep" aria-hidden>
                   →
                 </span>
-                <FormControl fullWidth size="small" disabled={!apiConfigured}>
-                  <Select
-                    displayEmpty
-                    value={filters.yearTo ?? ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFilters((prev) => ({
-                        ...prev,
-                        yearTo: value === '' ? null : Number(value),
-                      }));
-                    }}
-                    inputProps={{ 'aria-label': 'Do roku' }}
-                  >
-                    <MenuItem value="">Do dziś</MenuItem>
-                    {YEAR_OPTIONS.map((year) => (
-                      <MenuItem key={year} value={year}>
-                        {year}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Select
+                  value={filters.yearTo ?? ''}
+                  disabled={!apiConfigured}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFilters((prev) => ({
+                      ...prev,
+                      yearTo: value === '' ? null : Number(value),
+                    }));
+                  }}
+                >
+                  <option value="">Do dziś</option>
+                  {YEAR_OPTIONS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </div>
 
@@ -382,13 +367,12 @@ const MagdaLosuje: React.FC = () => {
                 max={9}
                 step={0.5}
                 disabled={!apiConfigured}
-                onChange={(_, value) =>
+                onChange={(value) =>
                   setFilters((prev) => ({
                     ...prev,
                     minRating: Array.isArray(value) ? value[0] : value,
                   }))
                 }
-                className="magda-rating-slider"
               />
               <div className="magda-rating-ends">
                 <span>0</span>
@@ -437,20 +421,20 @@ const MagdaLosuje: React.FC = () => {
           />
 
           <Button
-            className="magda-draw-btn"
-            variant="contained"
-            size="large"
+            className="magda-draw-btn w-full h-12 text-sm font-bold gap-2"
             disabled={!apiConfigured || drawing || loadingGenres}
             onClick={handleDraw}
-            startIcon={
-              drawing ? <CircularProgress size={20} color="inherit" /> : <ShuffleIcon />
-            }
           >
-            {drawing ? 'Losuję…' : movie ? 'Losuj ponownie' : 'Losuj film'}
+            {drawing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Shuffle className="w-5 h-5" />
+            )}
+            <span>{drawing ? 'Losuję…' : movie ? 'Losuj ponownie' : 'Losuj film'}</span>
           </Button>
         </motion.section>
 
-        <Box className="magda-result-slot">
+        <div className="magda-result-slot">
           <AnimatePresence mode="wait">
             {!movie && !drawing && (
               <motion.div
@@ -460,10 +444,10 @@ const MagdaLosuje: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <LocalMoviesOutlinedIcon sx={{ fontSize: 48, opacity: 0.45 }} />
-                <Typography variant="body1" color="text.secondary" textAlign="center">
+                <Film className="w-10 h-10 text-slate-400 mb-2" />
+                <p className="text-sm font-semibold text-slate-600 text-center">
                   Tu pojawi się wylosowany film.
-                </Typography>
+                </p>
               </motion.div>
             )}
 
@@ -485,7 +469,7 @@ const MagdaLosuje: React.FC = () => {
                 exit={{ opacity: 0 }}
               >
                 <div className="magda-spinner-ring" />
-                <Typography className="magda-drawing-text">Ładuję taśmę…</Typography>
+                <p className="magda-drawing-text">Ładuję taśmę…</p>
               </motion.div>
             )}
 
@@ -493,10 +477,10 @@ const MagdaLosuje: React.FC = () => {
               <motion.article
                 key={movie.id}
                 className="magda-ticket"
-                initial={{ opacity: 0, scale: 0.88, y: 40, rotateX: 12, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
+                initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16, scale: 0.98 }}
-                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               >
                 {backdrop && (
                   <div
@@ -515,128 +499,125 @@ const MagdaLosuje: React.FC = () => {
                       />
                     ) : (
                       <div className="magda-poster magda-poster--fallback">
-                        <LocalMoviesOutlinedIcon sx={{ fontSize: 40 }} />
+                        <Film className="w-10 h-10 text-amber-600" />
                       </div>
                     )}
                   </div>
 
                   <div className="magda-ticket-info">
-                    <Typography className="magda-movie-title" component="h2">
+                    <h2 className="magda-movie-title">
                       {movie.title}
-                    </Typography>
+                    </h2>
 
                     {movie.original_title !== movie.title && (
-                      <Typography className="magda-original-title" component="p">
+                      <p className="magda-original-title">
                         {movie.original_title}
-                      </Typography>
+                      </p>
                     )}
 
-                    <Stack direction="row" flexWrap="wrap" gap={1} sx={{ my: 1.5 }}>
-                      <Chip
-                        size="small"
-                        icon={<StarRoundedIcon />}
-                        label={`${movie.vote_average.toFixed(1)} / 10`}
-                        className="magda-chip"
-                      />
-                      <Chip
-                        size="small"
-                        label={releaseYear(movie.release_date)}
-                        className="magda-chip"
-                      />
+                    <div className="flex flex-wrap gap-1.5 my-3">
+                      <span className="magda-chip">
+                        <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline -mt-0.5" />{' '}
+                        {movie.vote_average.toFixed(1)} / 10
+                      </span>
+                      <span className="magda-chip">
+                        {releaseYear(movie.release_date)}
+                      </span>
                       {movie.genre_ids.slice(0, 3).map((id) => {
                         const name = genreName(id);
                         return name ? (
-                          <Chip key={id} size="small" label={name} className="magda-chip" />
+                          <span key={id} className="magda-chip">
+                            {name}
+                          </span>
                         ) : null;
                       })}
-                    </Stack>
+                    </div>
 
                     {movie.overview ? (
-                      <Typography className="magda-overview">{movie.overview}</Typography>
+                      <p className="magda-overview">{movie.overview}</p>
                     ) : (
-                      <Typography className="magda-overview magda-overview--muted">
+                      <p className="magda-overview magda-overview--muted">
                         Brak opisu po polsku dla tego tytułu.
-                      </Typography>
+                      </p>
                     )}
 
-                    <Stack direction={{ xs: 'column', sm: 'row' }} gap={1} flexWrap="wrap" mt={0.5}>
+                    <div className="flex flex-col sm:flex-row gap-2 flex-wrap pt-3">
                       {savedEntry ? (
                         <>
                           <Button
-                            className="magda-wl-btn magda-wl-btn--saved"
-                            variant="outlined"
-                            size="small"
+                            variant="outline"
+                            size="sm"
                             disabled
-                            startIcon={<BookmarkAddedIcon />}
+                            className="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800"
                           >
-                            Na watchliście
+                            <BookmarkCheck className="w-4 h-4 text-emerald-600" />
+                            <span>Na watchliście</span>
                           </Button>
                           <Button
-                            className={`magda-wl-btn${savedEntry.watched ? ' magda-wl-btn--done' : ''}`}
-                            variant="contained"
-                            size="small"
+                            size="sm"
                             disabled={toggling}
                             onClick={() => void handleToggleCurrentWatched()}
-                            startIcon={
-                              toggling ? (
-                                <CircularProgress size={16} color="inherit" />
-                              ) : savedEntry.watched ? (
-                                <CheckCircleIcon />
-                              ) : (
-                                <CheckCircleOutlineIcon />
-                              )
-                            }
+                            className={cn(
+                              "gap-1.5",
+                              savedEntry.watched
+                                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                                : "bg-amber-600 hover:bg-amber-700 text-white"
+                            )}
                           >
-                            {savedEntry.watched ? 'Obejrzane' : 'Oznacz jako obejrzane'}
+                            {toggling ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : savedEntry.watched ? (
+                              <CheckCircle2 className="w-4 h-4" />
+                            ) : (
+                              <Circle className="w-4 h-4" />
+                            )}
+                            <span>{savedEntry.watched ? 'Obejrzane' : 'Oznacz jako obejrzane'}</span>
                           </Button>
                         </>
                       ) : (
                         <Button
-                          className="magda-wl-btn"
-                          variant="contained"
-                          size="small"
+                          size="sm"
                           disabled={adding}
                           onClick={() => void handleAddToWatchlist()}
-                          startIcon={
-                            adding ? (
-                              <CircularProgress size={16} color="inherit" />
-                            ) : (
-                              <BookmarkAddOutlinedIcon />
-                            )
-                          }
+                          className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
                         >
-                          Dodaj do watchlisty
+                          {adding ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <BookmarkPlus className="w-4 h-4" />
+                          )}
+                          <span>Dodaj do watchlisty</span>
                         </Button>
                       )}
 
                       <Button
-                        className="magda-tmdb-link"
-                        component="a"
-                        href={`https://www.themoviedb.org/movie/${movie.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                        size="small"
-                        endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
                       >
-                        TMDB
+                        <a
+                          href={`https://www.themoviedb.org/movie/${movie.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span>TMDB</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
                       </Button>
-                    </Stack>
+                    </div>
                   </div>
                 </div>
               </motion.article>
             )}
           </AnimatePresence>
-        </Box>
+        </div>
 
         {watchlistActionError && (
-          <Alert
-            severity="error"
-            sx={{ mt: 2, borderRadius: 2 }}
-            onClose={() => setWatchlistActionError(null)}
-          >
-            {watchlistActionError}
-          </Alert>
+          <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 mt-4">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            <span>{watchlistActionError}</span>
+          </div>
         )}
 
         <WatchlistPanel
@@ -665,11 +646,11 @@ const MagdaLosuje: React.FC = () => {
           }}
         />
 
-        <Typography className="magda-credit" component="p">
+        <p className="magda-credit">
           Dane filmów: The Movie Database (TMDB)
-        </Typography>
-      </Box>
-    </Box>
+        </p>
+      </div>
+    </main>
   );
 };
 

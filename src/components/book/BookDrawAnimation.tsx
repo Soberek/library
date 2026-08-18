@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Typography } from '@mui/material';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import { BookOpen } from 'lucide-react';
 import type { LotteryBook } from '../../types/LotteryBook';
 
 const FRAME_W = 140;
@@ -102,7 +101,7 @@ function animateTranslateX(
   });
 }
 
-const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
+export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
   reelBooks,
   winner,
   onComplete,
@@ -211,7 +210,7 @@ const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
                         <img src={book.cover} alt="" draggable={false} />
                       ) : (
                         <div className="book-film-frame-fallback">
-                          <MenuBookOutlinedIcon />
+                          <BookOpen className="w-6 h-6 text-slate-400" />
                           <span>{book.title}</span>
                         </div>
                       )}
@@ -230,9 +229,9 @@ const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
         </div>
       </div>
 
-      <Typography className="book-draw-text" key={phraseIndex}>
+      <p className="book-draw-text" key={phraseIndex}>
         {PHRASES[phraseIndex]}
-      </Typography>
+      </p>
     </div>
   );
 };

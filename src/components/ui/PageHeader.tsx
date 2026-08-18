@@ -1,19 +1,8 @@
 import React from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  ToggleButton,
-  ToggleButtonGroup,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import {
-  ViewModule as GridViewIcon,
-  ViewList as ViewListIcon,
-} from "@mui/icons-material";
+import { Plus, ArrowUpDown, LayoutGrid, List, BookOpen, CheckCircle2 } from "lucide-react";
 import { formatBookCount } from "../../utils/textHelpers";
+import { Button } from "./button";
+import { cn } from "../../lib/utils";
 
 interface PageHeaderProps {
   title?: string;
@@ -21,288 +10,123 @@ interface PageHeaderProps {
   totalCount?: number;
   readCount?: number;
   onAddBook: () => void;
+  onExportImport?: () => void;
   viewMode: "cards" | "table";
   onViewModeChange: (newMode: "cards" | "table") => void;
   hideViewToggle?: boolean;
   hideAddButton?: boolean;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({
+export const PageHeader: React.FC<PageHeaderProps> = ({
   title = "Moje Książki",
   bookCount,
   totalCount,
   readCount,
   onAddBook,
+  onExportImport,
   viewMode,
   onViewModeChange,
   hideViewToggle = false,
   hideAddButton = false,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isFiltered = typeof totalCount === "number" && totalCount !== bookCount;
+  const countLabel = isFiltered
+    ? `${bookCount} z ${totalCount} pozycji`
+    : formatBookCount(bookCount);
 
-  const handleViewModeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newMode: "cards" | "table" | null,
-  ) => {
-    if (newMode !== null) {
-      onViewModeChange(newMode);
-    }
-  };
-
-  const countLabel =
-    typeof totalCount === "number" && totalCount !== bookCount
-      ? `${formatBookCount(bookCount)} z ${totalCount}`
-      : formatBookCount(bookCount);
-
-  const subtitleParts = [countLabel];
-  if (typeof readCount === "number") {
-    subtitleParts.push(
-      `${readCount} ${readCount === 1 ? "przeczytana" : "przeczytanych"}`,
-    );
-  }
-
-  if (hideViewToggle && hideAddButton) {
-    return (
-      <Box
-        component="header"
-        sx={{
-          pb: 2.5,
-          mb: 1,
-          borderBottom: "1px solid",
-          borderColor: "grey.200",
-        }}
-      >
-        <Typography
-          variant="overline"
-          sx={{
-            display: "block",
-            color: "primary.main",
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            fontSize: "0.6875rem",
-            mb: 0.5,
-            lineHeight: 1.2,
-          }}
-        >
-          Kolekcja
-        </Typography>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            fontWeight: 800,
-            color: "text.primary",
-            letterSpacing: "-0.03em",
-            fontSize: { xs: "1.75rem", sm: "2rem" },
-            lineHeight: 1.15,
-            mb: 0.75,
-          }}
-        >
-          {title}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 500,
-            fontSize: "0.875rem",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 0.75,
-          }}
-        >
-          {subtitleParts.map((part, index) => (
-            <React.Fragment key={part}>
-              {index > 0 && (
-                <Box
-                  component="span"
-                  sx={{
-                    width: 3,
-                    height: 3,
-                    borderRadius: "50%",
-                    bgcolor: "grey.400",
-                    flexShrink: 0,
-                  }}
-                />
-              )}
-              <Box component="span">{part}</Box>
-            </React.Fragment>
-          ))}
-        </Typography>
-      </Box>
-    );
-  }
+  const total = typeof totalCount === "number" && totalCount > 0 ? totalCount : bookCount;
+  const readPct = total > 0 && typeof readCount === "number" ? Math.round((readCount / total) * 100) : 0;
 
   return (
-    <Box
-      component="header"
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        alignItems: { xs: "stretch", md: "flex-end" },
-        justifyContent: "space-between",
-        gap: { xs: 2.5, md: 3 },
-        pb: 2.5,
-        mb: 1,
-        borderBottom: "1px solid",
-        borderColor: "grey.200",
-      }}
-    >
-      <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography
-          variant="overline"
-          sx={{
-            display: "block",
-            color: "primary.main",
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            fontSize: "0.6875rem",
-            mb: 0.5,
-            lineHeight: 1.2,
-          }}
-        >
-          Kolekcja
-        </Typography>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            fontWeight: 800,
-            color: "text.primary",
-            letterSpacing: "-0.03em",
-            fontSize: { xs: "1.75rem", sm: "2rem", md: "2.125rem" },
-            lineHeight: 1.15,
-            mb: 0.75,
-          }}
-        >
-          {title}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 500,
-            fontSize: "0.875rem",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 0.75,
-          }}
-        >
-          {subtitleParts.map((part, index) => (
-            <React.Fragment key={part}>
-              {index > 0 && (
-                <Box
-                  component="span"
-                  sx={{
-                    width: 3,
-                    height: 3,
-                    borderRadius: "50%",
-                    bgcolor: "grey.400",
-                    flexShrink: 0,
-                  }}
-                />
-              )}
-              <Box component="span">{part}</Box>
-            </React.Fragment>
-          ))}
-        </Typography>
-      </Box>
+    <header className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 pb-4 mb-2 border-b border-slate-200/90">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200/60">
+            Kolekcja
+          </span>
+          {isFiltered && (
+            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+              Filtrowanie aktywne
+            </span>
+          )}
+        </div>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.25,
-          flexShrink: 0,
-          alignSelf: { xs: "stretch", sm: "flex-start", md: "flex-end" },
-        }}
-      >
-        {!hideViewToggle && (
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            aria-label="Widok listy książek"
-            size="small"
-            sx={{
-              p: 0.375,
-              bgcolor: "grey.100",
-              borderRadius: 2,
-              border: "1px solid",
-              borderColor: "grey.200",
-              gap: 0.25,
-              "& .MuiToggleButtonGroup-grouped": {
-                border: "none",
-                borderRadius: "8px !important",
-                mx: 0,
-              },
-              "& .MuiToggleButton-root": {
-                textTransform: "none",
-                px: { xs: 1.25, sm: 1.5 },
-                py: 0.75,
-                minWidth: { xs: 40, sm: "auto" },
-                color: "text.secondary",
-                fontWeight: 600,
-                fontSize: "0.8125rem",
-                transition: "all 0.2s ease",
-                "&.Mui-selected": {
-                  bgcolor: "background.paper",
-                  color: "primary.main",
-                  boxShadow: "0 1px 3px rgba(26, 32, 44, 0.08)",
-                  "&:hover": {
-                    bgcolor: "background.paper",
-                  },
-                },
-                "&:hover": {
-                  bgcolor: "rgba(102, 126, 234, 0.06)",
-                },
-              },
-            }}
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
+          {title}
+        </h1>
+
+        <div className="flex flex-wrap items-center gap-2 mt-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+            <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+            <span>{countLabel}</span>
+          </span>
+
+          {typeof readCount === "number" && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{readCount} przeczytanych</span>
+              <span className="text-emerald-600 font-extrabold ml-0.5">({readPct}%)</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 shrink-0">
+        {onExportImport && (
+          <Button
+            variant="outline"
+            size="default"
+            onClick={onExportImport}
+            title="Kopia zapasowa / Import / Eksport"
+            aria-label="Kopia zapasowa, import lub eksport biblioteki"
+            className="border-slate-200 bg-white hover:bg-slate-50 shadow-2xs font-semibold gap-1.5 h-10 px-3"
           >
-            <ToggleButton value="cards" aria-label="Widok siatki">
-              <GridViewIcon sx={{ fontSize: 18, mr: { xs: 0, sm: 0.75 } }} />
-              {!isMobile && "Siatka"}
-            </ToggleButton>
-            <ToggleButton value="table" aria-label="Widok tabeli">
-              <ViewListIcon sx={{ fontSize: 18, mr: { xs: 0, sm: 0.75 } }} />
-              {!isMobile && "Tabela"}
-            </ToggleButton>
-          </ToggleButtonGroup>
+            <ArrowUpDown className="w-4 h-4 text-slate-600" />
+            <span className="hidden sm:inline text-xs">Kopia & Import</span>
+          </Button>
+        )}
+
+        {!hideViewToggle && (
+          <div className="flex items-center p-1 bg-slate-100 border border-slate-200 rounded-xl shadow-2xs">
+            <button
+              type="button"
+              onClick={() => onViewModeChange("cards")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                viewMode === "cards"
+                  ? "bg-white text-indigo-700 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+              aria-label="Widok siatki"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Siatka</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onViewModeChange("table")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                viewMode === "table"
+                  ? "bg-white text-indigo-700 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+              aria-label="Widok tabeli"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Tabela</span>
+            </button>
+          </div>
         )}
 
         {!hideAddButton && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onAddBook}
-            sx={{
-              flex: { xs: 1, sm: "none" },
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              borderRadius: 2,
-              px: { xs: 2, sm: 2.5 },
-              py: 1,
-              minHeight: 40,
-              fontWeight: 600,
-              textTransform: "none",
-              fontSize: "0.875rem",
-              boxShadow: "0 2px 10px rgba(102, 126, 234, 0.28)",
-              whiteSpace: "nowrap",
-              "&:hover": {
-                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                boxShadow: "0 4px 16px rgba(102, 126, 234, 0.36)",
-                transform: "translateY(-1px)",
-              },
-              transition: "all 0.2s ease",
-            }}
-          >
-            {isMobile ? "Dodaj" : "Dodaj książkę"}
+          <Button onClick={onAddBook} className="gap-1.5 shadow-md hover:shadow-lg font-bold h-10 px-4">
+            <Plus className="w-4 h-4" />
+            <span>Dodaj książkę</span>
           </Button>
         )}
-      </Box>
-    </Box>
+      </div>
+    </header>
   );
 };
 

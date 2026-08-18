@@ -1,10 +1,6 @@
 import React from "react";
-import { Box } from "@mui/material";
 import MetricCard from "./MetricCard";
-import StarIcon from "@mui/icons-material/Star";
-import PagesIcon from "@mui/icons-material/Pages";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import { Star, BookOpen, Layers, TrendingUp } from "lucide-react";
 
 interface AdditionalStats {
   averageRating: number;
@@ -17,49 +13,40 @@ interface MetricsGridProps {
   additionalStats: AdditionalStats;
 }
 
-const MetricsGrid: React.FC<MetricsGridProps> = ({ additionalStats }) => {
+export const MetricsGrid: React.FC<MetricsGridProps> = ({ additionalStats }) => {
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr 1fr",
-          md: "repeat(4, 1fr)",
-        },
-        gap: 1,
-      }}
-    >
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
       <MetricCard
         title="Średnia ocena"
         value={
           additionalStats.averageRating > 0
-            ? additionalStats.averageRating.toFixed(1)
-            : "0.0"
+            ? `${additionalStats.averageRating.toFixed(1)} / 10`
+            : "0.0 / 10"
         }
-        icon={<StarIcon />}
-        accent="#f59e0b"
+        icon={<Star className="w-4 h-4 fill-amber-400 text-amber-400" />}
+        accent="#d97706"
       />
       <MetricCard
         title="Wszystkich stron"
         value={additionalStats.totalPages.toLocaleString()}
-        icon={<PagesIcon />}
-        accent="#7c3aed"
+        icon={<Layers className="w-4 h-4" />}
+        accent="#4f46e5"
       />
       <MetricCard
         title="Przeczytanych stron"
         value={additionalStats.readPages.toLocaleString()}
-        icon={<MenuBookOutlinedIcon />}
+        icon={<BookOpen className="w-4 h-4" />}
         accent="#059669"
       />
       <MetricCard
-        title="Postęp ogólny"
+        title="Postęp czytania"
         value={`${additionalStats.progressRate}%`}
-        icon={<TrendingUpIcon />}
-        accent="#0891b2"
+        icon={<TrendingUp className="w-4 h-4" />}
+        accent="#0284c7"
         showProgress
         progressValue={additionalStats.progressRate}
       />
-    </Box>
+    </div>
   );
 };
 

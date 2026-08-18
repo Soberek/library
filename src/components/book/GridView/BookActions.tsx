@@ -1,9 +1,7 @@
 import React from 'react';
-import { Button, Box, alpha } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { Trash2, Edit3 } from 'lucide-react';
 import type { Book } from '../../../types/Book';
+import { Button } from '../../ui/button';
 
 interface BookActionsProps {
   book: Book;
@@ -11,81 +9,33 @@ interface BookActionsProps {
   onDelete: (bookId: string) => void;
 }
 
-const ActionsContainer = styled(Box)(() => ({
-  display: 'flex',
-  gap: 12,
-  width: '100%',
-}));
-
-const DeleteButton = styled(Button)(() => ({
-  flex: 1,
-  padding: '12px 24px',
-  borderRadius: 16,
-  textTransform: 'none',
-  fontWeight: 700,
-  fontSize: '0.938rem',
-  border: `3px solid #ef4444`,
-  color: '#dc2626',
-  backgroundColor: '#fff',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-
-  '&:hover': {
-    backgroundColor: alpha('#ef4444', 0.05),
-    borderColor: '#dc2626',
-    transform: 'translateY(-2px)',
-    boxShadow: `0 8px 16px ${alpha('#ef4444', 0.2)}`,
-  },
-
-  '& .MuiButton-startIcon': {
-    marginRight: 8,
-  },
-}));
-
-const EditButton = styled(Button)(() => ({
-  flex: 1,
-  padding: '12px 24px',
-  borderRadius: 16,
-  textTransform: 'none',
-  fontWeight: 700,
-  fontSize: '0.938rem',
-  color: '#fff',
-  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  boxShadow: `0 4px 12px ${alpha('#6366f1', 0.3)}`,
-  border: 'none',
-
-  '&:hover': {
-    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-    transform: 'translateY(-2px)',
-    boxShadow: `0 8px 20px ${alpha('#6366f1', 0.4)}`,
-  },
-
-  '& .MuiButton-startIcon': {
-    marginRight: 8,
-  },
-}));
-
-export default function BookActions({
+export const BookActions: React.FC<BookActionsProps> = ({
   book,
   onEdit,
   onDelete,
-}: BookActionsProps) {
+}) => {
   return (
-    <ActionsContainer>
-      <DeleteButton
-        variant="outlined"
-        startIcon={<DeleteIcon sx={{ fontSize: 20 }} />}
+    <div className="flex gap-2 w-full">
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => onDelete(book.id)}
+        className="flex-1 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
       >
+        <Trash2 className="w-4 h-4 mr-1.5" />
         Usuń
-      </DeleteButton>
-      <EditButton
-        variant="contained"
-        startIcon={<EditIcon sx={{ fontSize: 20 }} />}
+      </Button>
+      <Button
+        variant="default"
+        size="sm"
         onClick={() => onEdit(book.id)}
+        className="flex-1"
       >
+        <Edit3 className="w-4 h-4 mr-1.5" />
         Edytuj
-      </EditButton>
-    </ActionsContainer>
+      </Button>
+    </div>
   );
-}
+};
+
+export default BookActions;

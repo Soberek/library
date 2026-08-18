@@ -82,99 +82,69 @@ const initialState: AppState = {
 };
 
 // Zustand Store
-export const useFilterStore = create<FilterStore>()(
-  devtools(
-    (set, get) => ({
-      ...initialState,
+export const useFilterStore = create<FilterStore>((set, get) => ({
+  ...initialState,
 
-      setFilter: (field, value) =>
-        set(
-          (state) => {
-            const newFilters = {
-              ...state.filters,
-              [field]: value,
-            };
-            return {
-              filters: newFilters,
-              activeFilters: calculateActiveFilters(newFilters),
-            };
-          },
-          false,
-          "setFilter",
-        ),
-
-      setTab: (tab) =>
-        set(
-          {
-            activeTab: tab,
-            lastOpenTab: tab,
-          },
-          false,
-          "setTab",
-        ),
-
-      toggleExpanded: () =>
-        set(
-          (state) => ({ expanded: !state.expanded }),
-          false,
-          "toggleExpanded",
-        ),
-
-      setExpanded: (value) => set({ expanded: value }, false, "setExpanded"),
-
-      toggleTab: (tab) =>
-        set(
-          (state) => {
-            // Wenn der gleiche Tab angeklickt wird
-            if (state.activeTab === tab) {
-              return {
-                expanded: !state.expanded,
-              };
-            }
-            // Wenn ein anderer Tab angeklickt wird
-            return {
-              activeTab: tab,
-              lastOpenTab: tab,
-              expanded: state.expanded || true,
-            };
-          },
-          false,
-          "toggleTab",
-        ),
-
-      toggleAdvancedFilters: () =>
-        set(
-          (state) => ({ showAdvancedFilters: !state.showAdvancedFilters }),
-          false,
-          "toggleAdvancedFilters",
-        ),
-
-      resetFilters: (initialSortBy = "dateAdded", initialSortOrder = "desc") =>
-        set(
-          {
-            filters: {
-              status: "all",
-              genre: "all",
-              ratingRange: [0, 10],
-              pagesRange: [0, 5000],
-              sortBy: initialSortBy as FilterState["sortBy"],
-              sortOrder: initialSortOrder,
-              showOnlyFavorites: false,
-              author: "",
-              searchTerm: "",
-              statsYear: "all",
-            },
-            activeFilters: 0,
-          },
-          false,
-          "resetFilters",
-        ),
-
-      getActiveFiltersCount: () => {
-        const state = get();
-        return calculateActiveFilters(state.filters);
-      },
+  setFilter: (field, value) =>
+    set((state) => {
+      const newFilters = {
+        ...state.filters,
+        [field]: value,
+      };
+      return {
+        filters: newFilters,
+        activeFilters: calculateActiveFilters(newFilters),
+      };
     }),
-    { name: "FilterStore" },
-  ),
-);
+
+  setTab: (tab) =>
+    set({
+      activeTab: tab,
+      lastOpenTab: tab,
+    }),
+
+  toggleExpanded: () =>
+    set((state) => ({ expanded: !state.expanded })),
+
+  setExpanded: (value) => set({ expanded: value }),
+
+  toggleTab: (tab) =>
+    set((state) => {
+      if (state.activeTab === tab) {
+        return {
+          expanded: !state.expanded,
+        };
+      }
+      return {
+        activeTab: tab,
+        lastOpenTab: tab,
+        expanded: true,
+      };
+    }),
+
+  toggleAdvancedFilters: () =>
+    set((state) => ({ showAdvancedFilters: !state.showAdvancedFilters })),
+
+  resetFilters: (initialSortBy = "dateAdded", initialSortOrder = "desc") =>
+    set({
+      filters: {
+        status: "all",
+        genre: "all",
+        ratingRange: [0, 10],
+        pagesRange: [0, 5000],
+        sortBy: initialSortBy as FilterState["sortBy"],
+        sortOrder: initialSortOrder,
+        showOnlyFavorites: false,
+        author: "",
+        searchTerm: "",
+        statsYear: "all",
+      },
+      activeFilters: 0,
+    }),
+
+  getActiveFiltersCount: () => {
+    const state = get();
+    return calculateActiveFilters(state.filters);
+  },
+}));
+

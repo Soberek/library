@@ -22,8 +22,7 @@ describe('BookForm', () => {
     expect(screen.getByLabelText(/Przeczytane strony/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Liczba stron/i)).toBeInTheDocument();
 
-    // 5 stars with half-steps → empty + 10 half values
-    expect(screen.getAllByRole('radio')).toHaveLength(11);
+    expect(screen.getByLabelText(/5 gwiazdek/i)).toBeInTheDocument();
     expect(screen.getByTestId('cover-input')).toBeInTheDocument();
 
     expect(

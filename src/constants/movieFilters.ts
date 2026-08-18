@@ -1,4 +1,30 @@
-import type { MovieSortBy } from '../types/Movie';
+import type { MovieFilters, MovieSortBy } from '../types/Movie';
+
+export const DEFAULT_FILTERS: MovieFilters = {
+  genreId: null,
+  yearFrom: null,
+  yearTo: null,
+  minRating: 6,
+  minVotes: 100,
+  maxRating: null,
+  runtimeMin: null,
+  runtimeMax: null,
+  originalLanguage: null,
+  originCountry: null,
+  excludeGenreId: null,
+  sortBy: 'popularity.desc',
+  castId: null,
+  castName: null,
+  crewId: null,
+  crewName: null,
+  companyId: null,
+  companyName: null,
+  watchProviderId: null,
+  watchRegion: 'PL',
+  certification: null,
+  certificationCountry: 'US',
+};
+
 
 export const MOVIE_SORT_OPTIONS: { value: MovieSortBy; label: string }[] = [
   { value: 'popularity.desc', label: 'Popularność ↓' },
@@ -9,6 +35,7 @@ export const MOVIE_SORT_OPTIONS: { value: MovieSortBy; label: string }[] = [
   { value: 'primary_release_date.asc', label: 'Najstarsze' },
   { value: 'vote_count.desc', label: 'Najwięcej głosów' },
 ];
+
 
 export const ORIGINAL_LANGUAGES: { code: string; label: string }[] = [
   { code: 'pl', label: 'Polski' },

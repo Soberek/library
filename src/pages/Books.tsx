@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo } from "react";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import React, { useCallback, useMemo, useState } from "react";
 import { PageHeader } from "../components/ui";
 import PageError from "../components/ui/PageError";
 import {
@@ -7,6 +6,7 @@ import {
   BookListLoading,
   BooksViewSwitcher,
   AddBookFab,
+  ExportImportModal,
 } from "../components/book";
 import BookForm from "../components/forms/AddBookForm/BookForm";
 import { useBooksQuery, useBookFilters } from "../hooks";
@@ -15,10 +15,7 @@ import FilterStatisticsPanel from "../components/filters/FilterStatisticsPanel";
 import { useFilterStore, useUIStore } from "../stores";
 import type { Book } from "../types/Book";
 
-const Books: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+export const Books: React.FC = () => {
   const {
     books,
     loading,
@@ -31,6 +28,7 @@ const Books: React.FC = () => {
     handleStatusChange,
     handleToggleFavorite,
     handleRatingChange,
+    handlePagesChange,
   } = useBooksQuery(false);
 
   const filteredBooks = useBookFilters(books);
@@ -40,13 +38,14 @@ const Books: React.FC = () => {
   const storedViewMode = useUIStore((state) => state.viewMode);
   const setViewMode = useUIStore((state) => state.setViewMode);
 
-  const [modalState, setModalState] = React.useState<{
+  const [modalState, setModalState] = useState<{
     open: boolean;
     bookId: string | null;
   }>({ open: false, bookId: null });
-  const [formDirty, setFormDirty] = React.useState(false);
+  const [exportImportOpen, setExportImportOpen] = useState(false);
+  const [formDirty, setFormDirty] = useState(false);
 
-  const viewMode = isMobile ? "cards" : storedViewMode;
+  const viewMode = storedViewMode;
 
   const editingBook = modalState.bookId
     ? books.find((book) => book.id === modalState.bookId)
@@ -94,11 +93,23 @@ const Books: React.FC = () => {
     [modalState.bookId, handleBookDelete, handleBookModalClose],
   );
 
+  const handleImportBooks = useCallback(
+    async (importedBooks: Omit<Book, 'id'>[]) => {
+      let count = 0;
+      for (const item of importedBooks) {
+        await handleBookAdd(item as Book);
+        count++;
+      }
+      return count;
+    },
+    [handleBookAdd],
+  );
+
   if (error) {
     return (
-      <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+      <div className="p-4 sm:p-6 md:p-8">
         <PageError message={error.message} />
-      </Box>
+      </div>
     );
   }
 
@@ -109,36 +120,24 @@ const Books: React.FC = () => {
     : "Dodaj nową książkę";
 
   return (
-    <Box
-      sx={{
-        p: { xs: 2, sm: 3, md: 4 },
-        pb: { xs: 10, md: 4 },
-        width: "100%",
-        minHeight: "calc(100vh - 64px)",
-      }}
-    >
-      <Box sx={{ mb: 3 }}>
-        <PageHeader
-          bookCount={loading ? 0 : filteredBooks.length}
-          totalCount={loading ? 0 : books.length}
-          readCount={loading ? 0 : filteredReadCount}
-          onAddBook={() => handleBookModalOpen({ bookId: null })}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          hideViewToggle={isMobile}
-          hideAddButton={isMobile}
-        />
-      </Box>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 pb-24 md:pb-8 w-full min-h-[calc(100vh-64px)] space-y-6">
+      <PageHeader
+        bookCount={loading ? 0 : filteredBooks.length}
+        totalCount={loading ? 0 : books.length}
+        readCount={loading ? 0 : filteredReadCount}
+        onAddBook={() => handleBookModalOpen({ bookId: null })}
+        onExportImport={() => setExportImportOpen(true)}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
-      <Box sx={{ mb: 3 }}>
-        <FilterStatisticsPanel
-          books={books}
-          booksStats={booksStats}
-          additionalStats={additionalStats}
-        />
-      </Box>
+      <FilterStatisticsPanel
+        books={books}
+        booksStats={booksStats}
+        additionalStats={additionalStats}
+      />
 
-      <Box sx={{ width: "100%" }}>
+      <div className="w-full">
         {loading ? (
           <BookListLoading />
         ) : filteredBooks.length === 0 ? (
@@ -156,9 +155,10 @@ const Books: React.FC = () => {
             onStatusChange={handleStatusChange}
             onToggleFavorite={handleToggleFavorite}
             onRatingChange={handleRatingChange}
+            onPagesChange={handlePagesChange}
           />
         )}
-      </Box>
+      </div>
 
       <AddBookFab onClick={() => handleBookModalOpen({ bookId: null })} />
 
@@ -179,7 +179,14 @@ const Books: React.FC = () => {
           />
         )}
       </CustomModal>
-    </Box>
+
+      <ExportImportModal
+        open={exportImportOpen}
+        onClose={() => setExportImportOpen(false)}
+        books={books}
+        onImportBooks={handleImportBooks}
+      />
+    </div>
   );
 };
 

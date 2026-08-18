@@ -1,25 +1,15 @@
-import { useState, useCallback } from "react";
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Box,
-  ButtonBase,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import React, { useState, useCallback } from "react";
+import { Menu, BookOpen } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MobileDrawer from "./MobileDrawer";
 import SearchBar from "./SearchBar";
 
-const MobileNavbar: React.FC = () => {
+export const MobileNavbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const isMagdaPage = location.pathname === "/magda-losuje";
-  const hideSearch =
-    isMagdaPage || location.pathname === "/losuj-ksiazke";
+
+  const hideSearch = location.pathname !== "/";
 
   const handleDrawerOpen = useCallback(() => setDrawerOpen(true), []);
   const handleDrawerClose = useCallback(() => setDrawerOpen(false), []);
@@ -27,73 +17,36 @@ const MobileNavbar: React.FC = () => {
 
   return (
     <>
-      <AppBar
-        position="sticky"
-        elevation={0}
-        color="transparent"
-        sx={{
-          display: { md: "none" },
-          bgcolor: "rgba(255, 255, 255, 0.95)",
-          borderBottom: "1px solid",
-          borderColor: "grey.200",
-          boxShadow: "0 1px 2px rgba(26, 32, 44, 0.04)",
-        }}
-      >
-        <Toolbar
-          sx={{ justifyContent: "space-between", minHeight: 56, py: 0.5 }}
-        >
-          <ButtonBase
+      <header className="sticky top-0 z-40 block md:hidden w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
+        <div className="flex h-14 items-center justify-between px-4">
+          <button
             onClick={handleBrandClick}
             aria-label="MyLibrary — strona główna"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              borderRadius: 1.5,
-              py: 0.5,
-              px: 0.5,
-            }}
+            className="flex items-center gap-2 rounded-xl py-1 px-1 transition-opacity hover:opacity-80 cursor-pointer"
           >
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: 1.5,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "rgba(102, 126, 234, 0.1)",
-                color: "primary.main",
-              }}
-            >
-              <MenuBookOutlinedIcon sx={{ fontSize: 18 }} />
-            </Box>
-            <Typography
-              fontFamily="var(--font-display)"
-              fontWeight={700}
-              fontSize="1.0625rem"
-              letterSpacing="-0.02em"
-            >
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200/60 shadow-xs">
+              <BookOpen className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-base font-bold tracking-tight text-slate-900 font-display">
               MyLibrary
-            </Typography>
-          </ButtonBase>
+            </span>
+          </button>
 
-          <IconButton
-            edge="end"
+          <button
             aria-label="Otwórz menu"
             onClick={handleDrawerOpen}
-            sx={{ color: "text.secondary" }}
+            className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <MenuIcon />
-          </IconButton>
-        </Toolbar>
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
 
         {!hideSearch && (
-          <Box sx={{ px: 2, pb: 1.5 }}>
+          <div className="px-4 pb-3">
             <SearchBar variant="mobile" />
-          </Box>
+          </div>
         )}
-      </AppBar>
+      </header>
 
       <MobileDrawer open={drawerOpen} onClose={handleDrawerClose} />
     </>

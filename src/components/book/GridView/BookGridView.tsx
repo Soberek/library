@@ -1,6 +1,4 @@
 import React from "react";
-import { Box, Grid, Zoom, Fade } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import BookCard from "./BookCard";
 import type { Book, BookStatus } from "../../../types/Book";
 
@@ -11,26 +9,8 @@ interface BookGridViewProps {
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
+  onPagesChange?: (bookId: string, newReadPages: number, overallPages?: number) => void;
 }
-
-const GridContainer = styled(Box)(({ theme }) => ({
-  width: "100%",
-  minHeight: "400px",
-  position: "relative",
-  padding: theme.spacing(1),
-}));
-
-const CardWrapper = styled(Box)(() => ({
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  position: "relative",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-  "&:hover": {
-    zIndex: 2,
-  },
-}));
 
 export const BookGridView: React.FC<BookGridViewProps> = ({
   books,
@@ -39,64 +19,26 @@ export const BookGridView: React.FC<BookGridViewProps> = ({
   onStatusChange,
   onToggleFavorite,
   onRatingChange,
+  onPagesChange,
 }) => {
   return (
-    <GridContainer>
-      <Grid
-        container
-        spacing={1}
-        sx={{
-          margin: 0,
-          width: "100%",
-        }}
-      >
-        {books.map((book, index) => (
-          <Grid
-            item
-            key={book.id}
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            xl={2}
-            sx={{
-              display: "flex",
-              padding: { xs: 0.75, sm: 1, md: 1.25 },
-            }}
-          >
-            <Zoom
-              in={true}
-              timeout={500}
-              style={{
-                transitionDelay: `${Math.min(index * 50, 800)}ms`,
-                width: "100%",
-              }}
-            >
-              <CardWrapper>
-                <Fade
-                  in={true}
-                  timeout={1000}
-                  style={{
-                    transitionDelay: `${Math.min(index * 50 + 100, 900)}ms`,
-                  }}
-                >
-                  <Box sx={{ width: "100%", height: "100%" }}>
-                    <BookCard
-                      book={book}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onStatusChange={onStatusChange}
-                      onToggleFavorite={onToggleFavorite}
-                      onRatingChange={onRatingChange}
-                    />
-                  </Box>
-                </Fade>
-              </CardWrapper>
-            </Zoom>
-          </Grid>
+    <div className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+        {books.map((book) => (
+          <div key={book.id} className="w-full flex flex-col fade-in-up">
+            <BookCard
+              book={book}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onStatusChange={onStatusChange}
+              onToggleFavorite={onToggleFavorite}
+              onRatingChange={onRatingChange}
+              onPagesChange={onPagesChange}
+            />
+          </div>
         ))}
-      </Grid>
-    </GridContainer>
+      </div>
+    </div>
   );
 };
 

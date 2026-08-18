@@ -1,13 +1,22 @@
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import NotFound from '../pages/NotFound';
+import { PageLoader } from '../components/ui/PageLoader';
 import { ProtectedRoute } from '../components';
 import App from '../App';
-import SignUp from '../pages/SignUp';
-import SignIn from '../pages/SignIn';
-import Books from '../pages/Books';
-import MagdaLosuje from '../pages/MagdaLosuje';
-import BookLosuje from '../pages/BookLosuje';
-import PozycjeSeksualne from '../pages/PozycjeSeksualne';
+
+const Books = lazy(() => import('../pages/Books'));
+const MagdaLosuje = lazy(() => import('../pages/MagdaLosuje'));
+const BookLosuje = lazy(() => import('../pages/BookLosuje'));
+const PozycjeSeksualne = lazy(() => import('../pages/PozycjeSeksualne'));
+const SignUp = lazy(() => import('../pages/SignUp'));
+const SignIn = lazy(() => import('../pages/SignIn'));
+const NotFound = lazy(() => import('../pages/NotFound'));
+
+const withSuspense = (Component: React.ComponentType) => (
+  <Suspense fallback={<PageLoader />}>
+    <Component />
+  </Suspense>
+);
 
 const router = createBrowserRouter([
   {
@@ -20,19 +29,19 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Books />,
+            element: withSuspense(Books),
           },
           {
             path: 'magda-losuje',
-            element: <MagdaLosuje />,
+            element: withSuspense(MagdaLosuje),
           },
           {
             path: 'losuj-ksiazke',
-            element: <BookLosuje />,
+            element: withSuspense(BookLosuje),
           },
           {
             path: 'pozycje-seksualne',
-            element: <PozycjeSeksualne />,
+            element: withSuspense(PozycjeSeksualne),
           },
         ],
       },
@@ -40,19 +49,19 @@ const router = createBrowserRouter([
   },
   {
     path: '/sign-up',
-    element: <SignUp />,
+    element: withSuspense(SignUp),
   },
   {
     path: '/sign-in',
-    element: <SignIn />,
+    element: withSuspense(SignIn),
   },
   {
     path: '*',
-    element: <NotFound />,
+    element: withSuspense(NotFound),
   },
 ]);
 
-const RouterProviderWrapper: React.FC = () => {
+export const RouterProviderWrapper: React.FC = () => {
   return <RouterProvider router={router} />;
 };
 

@@ -1,33 +1,32 @@
-import React from "react";
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  Typography,
-  Divider,
-} from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import React, { useEffect } from "react";
+import { Home, Sparkles, Heart, LogOut, X, BookOpen } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
 import MagdaIcon from "../ui/MagdaIcon";
+import { cn } from "../../lib/utils";
 
 interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
 }
 
-const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
+export const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   const handleLogout = async () => {
     try {
@@ -39,164 +38,117 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
     }
   };
 
-  return (
-    <Drawer
-      anchor="left"
-      open={open}
-      onClose={onClose}
-      PaperProps={{ sx: { width: 280 } }}
-    >
-      <Box
-        sx={{
-          px: 2.5,
-          py: 3,
-          bgcolor: "grey.50",
-          borderBottom: "1px solid",
-          borderColor: "grey.200",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1 }}>
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 1.5,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "rgba(102, 126, 234, 0.1)",
-              color: "primary.main",
-            }}
-          >
-            <MenuBookOutlinedIcon sx={{ fontSize: 20 }} />
-          </Box>
-          <Typography variant="h6" fontFamily="var(--font-display)" fontWeight={700} letterSpacing="-0.02em">
-            MyLibrary
-          </Typography>
-        </Box>
-        {user?.email && (
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {user.email}
-          </Typography>
-        )}
-      </Box>
+  if (!open) return null;
 
-      <List sx={{ py: 1 }}>
-        <ListItem disablePadding>
-          <ListItemButton
-            component={Link}
+  return (
+    <div className="fixed inset-0 z-50 flex md:hidden">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity animate-in fade-in-0 duration-200"
+        onClick={onClose}
+      />
+
+      {/* Drawer surface */}
+      <div className="relative z-50 w-72 max-w-[80vw] h-full bg-white border-r border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-left duration-250">
+        {/* Header */}
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200/60 shadow-xs">
+              <BookOpen className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900 font-display">
+                MyLibrary
+              </h2>
+              {user?.email && (
+                <p className="text-xs text-slate-500 truncate max-w-[150px]">
+                  {user.email}
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Zamknij menu"
+            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Links */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          <Link
             to="/"
             onClick={onClose}
-            selected={location.pathname === "/"}
-            sx={{
-              mx: 1,
-              borderRadius: 1.5,
-              "&.Mui-selected": {
-                bgcolor: "rgba(102, 126, 234, 0.1)",
-                color: "primary.main",
-              },
-            }}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              location.pathname === "/"
+                ? "bg-indigo-50 text-indigo-700 font-bold"
+                : "text-slate-700 hover:bg-slate-100"
+            )}
           >
-            <ListItemIcon
-              sx={{
-                minWidth: 36,
-                color:
-                  location.pathname === "/" ? "primary.main" : "text.secondary",
-              }}
-            >
-              <HomeIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Moja biblioteka"
-              primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            component={Link}
+            <Home className="w-4 h-4 shrink-0 text-indigo-600" />
+            <span>Moja biblioteka</span>
+          </Link>
+
+          <Link
             to="/magda-losuje"
             onClick={onClose}
-            selected={location.pathname === "/magda-losuje"}
-            sx={{
-              mx: 1,
-              borderRadius: 1.5,
-              "&.Mui-selected": {
-                bgcolor: "rgba(240, 180, 41, 0.16)",
-                color: "#8a6a12",
-              },
-            }}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              location.pathname === "/magda-losuje"
+                ? "bg-amber-100 text-amber-900 font-bold"
+                : "text-slate-700 hover:bg-amber-50 hover:text-amber-800"
+            )}
           >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <MagdaIcon size={24} alt="" />
-            </ListItemIcon>
-            <ListItemText
-              primary="MAGDA LOSUJE"
-              primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            component={Link}
+            <MagdaIcon size={20} alt="" />
+            <span>MAGDA LOSUJE</span>
+          </Link>
+
+          <Link
             to="/losuj-ksiazke"
             onClick={onClose}
-            selected={location.pathname === "/losuj-ksiazke"}
-            sx={{
-              mx: 1,
-              borderRadius: 1.5,
-              "&.Mui-selected": {
-                bgcolor: "rgba(47, 111, 94, 0.14)",
-                color: "#2f6f5e",
-              },
-            }}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              location.pathname === "/losuj-ksiazke"
+                ? "bg-emerald-100 text-emerald-900 font-bold"
+                : "text-slate-700 hover:bg-emerald-50 hover:text-emerald-800"
+            )}
           >
-            <ListItemIcon
-              sx={{
-                minWidth: 36,
-                color:
-                  location.pathname === "/losuj-ksiazke"
-                    ? "#2f6f5e"
-                    : "text.secondary",
-              }}
-            >
-              <MenuBookOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Losuj książkę"
-              primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
-            />
-          </ListItemButton>
-        </ListItem>
-      </List>
+            <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Losuj książkę</span>
+          </Link>
 
-      {user && (
-        <>
-          <Divider sx={{ my: 1 }} />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleLogout}
-                sx={{
-                  mx: 1,
-                  borderRadius: 1.5,
-                  color: "error.main",
-                  "&:hover": { bgcolor: "rgba(239, 68, 68, 0.08)" },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 36, color: "error.main" }}>
-                  <ExitToAppIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Wyloguj się"
-                  primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
-        </>
-      )}
-    </Drawer>
+          <Link
+            to="/pozycje-seksualne"
+            onClick={onClose}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              location.pathname === "/pozycje-seksualne"
+                ? "bg-pink-100 text-pink-900 font-bold"
+                : "text-slate-700 hover:bg-pink-50 hover:text-pink-800"
+            )}
+          >
+            <Heart className="w-4 h-4 text-pink-600 shrink-0" />
+            <span>Pozycje</span>
+          </Link>
+        </div>
+
+        {/* Footer actions */}
+        {user && (
+          <div className="p-3 border-t border-slate-100">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4 shrink-0" />
+              <span>Wyloguj się</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

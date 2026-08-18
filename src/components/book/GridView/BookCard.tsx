@@ -1,28 +1,13 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  IconButton,
-  LinearProgress,
-  Tooltip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  Rating,
-} from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Heart, Edit3, Trash2, Check, Layers, User, CheckCircle2 } from "lucide-react";
 import type { Book, BookStatus } from "../../../types/Book";
-import { GOLD, STATUS_ACCENT } from "../../../constants/bookUi";
 import StatusMenuButton from "../StatusMenuButton";
+import { Modal } from "../../ui/modal";
+import { Button } from "../../ui/button";
+import { Progress } from "../../ui/progress";
+import { Rating } from "../../ui/rating";
+import { formatGenre } from "../../../utils/textHelpers";
+import { cn } from "../../../lib/utils";
 
 interface BookCardProps {
   book: Book;
@@ -31,49 +16,88 @@ interface BookCardProps {
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
+  onPagesChange?: (bookId: string, newReadPages: number, overallPages?: number) => void;
 }
 
-const BookCard: React.FC<BookCardProps> = ({
+const GENRE_GRADIENTS: Record<string, string> = {
+  fantasy: "from-purple-600 via-indigo-600 to-blue-700",
+  "science-fiction": "from-cyan-600 via-blue-600 to-indigo-800",
+  kryminał: "from-slate-700 via-slate-800 to-zinc-900",
+  thriller: "from-rose-700 via-red-800 to-slate-900",
+  romans: "from-pink-500 via-rose-500 to-red-600",
+  historia: "from-amber-700 via-amber-800 to-stone-900",
+  biografia: "from-emerald-700 via-teal-800 to-slate-800",
+  horror: "from-red-900 via-stone-900 to-black",
+  psychologia: "from-teal-600 via-emerald-600 to-cyan-700",
+};
+
+export const BookCard: React.FC<BookCardProps> = ({
   book,
   onEdit,
   onDelete,
   onStatusChange,
   onToggleFavorite,
   onRatingChange,
+  onPagesChange,
 }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const progress = Math.min(
-    ((book.readPages ?? 0) / (book.overallPages || 1)) * 100,
-    100,
-  );
-  const accent = STATUS_ACCENT[book.read] ?? "#667eea";
+  const [imgError, setImgError] = useState(false);
+
+  const overall = Math.max(book.overallPages || 1, 1);
+  const read = Math.min(Math.max(book.readPages || 0, 0), overall);
+  const progress = Math.min((read / overall) * 100, 100);
   const isFavorite = Boolean(book.isFavorite);
+  const isCompleted = book.read === "Przeczytana" || progress >= 100;
+  const formattedGenre = formatGenre(book.genre);
+
+  const genreLower = (book.genre || "").toLowerCase();
+  const fallbackGradient =
+    GENRE_GRADIENTS[genreLower] || "from-indigo-600 via-violet-600 to-purple-800";
+
+  const handleFinishBook = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onPagesChange) {
+      onPagesChange(book.id, overall, overall);
+    }
+    onStatusChange(book.id, "Przeczytana");
+  };
 
   return (
-    <Box
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: 3,
-        bgcolor: "#fff",
-        border: "1px solid",
-        borderColor: isFavorite ? "rgba(201, 162, 39, 0.28)" : "rgba(15,23,42,0.08)",
-        boxShadow: isFavorite
-          ? `0 8px 28px ${GOLD.glow}, 0 2px 8px rgba(15,23,42,0.04)`
-          : "0 2px 10px rgba(15,23,42,0.04)",
-        overflow: "hidden",
-        transition: "transform 0.25s ease, box-shadow 0.25s ease",
-        "&:hover": {
-          transform: "translateY(-3px)",
-          boxShadow: isFavorite
-            ? `0 14px 36px ${GOLD.glow}, 0 6px 16px rgba(15,23,42,0.06)`
-            : "0 10px 28px rgba(15,23,42,0.08)",
-          "& .card-actions": { opacity: 1 },
-        },
-      }}
+    <div
+      className={cn(
+        "group relative flex flex-col h-full rounded-3xl border bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+        isFavorite
+          ? "border-amber-300 ring-2 ring-amber-200/50 shadow-[0_4px_20px_rgba(245,158,11,0.08)]"
+          : "border-slate-200 shadow-2xs hover:border-indigo-200 hover:shadow-md"
+      )}
     >
-      <Box
+      {/* Top Header Controls Bar */}
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
+        <StatusMenuButton
+          status={book.read}
+          onSelect={(next) => onStatusChange(book.id, next)}
+          variant="solid"
+          size="sm"
+        />
+
+        <button
+          type="button"
+          onClick={() => onToggleFavorite(book.id, isFavorite)}
+          aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+          title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+          className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border shadow-2xs",
+            isFavorite
+              ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600"
+              : "bg-slate-50 text-slate-400 border-slate-200 hover:text-rose-500 hover:border-rose-200 hover:bg-white"
+          )}
+        >
+          <Heart className={cn("w-4 h-4", isFavorite && "fill-white text-white")} />
+        </button>
+      </div>
+
+      {/* Book Cover Container */}
+      <div
         onClick={() => onEdit(book.id)}
         role="button"
         tabIndex={0}
@@ -84,370 +108,213 @@ const BookCard: React.FC<BookCardProps> = ({
           }
         }}
         aria-label={`Edytuj książkę ${book.title}`}
-        sx={{
-          position: "relative",
-          height: 240,
-          flexShrink: 0,
-          overflow: "hidden",
-          bgcolor: isFavorite ? GOLD.soft : "#f1f5f9",
-          cursor: "pointer",
-          ...(isFavorite && {
-            boxShadow: `inset 0 0 0 2px ${GOLD.mid}, inset 0 0 0 5px rgba(248,241,223,0.95)`,
-          }),
-        }}
+        className="relative h-56 w-full cursor-pointer flex items-center justify-center px-4 py-2 select-none"
       >
-        {book.cover ? (
-          <Box
-            component="img"
-            src={book.cover}
-            alt={book.title}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              objectPosition: "center center",
-              display: "block",
-            }}
-          />
-        ) : (
-          <Box
-            sx={{
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: isFavorite
-                ? `linear-gradient(145deg, ${GOLD.soft}, #efe0b0)`
-                : `linear-gradient(145deg, ${accent}22, ${accent}44)`,
-              color: isFavorite ? GOLD.deep : accent,
-            }}
-          >
-            <MenuBookOutlinedIcon sx={{ fontSize: 48 }} />
-          </Box>
-        )}
-
-        <Box
-          sx={{ position: "absolute", top: 10, left: 10, zIndex: 3 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <StatusMenuButton
-            status={book.read}
-            onSelect={(next) => onStatusChange(book.id, next)}
-            variant="solid"
-          />
-        </Box>
-
-        <Box
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            zIndex: 3,
-            display: "flex",
-            alignItems: "center",
-            gap: 0.75,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {isFavorite && (
-            <Box
-              aria-hidden
-              sx={{
-                position: "relative",
-                width: 34,
-                height: 34,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Box
-                sx={{
-                  position: "absolute",
-                  inset: 0,
-                  borderRadius: "50%",
-                  background: `conic-gradient(from 210deg, ${GOLD.deep}, ${GOLD.mid}, #f5e6a8, ${GOLD.mid}, ${GOLD.deep}, ${GOLD.rich}, ${GOLD.deep})`,
-                  boxShadow: `0 2px 10px ${GOLD.glow}`,
-                }}
+        {book.cover && !imgError ? (
+          <div className="relative max-h-52 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+            {/* Realistic Book Jacket Container */}
+            <div className="relative rounded-lg overflow-hidden shadow-[0_8px_18px_rgba(0,0,0,0.14)] max-h-50 border border-black/5">
+              {/* Left spine shadow */}
+              <div className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/25 to-transparent z-10 pointer-events-none" />
+              <img
+                src={book.cover}
+                alt={book.title}
+                onError={() => setImgError(true)}
+                className="max-h-50 max-w-[155px] object-cover rounded-md"
               />
-              <Box
-                sx={{
-                  position: "relative",
-                  width: 22,
-                  height: 22,
-                  borderRadius: "50%",
-                  bgcolor: "#fffaf0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 0 0 1px rgba(201,162,39,0.3) inset",
-                }}
-              >
-                <StarIcon sx={{ fontSize: 13, color: GOLD.rich }} />
-              </Box>
-            </Box>
-          )}
-
-          <Tooltip
-            title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+            </div>
+          </div>
+        ) : (
+          /* Editorial Fallback Cover */
+          <div
+            className={cn(
+              "w-32 h-48 rounded-lg p-3.5 flex flex-col justify-between text-white shadow-[0_8px_18px_rgba(0,0,0,0.14)] relative overflow-hidden transition-transform duration-300 group-hover:scale-105 bg-gradient-to-br",
+              fallbackGradient
+            )}
           >
-            <IconButton
-              size="small"
-              onClick={() => onToggleFavorite(book.id, isFavorite)}
-              sx={{
-                width: 32,
-                height: 32,
-                bgcolor: isFavorite ? GOLD.rich : "rgba(255,255,255,0.95)",
-                color: isFavorite ? "#fff" : "#94a3b8",
-                border: "1px solid",
-                borderColor: isFavorite ? GOLD.deep : "rgba(15,23,42,0.08)",
-                boxShadow: isFavorite
-                  ? `0 4px 12px ${GOLD.glow}`
-                  : "0 2px 6px rgba(15,23,42,0.08)",
-                "&:hover": {
-                  bgcolor: isFavorite ? GOLD.deep : "#fff",
-                  color: isFavorite ? "#fff" : "#ef4444",
-                },
-              }}
-            >
-              {isFavorite ? (
-                <FavoriteIcon sx={{ fontSize: 15 }} />
-              ) : (
-                <FavoriteBorderIcon sx={{ fontSize: 16 }} />
+            {/* Left spine shadow */}
+            <div className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/30 to-transparent pointer-events-none" />
+            
+            <div className="relative z-10">
+              {formattedGenre && (
+                <span className="inline-block text-[10px] font-bold text-white/85 border-b border-white/30 pb-0.5 mb-1.5 truncate max-w-full">
+                  {formattedGenre}
+                </span>
               )}
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+              <h3 className="text-xs font-bold line-clamp-3 leading-snug text-white drop-shadow-xs">
+                {book.title}
+              </h3>
+            </div>
 
-      <Box
-        sx={{
-          px: 2,
-          pb: 2,
-          pt: 0.5,
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.25,
-          flex: 1,
-        }}
-      >
-        <Box sx={{ textAlign: "center" }}>
-          {isFavorite && (
-            <Typography
-              sx={{
-                mb: 0.5,
-                fontSize: "0.6rem",
-                fontWeight: 800,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                background: `linear-gradient(90deg, ${GOLD.deep}, ${GOLD.rich}, ${GOLD.deep})`,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Ulubiona
-            </Typography>
+            <div className="relative z-10 pt-1.5 border-t border-white/20">
+              <p className="text-[10px] font-semibold text-white/90 truncate">
+                {book.author}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Book details body */}
+      <div className="flex flex-col flex-1 p-4 pt-2 gap-3 text-left">
+        {/* Title, Author & Genre Header */}
+        <div>
+          {formattedGenre && (
+            <div className="mb-1.5">
+              <span className="inline-block text-[11px] font-semibold text-indigo-700 bg-indigo-50/90 px-2.5 py-0.5 rounded-full border border-indigo-100/80 truncate max-w-full">
+                {formattedGenre}
+              </span>
+            </div>
           )}
-          <Typography
-            component="h2"
+
+          <h2
             onClick={() => onEdit(book.id)}
-            sx={{
-              fontWeight: 800,
-              fontSize: "1rem",
-              lineHeight: 1.25,
-              letterSpacing: "-0.02em",
-              color: "#0f172a",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              mb: 0.35,
-              cursor: "pointer",
-              "&:hover": { color: "primary.main" },
-            }}
+            className="font-bold text-base text-slate-900 line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors leading-snug"
           >
             {book.title}
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: "0.78rem",
-              fontWeight: 500,
-              color: "#64748b",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {book.author}
-          </Typography>
-        </Box>
+          </h2>
+          <p className="text-xs text-slate-500 font-medium truncate mt-1 flex items-center gap-1.5">
+            <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>{book.author}</span>
+          </p>
+        </div>
 
-        <Box
-          sx={{
-            px: 1.25,
-            py: 1,
-            borderRadius: 2,
-            bgcolor: isFavorite ? "rgba(248, 241, 223, 0.7)" : "#f8fafc",
-            border: "1px solid",
-            borderColor: isFavorite
-              ? "rgba(201, 162, 39, 0.2)"
-              : "rgba(15,23,42,0.05)",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 0.6,
-            }}
-          >
-            <Typography
-              sx={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b" }}
-            >
-              {book.readPages} / {book.overallPages}
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: "0.7rem",
-                fontWeight: 800,
-                color: isFavorite ? GOLD.deep : "#667eea",
-              }}
-            >
+        {/* Progress box */}
+        <div className="p-3 rounded-2xl bg-slate-50/90 border border-slate-100">
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-600 mb-1.5">
+            <span className="flex items-center gap-1">
+              <Layers className="w-3.5 h-3.5 text-slate-400" />
+              <span>{read} / {overall} str.</span>
+            </span>
+            <span className="font-extrabold text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-slate-200 shadow-2xs text-[11px]">
               {Math.round(progress)}%
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 5,
-              borderRadius: 999,
-              bgcolor: isFavorite ? "rgba(201,162,39,0.15)" : "#e2e8f0",
-              "& .MuiLinearProgress-bar": {
-                borderRadius: 999,
-                background: isFavorite
-                  ? `linear-gradient(90deg, ${GOLD.rich}, ${GOLD.mid})`
-                  : "linear-gradient(90deg, #667eea, #764ba2)",
-              },
-            }}
-          />
-        </Box>
+            </span>
+          </div>
+          <Progress value={progress} />
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mt: "auto",
-            gap: 1,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+          {/* Quick stepper buttons or Completed state */}
+          {isCompleted ? (
+            <div className="flex items-center justify-center gap-1.5 mt-2.5 pt-2 border-t border-slate-200/60 text-xs font-bold text-emerald-700 bg-emerald-50/80 rounded-xl py-1 px-2.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Książka przeczytana</span>
+            </div>
+          ) : onPagesChange ? (
+            <div
+              className="flex items-center justify-between gap-1.5 mt-2.5 pt-2 border-t border-slate-200/60"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  onPagesChange(
+                    book.id,
+                    Math.min(overall, read + 10),
+                    overall
+                  )
+                }
+                title="Dodaj 10 stron do przeczytanych"
+                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center"
+              >
+                +10
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onPagesChange(
+                    book.id,
+                    Math.min(overall, read + 50),
+                    overall
+                  )
+                }
+                title="Dodaj 50 stron do przeczytanych"
+                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center"
+              >
+                +50
+              </button>
+              <button
+                type="button"
+                onClick={handleFinishBook}
+                title="Oznacz całą książkę jako przeczytaną (100%)"
+                className="flex-[1.2] py-1 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1 active:scale-95"
+              >
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>Przeczytana</span>
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Footer with Rating & Action buttons */}
+        <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-1.5">
             <Rating
-              name={`rating-${book.id}`}
               value={book.rating / 2}
-              precision={0.5}
-              max={5}
-              size="small"
-              onChange={(_, newValue) => {
-                if (newValue !== null && onRatingChange) {
-                  onRatingChange(book.id, newValue * 2);
+              size="sm"
+              onChange={(_, val) => {
+                if (val !== null && onRatingChange) {
+                  onRatingChange(book.id, val * 2);
                 }
               }}
-              icon={<StarIcon sx={{ fontSize: 17 }} />}
-              emptyIcon={
-                <StarBorderIcon sx={{ fontSize: 17, color: "#cbd5e1" }} />
-              }
-              sx={{
-                "& .MuiRating-iconFilled": {
-                  color: isFavorite ? GOLD.rich : "#f59e0b",
-                },
-                "& .MuiRating-iconHover": {
-                  color: isFavorite ? GOLD.deep : "#d97706",
-                },
-              }}
             />
-            <Typography
-              sx={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b" }}
+            <span className="text-xs font-black text-slate-700 ml-0.5">
+              {book.rating > 0 ? book.rating.toFixed(1) : "—"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onEdit(book.id)}
+              aria-label="Edytuj książkę"
+              title="Edytuj książkę"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
             >
-              {book.rating.toFixed(1)}
-            </Typography>
-          </Box>
+              <Edit3 className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpenDeleteDialog(true)}
+              aria-label="Usuń książkę"
+              title="Usuń książkę"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
 
-          <Box
-            className="card-actions"
-            sx={{
-              display: "flex",
-              gap: 0.25,
-              opacity: { xs: 1, md: 0.45 },
-              transition: "opacity 0.2s ease",
-            }}
-          >
-            <Tooltip title="Edytuj">
-              <IconButton
-                size="small"
-                onClick={() => onEdit(book.id)}
-                aria-label="Edytuj"
-                sx={{
-                  color: "#94a3b8",
-                  "&:hover": {
-                    color: "#667eea",
-                    bgcolor: "rgba(102,126,234,0.08)",
-                  },
-                }}
-              >
-                <EditOutlinedIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Usuń">
-              <IconButton
-                size="small"
-                onClick={() => setOpenDeleteDialog(true)}
-                aria-label="Usuń"
-                sx={{
-                  color: "#94a3b8",
-                  "&:hover": {
-                    color: "#ef4444",
-                    bgcolor: "rgba(239,68,68,0.08)",
-                  },
-                }}
-              >
-                <DeleteOutlineIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Box>
-
-      <Dialog
-        open={openDeleteDialog}
+      {/* Delete confirmation modal */}
+      <Modal
+        isOpen={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
-        aria-labelledby="delete-book-title"
+        title="Potwierdź usunięcie"
+        maxWidth="sm"
       >
-        <DialogTitle id="delete-book-title">Potwierdź usunięcie</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Czy na pewno chcesz usunąć „{book.title}”? Tej operacji nie można
-            cofnąć.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Anuluj</Button>
-          <Button
-            color="error"
-            autoFocus
-            onClick={() => {
-              onDelete(book.id);
-              setOpenDeleteDialog(false);
-            }}
-          >
-            Usuń
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Czy na pewno chcesz usunąć „<strong className="text-slate-900">{book.title}</strong>”? Tej operacji nie można cofnąć.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setOpenDeleteDialog(false)}
+            >
+              Anuluj
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                onDelete(book.id);
+                setOpenDeleteDialog(false);
+              }}
+            >
+              Usuń
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
   );
 };
 

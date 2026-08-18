@@ -1,63 +1,79 @@
-import type { ElementType } from "react";
-import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined";
-import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
+import type { ComponentType } from "react";
+import { BookmarkPlus, BookOpen, CheckCircle2, XCircle } from "lucide-react";
 import type { BookStatus } from "../types/Book";
 import { BOOK_STATUS_LABELS } from "./bookStatus";
 
 export const GOLD = {
-  soft: "#f8f1df",
-  mid: "#e8c872",
-  rich: "#c9a227",
-  deep: "#8a6a12",
-  glow: "rgba(201, 162, 39, 0.35)",
+  soft: "#fef9c3",
+  mid: "#facc15",
+  rich: "#eab308",
+  deep: "#a16207",
+  glow: "rgba(234, 179, 8, 0.35)",
 } as const;
 
 export const STATUS_ACCENT: Record<BookStatus, string> = {
-  "Chcę przeczytać": "#3b82f6",
-  "W trakcie": "#f59e0b",
-  Przeczytana: "#22c55e",
-  Porzucona: "#ef4444",
+  "Chcę przeczytać": "#2563eb",
+  "W trakcie": "#d97706",
+  Przeczytana: "#16a34a",
+  Porzucona: "#dc2626",
 };
 
 export const STATUS_STYLE: Record<
   BookStatus,
-  { bg: string; color: string; Icon: ElementType; short: string }
+  { bg: string; color: string; border?: string; Icon: ComponentType<{ className?: string; size?: number }>; short: string }
 > = {
   "Chcę przeczytać": {
-    bg: "#3b82f6",
+    bg: "#2563eb",
     color: "#fff",
-    Icon: BookmarkAddOutlinedIcon,
+    border: "#1d4ed8",
+    Icon: BookmarkPlus,
     short: "Do przeczytania",
   },
   "W trakcie": {
-    bg: "#f59e0b",
+    bg: "#d97706",
     color: "#fff",
-    Icon: AutoStoriesOutlinedIcon,
+    border: "#b45309",
+    Icon: BookOpen,
     short: "W trakcie",
   },
   Przeczytana: {
-    bg: "#22c55e",
+    bg: "#16a34a",
     color: "#fff",
-    Icon: CheckCircleOutlineIcon,
+    border: "#15803d",
+    Icon: CheckCircle2,
     short: "Przeczytana",
   },
   Porzucona: {
-    bg: "#ef4444",
+    bg: "#dc2626",
     color: "#fff",
-    Icon: HighlightOffOutlinedIcon,
+    border: "#b91c1c",
+    Icon: XCircle,
     short: "Porzucona",
   },
 };
 
-export const STATUS_PILL: Record<BookStatus, { bg: string; color: string }> =
-  {
-    "Chcę przeczytać": { bg: "rgba(59, 130, 246, 0.12)", color: "#1d4ed8" },
-    "W trakcie": { bg: "rgba(245, 158, 11, 0.14)", color: "#b45309" },
-    Przeczytana: { bg: "rgba(34, 197, 94, 0.12)", color: "#15803d" },
-    Porzucona: { bg: "rgba(239, 68, 68, 0.12)", color: "#b91c1c" },
-  };
+export const STATUS_PILL: Record<BookStatus, { bg: string; color: string; border: string }> = {
+  "Chcę przeczytać": {
+    bg: "#eff6ff",
+    color: "#1d4ed8",
+    border: "#bfdbfe",
+  },
+  "W trakcie": {
+    bg: "#fffbeb",
+    color: "#b45309",
+    border: "#fde68a",
+  },
+  Przeczytana: {
+    bg: "#f0fdf4",
+    color: "#15803d",
+    border: "#bbf7d0",
+  },
+  Porzucona: {
+    bg: "#fef2f2",
+    color: "#b91c1c",
+    border: "#fecaca",
+  },
+};
 
 export const getNextStatus = (current: BookStatus): BookStatus => {
   switch (current) {

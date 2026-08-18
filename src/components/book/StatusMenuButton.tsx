@@ -1,15 +1,8 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-} from "@mui/material";
+import React, { useState, useRef, useEffect } from "react";
 import type { BookStatus } from "../../types/Book";
 import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
 import { STATUS_STYLE, STATUS_PILL } from "../../constants/bookUi";
+import { cn } from "../../lib/utils";
 
 interface StatusMenuButtonProps {
   status: BookStatus;
@@ -18,118 +11,100 @@ interface StatusMenuButtonProps {
   size?: "sm" | "md";
 }
 
-const StatusMenuButton: React.FC<StatusMenuButtonProps> = ({
+export const StatusMenuButton: React.FC<StatusMenuButtonProps> = ({
   status,
   onSelect,
   variant = "solid",
   size = "sm",
 }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const style = STATUS_STYLE[status];
   const pill = STATUS_PILL[status];
   const StatusIcon = style.Icon;
-
   const isSolid = variant === "solid";
 
-  return (
-    <>
-      <Tooltip title="Zmień status" arrow>
-        <Box
-          component="button"
-          type="button"
-          aria-haspopup="menu"
-          aria-expanded={open ? "true" : undefined}
-          aria-label={`Status: ${BOOK_STATUS_LABELS[status]}. Kliknij, aby zmienić.`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setAnchorEl(e.currentTarget);
-          }}
-          sx={{
-            border: "none",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            px: size === "sm" ? 1 : 1.25,
-            py: size === "sm" ? 0.4 : 0.5,
-            borderRadius: 999,
-            bgcolor: isSolid ? style.bg : pill.bg,
-            color: isSolid ? "#fff" : pill.color,
-            fontSize: size === "sm" ? "0.65rem" : "0.6875rem",
-            fontWeight: 700,
-            lineHeight: 1.2,
-            whiteSpace: "nowrap",
-            boxShadow: isSolid ? "0 2px 8px rgba(15,23,42,0.18)" : "none",
-            transition: "filter 0.15s ease",
-            "&:hover": { filter: "brightness(0.96)" },
-          }}
-        >
-          <StatusIcon sx={{ fontSize: size === "sm" ? 12 : 14 }} />
-          {isSolid ? style.short : BOOK_STATUS_LABELS[status]}
-        </Box>
-      </Tooltip>
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        onClick={(e) => e.stopPropagation()}
-        PaperProps={{
-          sx: {
-            mt: 0.5,
-            minWidth: 200,
-            borderRadius: 2,
-            border: "1px solid",
-            borderColor: "grey.100",
-            boxShadow: "0 8px 24px rgba(26, 32, 44, 0.1)",
-          },
+  return (
+    <div className="relative inline-block text-left" ref={menuRef}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label={`Status: ${BOOK_STATUS_LABELS[status]}. Kliknij, aby zmienić.`}
+        title="Kliknij, aby zmienić status"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
         }}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full font-bold transition-all hover:opacity-95 active:scale-95 cursor-pointer select-none border",
+          size === "sm" ? "px-2.5 py-0.5 text-[11px]" : "px-3 py-1 text-xs",
+          isSolid ? "text-white shadow-xs border-transparent" : "shadow-none"
+        )}
+        style={{
+          backgroundColor: isSolid ? style.bg : pill.bg,
+          color: isSolid ? "#fff" : pill.color,
+          borderColor: isSolid ? style.border : pill.border,
+        }}
       >
-        {BOOK_STATUSES.map((option) => {
-          const optionStyle = STATUS_STYLE[option];
-          const OptionIcon = optionStyle.Icon;
-          const selected = option === status;
-          return (
-            <MenuItem
-              key={option}
-              selected={selected}
-              onClick={() => {
-                setAnchorEl(null);
-                if (option !== status) onSelect(option);
-              }}
-              sx={{ py: 1.1, gap: 0.5 }}
-            >
-              <ListItemIcon sx={{ minWidth: 32 }}>
-                <Box
-                  sx={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: "50%",
-                    bgcolor: optionStyle.bg,
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <OptionIcon sx={{ fontSize: 13 }} />
-                </Box>
-              </ListItemIcon>
-              <ListItemText
-                primary={BOOK_STATUS_LABELS[option]}
-                primaryTypographyProps={{
-                  fontWeight: selected ? 700 : 500,
-                  fontSize: "0.875rem",
+        <StatusIcon size={size === "sm" ? 12 : 14} className="shrink-0" />
+        <span>{isSolid ? style.short : BOOK_STATUS_LABELS[status]}</span>
+      </button>
+
+      {isOpen && (
+        <div
+          role="menu"
+          onClick={(e) => e.stopPropagation()}
+          className="absolute left-0 z-50 mt-1.5 min-w-[190px] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl transition-all animate-in fade-in-0 zoom-in-95"
+        >
+          {BOOK_STATUSES.map((option) => {
+            const optionStyle = STATUS_STYLE[option];
+            const OptionIcon = optionStyle.Icon;
+            const selected = option === status;
+            return (
+              <button
+                key={option}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setIsOpen(false);
+                  if (option !== status) onSelect(option);
                 }}
-              />
-            </MenuItem>
-          );
-        })}
-      </Menu>
-    </>
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition-colors cursor-pointer select-none text-left",
+                  selected
+                    ? "bg-indigo-50 text-indigo-700 font-bold"
+                    : "text-slate-700 hover:bg-slate-50"
+                )}
+              >
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-xs"
+                  style={{ backgroundColor: optionStyle.bg }}
+                >
+                  <OptionIcon size={11} />
+                </div>
+                <span>{BOOK_STATUS_LABELS[option]}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

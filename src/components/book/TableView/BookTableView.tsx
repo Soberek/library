@@ -1,7 +1,7 @@
 import React from "react";
-import { Box, Paper } from "@mui/material";
 import BookTable from "./BookTable";
 import type { Book, BookStatus } from "../../../types/Book";
+import { Card } from "../../ui/card";
 
 interface BookTableViewProps {
   books: Book[];
@@ -10,11 +10,9 @@ interface BookTableViewProps {
   onStatusChange: (bookId: string, newStatus: BookStatus) => void;
   onToggleFavorite: (bookId: string, currentFavorite: boolean) => void;
   onRatingChange?: (bookId: string, newRating: number) => void;
+  onPagesChange?: (bookId: string, newReadPages: number, overallPages?: number) => void;
 }
 
-/**
- * Table view for displaying books in a data table format
- */
 export const BookTableView: React.FC<BookTableViewProps> = ({
   books,
   onEdit,
@@ -22,30 +20,20 @@ export const BookTableView: React.FC<BookTableViewProps> = ({
   onStatusChange,
   onToggleFavorite,
   onRatingChange = () => {},
+  onPagesChange,
 }) => {
   return (
-    <Box sx={{ width: "100%" }}>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 3,
-          overflow: "hidden",
-          border: "1px solid",
-          borderColor: "grey.200",
-          boxShadow: "0 1px 2px rgba(26, 32, 44, 0.04)",
-          bgcolor: "background.paper",
-        }}
-      >
-        <BookTable
-          books={books}
-          handleEdit={onEdit}
-          handleDelete={onDelete}
-          handleStatusChange={onStatusChange}
-          handleRatingChange={onRatingChange}
-          handleToggleFavorite={onToggleFavorite}
-        />
-      </Paper>
-    </Box>
+    <Card className="overflow-hidden shadow-sm border-slate-200/90 rounded-2xl">
+      <BookTable
+        books={books}
+        handleEdit={onEdit}
+        handleDelete={onDelete}
+        handleStatusChange={onStatusChange}
+        handleRatingChange={onRatingChange}
+        handleToggleFavorite={onToggleFavorite}
+        handlePagesChange={onPagesChange}
+      />
+    </Card>
   );
 };
 

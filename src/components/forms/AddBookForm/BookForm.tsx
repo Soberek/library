@@ -5,18 +5,16 @@ import type { Book, BookStatus, BookFormData } from '../../../types/Book';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { bookFormSchema } from '../../../schemas/bookSchema';
+import { Sparkles, Search, BookOpen, Loader2, AlertCircle } from 'lucide-react';
 import {
-  Box,
-  Button,
-  TextField,
-  MenuItem,
-  Autocomplete,
-  Divider,
-  Rating,
-  Alert,
-  Typography,
-} from '@mui/material';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+  searchOpenLibraryBooksByQuery,
+  type OpenLibraryQuickBook,
+} from '../../../services/openLibraryService';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { Input } from '../../ui/input';
+import { Select } from '../../ui/select';
+import { Button } from '../../ui/button';
+import { Rating } from '../../ui/rating';
 
 type Props = {
   initialData?: Book;
@@ -31,6 +29,24 @@ const genreOptions = Object.entries(GENRES)
     label,
   }));
 
+function matchSubjectToGenre(subjects?: string[]): string {
+  if (!subjects || subjects.length === 0) return 'Inne';
+  const joined = subjects.join(' ').toLowerCase();
+  if (joined.includes('fantasy') || joined.includes('magic')) return 'Fantasy';
+  if (joined.includes('science fiction') || joined.includes('sci-fi')) return 'Science-Fiction';
+  if (joined.includes('thriller') || joined.includes('suspense')) return 'Thriller';
+  if (joined.includes('crime') || joined.includes('detective') || joined.includes('mystery')) return 'Kryminał';
+  if (joined.includes('romance') || joined.includes('love')) return 'Romans';
+  if (joined.includes('history') || joined.includes('historical')) return 'Historia';
+  if (joined.includes('biography') || joined.includes('memoir')) return 'Biografia';
+  if (joined.includes('horror')) return 'Horror';
+  if (joined.includes('business') || joined.includes('economics')) return 'Biznes i ekonomia';
+  if (joined.includes('philosophy')) return 'Filozofia';
+  if (joined.includes('science')) return 'Nauki ścisłe';
+  if (joined.includes('psychology') || joined.includes('self-help')) return 'Psychologia';
+  return 'Inne';
+}
+
 const DEFAULT_VALUES = {
   title: '',
   author: '',
@@ -42,7 +58,7 @@ const DEFAULT_VALUES = {
   rating: 0,
 };
 
-const BookForm: React.FC<Props> = ({
+export const BookForm: React.FC<Props> = ({
   initialData,
   onSubmit: handleFormSubmit,
   onDirtyChange,
@@ -61,6 +77,58 @@ const BookForm: React.FC<Props> = ({
   const overallPages = useWatch({ control, name: 'overallPages' }) || 1;
   const readPages = useWatch({ control, name: 'readPages' }) || 0;
   const [coverBroken, setCoverBroken] = useState(false);
+
+  // Open Library quick search state
+  const [olQuery, setOlQuery] = useState('');
+  const [olResults, setOlResults] = useState<OpenLibraryQuickBook[]>([]);
+  const [olLoading, setOlLoading] = useState(false);
+  const [olShowSearch, setOlShowSearch] = useState(!initialData);
+  const debouncedOlQuery = useDebounce(olQuery, 400);
+
+  useEffect(() => {
+    if (!debouncedOlQuery || debouncedOlQuery.trim().length < 2) {
+      setOlResults([]);
+      return;
+    }
+    let cancelled = false;
+    setOlLoading(true);
+    searchOpenLibraryBooksByQuery(debouncedOlQuery, 6)
+      .then((res) => {
+        if (!cancelled) setOlResults(res);
+      })
+      .catch(() => {
+        if (!cancelled) setOlResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) setOlLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedOlQuery]);
+
+  const handleSelectOlBook = (book: OpenLibraryQuickBook) => {
+    setValue('title', book.title, { shouldValidate: true, shouldDirty: true });
+    setValue('author', book.author, { shouldValidate: true, shouldDirty: true });
+    if (book.pages) {
+      setValue('overallPages', Math.min(Math.max(book.pages, 1), 5000), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+    if (book.cover) {
+      setValue('cover', book.cover, { shouldValidate: true, shouldDirty: true });
+    }
+    if (book.rating) {
+      setValue('rating', book.rating, { shouldValidate: true, shouldDirty: true });
+    }
+    const guessedGenre = matchSubjectToGenre(book.subjects);
+    if (guessedGenre) {
+      setValue('genre', guessedGenre, { shouldValidate: true, shouldDirty: true });
+    }
+    setOlResults([]);
+    setOlQuery('');
+  };
 
   useEffect(() => {
     onDirtyChange?.(isDirty);
@@ -83,154 +151,244 @@ const BookForm: React.FC<Props> = ({
   const showCoverPreview = Boolean(coverUrl && /^https?:\/\//i.test(coverUrl));
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        pb: { xs: 10, sm: 0 },
-      }}
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       {Object.keys(errors).length > 0 && (
-        <Alert severity="error">
-          Proszę poprawić błędy w formularzu
-        </Alert>
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+          <span>Proszę poprawić błędy w formularzu</span>
+        </div>
       )}
-      <Controller
-        name="title"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            required
-            label="Tytuł"
-            variant="outlined"
-            fullWidth
-            error={!!errors.title}
-            helperText={errors.title?.message}
-          />
+
+      {olShowSearch && !initialData && (
+        <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-dashed border-indigo-200 flex flex-col gap-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-indigo-700 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+              Szybkie uzupełnianie z Open Library
+            </span>
+            <button
+              type="button"
+              onClick={() => setOlShowSearch(false)}
+              className="text-[11px] font-medium text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              Ukryj
+            </button>
+          </div>
+
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <Search className="h-4 w-4" />
+            </div>
+            <input
+              type="text"
+              placeholder="Wpisz tytuł lub autora (np. Wiedźmin, Tolkien)..."
+              value={olQuery}
+              onChange={(e) => setOlQuery(e.target.value)}
+              className="h-9 w-full rounded-xl border border-indigo-200 bg-white pl-9 pr-8 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 focus:outline-none"
+            />
+            {olLoading && (
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2.5">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" />
+              </div>
+            )}
+          </div>
+
+          {olResults.length > 0 && (
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 divide-y divide-slate-100 shadow-lg">
+              {olResults.map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleSelectOlBook(item)}
+                  className="p-2 flex items-center gap-2.5 hover:bg-indigo-50/50 cursor-pointer rounded-lg transition-colors"
+                >
+                  {item.cover ? (
+                    <img
+                      src={item.cover}
+                      alt=""
+                      className="w-7 h-10 object-cover rounded shrink-0 shadow-2xs"
+                    />
+                  ) : (
+                    <div className="w-7 h-10 bg-slate-100 rounded flex items-center justify-center shrink-0">
+                      <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-slate-900 truncate">
+                      {item.title}
+                    </p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {item.author} {item.pages ? `· ${item.pages} str.` : ''} {item.year ? `(${item.year})` : ''}
+                    </p>
+                  </div>
+                  <Button size="sm" variant="outline" className="h-7 text-[11px] px-2">
+                    Wybierz
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Title */}
+      <div>
+        <label htmlFor="book-title-input" className="block text-xs font-bold text-slate-700 mb-1">
+          Tytuł *
+        </label>
+        <Controller
+          name="title"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="book-title-input"
+              placeholder="np. Władca Pierścieni"
+              error={!!errors.title}
+            />
+          )}
+        />
+        {errors.title && (
+          <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
         )}
-      />
-      <Controller
-        name="author"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Autor"
-            required
-            variant="outlined"
-            fullWidth
-            error={!!errors.author}
-            helperText={errors.author?.message}
-          />
+      </div>
+
+      {/* Author */}
+      <div>
+        <label htmlFor="book-author-input" className="block text-xs font-bold text-slate-700 mb-1">
+          Autor *
+        </label>
+        <Controller
+          name="author"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="book-author-input"
+              placeholder="np. J.R.R. Tolkien"
+              error={!!errors.author}
+            />
+          )}
+        />
+        {errors.author && (
+          <p className="text-xs text-red-500 mt-1">{errors.author.message}</p>
         )}
-      />
-      <Controller
-        name="read"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            select
-            required
-            label="Status"
-            variant="outlined"
-            fullWidth
-            error={!!errors.read}
-            helperText={errors.read?.message}
-          >
-            {BOOK_STATUSES.map((status: BookStatus) => (
-              <MenuItem key={status} value={status}>
-                {BOOK_STATUS_LABELS[status]}
-              </MenuItem>
-            ))}
-          </TextField>
+      </div>
+
+      {/* Status */}
+      <div>
+        <label htmlFor="book-status-input" className="block text-xs font-bold text-slate-700 mb-1">
+          Status czytania *
+        </label>
+        <Controller
+          name="read"
+          control={control}
+          render={({ field }) => (
+            <Select {...field} id="book-status-input" error={!!errors.read}>
+              {BOOK_STATUSES.map((status: BookStatus) => (
+                <option key={status} value={status}>
+                  {BOOK_STATUS_LABELS[status]}
+                </option>
+              ))}
+            </Select>
+          )}
+        />
+        {errors.read && (
+          <p className="text-xs text-red-500 mt-1">{errors.read.message}</p>
         )}
-      />
-      <Controller
-        name="genre"
-        control={control}
-        render={({ field }) => (
-          <Autocomplete
-            options={genreOptions}
-            getOptionLabel={(option: { value: string; label: string }) => option.label}
-            onChange={(_, value) => field.onChange(value?.value)}
-            value={
-              genreOptions.find((option) => option.value === field.value) ||
-              null
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                required
-                label="Gatunek"
-                variant="outlined"
-                fullWidth
-                error={!!errors.genre}
-                helperText={errors.genre?.message}
+      </div>
+
+      {/* Genre */}
+      <div>
+        <label htmlFor="book-genre-input" className="block text-xs font-bold text-slate-700 mb-1">
+          Gatunek *
+        </label>
+        <Controller
+          name="genre"
+          control={control}
+          render={({ field }) => (
+            <Select {...field} id="book-genre-input" error={!!errors.genre}>
+              <option value="">Wybierz gatunek...</option>
+              {genreOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          )}
+        />
+        {errors.genre && (
+          <p className="text-xs text-red-500 mt-1">{errors.genre.message}</p>
+        )}
+      </div>
+
+      {/* Pages: read & overall */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="book-read-pages-input" className="block text-xs font-bold text-slate-700 mb-1">
+            Przeczytane strony
+          </label>
+          <Controller
+            name="readPages"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="book-read-pages-input"
+                type="number"
+                min={0}
+                max={5000}
+                error={!!errors.readPages}
+                onChange={(e) =>
+                  field.onChange(e.target.value === '' ? 0 : Number(e.target.value))
+                }
               />
             )}
           />
-        )}
-      />
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Controller
-          name="readPages"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="number"
-              label="Przeczytane strony"
-              inputProps={{ min: 0, max: 5000 }}
-              variant="outlined"
-              fullWidth
-              error={!!errors.readPages}
-              helperText={errors.readPages?.message}
-              onChange={(e) => field.onChange(e.target.value === '' ? 0 : Number(e.target.value))}
-            />
+          {errors.readPages && (
+            <p className="text-xs text-red-500 mt-1">{errors.readPages.message}</p>
           )}
-        />
-        <Divider orientation="vertical" flexItem />
-        <Controller
-          name="overallPages"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="number"
-              label="Liczba stron"
-              inputProps={{ min: 1, max: 5000 }}
-              variant="outlined"
-              fullWidth
-              error={!!errors.overallPages}
-              helperText={errors.overallPages?.message}
-              onChange={(e) => field.onChange(e.target.value === '' ? 1 : Number(e.target.value))}
-            />
+        </div>
+
+        <div>
+          <label htmlFor="book-overall-pages-input" className="block text-xs font-bold text-slate-700 mb-1">
+            Liczba stron *
+          </label>
+          <Controller
+            name="overallPages"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="book-overall-pages-input"
+                type="number"
+                min={1}
+                max={5000}
+                error={!!errors.overallPages}
+                onChange={(e) =>
+                  field.onChange(e.target.value === '' ? 1 : Number(e.target.value))
+                }
+              />
+            )}
+          />
+          {errors.overallPages && (
+            <p className="text-xs text-red-500 mt-1">{errors.overallPages.message}</p>
           )}
-        />
-      </Box>
-      <Box>
-        <Typography
-          variant="body2"
-          sx={{ fontWeight: 600, mb: 0.75, color: 'text.secondary' }}
-        >
-          Ocena
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        </div>
+      </div>
+
+      {/* Rating */}
+      <div>
+        <label className="block text-xs font-bold text-slate-700 mb-1">
+          Twoja ocena
+        </label>
+        <div className="flex items-center gap-3">
           <Controller
             name="rating"
             control={control}
             render={({ field }) => (
               <Rating
-                name="star-rating"
-                max={5}
-                precision={0.5}
-                size="large"
                 value={Number(field.value) / 2}
+                size="md"
                 onChange={(_, value) => field.onChange((value ?? 0) * 2)}
               />
             )}
@@ -239,104 +397,72 @@ const BookForm: React.FC<Props> = ({
             name="rating"
             control={control}
             render={({ field }) => (
-              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: 'text.secondary', minWidth: 40 }}>
-                {Number(field.value).toFixed(1)}/10
-              </Typography>
+              <span className="text-xs font-bold text-slate-600">
+                {Number(field.value).toFixed(1)} / 10
+              </span>
             )}
           />
-        </Box>
-        {errors.rating && (
-          <Typography variant="caption" color="error">
-            {errors.rating.message}
-          </Typography>
+        </div>
+      </div>
+
+      {/* Cover URL */}
+      <div>
+        <label htmlFor="book-cover-input" className="block text-xs font-bold text-slate-700 mb-1">
+          URL okładki
+        </label>
+        <Controller
+          name="cover"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="book-cover-input"
+              placeholder="https://images.unsplash.com/..."
+              data-testid="cover-input"
+              error={!!errors.cover}
+            />
+          )}
+        />
+        {errors.cover && (
+          <p className="text-xs text-red-500 mt-1">{errors.cover.message}</p>
         )}
-      </Box>
-      <Controller
-        name="cover"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="URL okładki"
-            variant="outlined"
-            fullWidth
-            placeholder="https://..."
-            inputProps={{ 'data-testid': 'cover-input' }}
-            error={!!errors.cover}
-            helperText={errors.cover?.message}
-          />
-        )}
-      />
+      </div>
+
+      {/* Cover preview */}
       {showCoverPreview && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            p: 1.5,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'grey.200',
-            bgcolor: 'grey.50',
-          }}
-        >
-          <Box
-            sx={{
-              width: 56,
-              height: 80,
-              borderRadius: 1,
-              overflow: 'hidden',
-              bgcolor: 'grey.200',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
+        <div className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-slate-50">
+          <div className="w-12 h-16 rounded-md overflow-hidden bg-slate-200 shrink-0 flex items-center justify-center">
             {coverBroken ? (
-              <MenuBookOutlinedIcon sx={{ color: 'grey.400' }} />
+              <BookOpen className="w-5 h-5 text-slate-400" />
             ) : (
-              <Box
-                component="img"
+              <img
                 src={coverUrl}
                 alt="Podgląd okładki"
                 onError={() => setCoverBroken(true)}
-                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                className="w-full h-full object-cover"
               />
             )}
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            {coverBroken
-              ? 'Nie udało się wczytać obrazu — sprawdź URL'
-              : 'Podgląd okładki'}
-          </Typography>
-        </Box>
+          </div>
+          <span className="text-xs text-slate-500 font-medium">
+            {coverBroken ? 'Nie udało się wczytać obrazu — sprawdź URL' : 'Podgląd okładki'}
+          </span>
+        </div>
       )}
-      <Box
-        sx={{
-          position: { xs: 'fixed', sm: 'static' },
-          left: { xs: 0, sm: 'auto' },
-          right: { xs: 0, sm: 'auto' },
-          bottom: { xs: 0, sm: 'auto' },
-          p: { xs: 2, sm: 0 },
-          mt: { sm: 1 },
-          bgcolor: { xs: 'background.paper', sm: 'transparent' },
-          borderTop: { xs: '1px solid', sm: 'none' },
-          borderColor: { xs: 'grey.200', sm: 'transparent' },
-          zIndex: 1,
-        }}
-      >
+
+      {/* Submit button */}
+      <div className="pt-2">
         <Button
           type="submit"
-          variant="contained"
-          fullWidth
           disabled={isSubmitting}
-          sx={{ fontWeight: 700, textTransform: 'none', py: 1.25, borderRadius: 2 }}
+          className="w-full h-11 text-sm font-bold"
         >
-          {initialData ? 'Zapisz zmiany' : 'Dodaj książkę'}
+          {isSubmitting ? (
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          ) : null}
+          <span>{initialData ? 'Zapisz zmiany' : 'Dodaj książkę'}</span>
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 };
 

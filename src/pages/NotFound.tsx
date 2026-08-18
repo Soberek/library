@@ -1,83 +1,39 @@
 import React from "react";
-import { Link as RouterLink, Navigate } from "react-router-dom";
-import { Box, Button, Typography, Link } from "@mui/material";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import { Link } from "react-router-dom";
+import { BookOpen, Home } from "lucide-react";
+import { Button } from "../components/ui/button";
 
-const NotFound: React.FC = () => (
-  <Box
-    sx={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      px: 2,
-      bgcolor: "grey.50",
-    }}
-  >
-    <Box sx={{ textAlign: "center", maxWidth: 400 }}>
-      <Box
-        sx={{
-          width: 56,
-          height: 56,
-          borderRadius: 2,
-          mx: "auto",
-          mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "rgba(102, 126, 234, 0.1)",
-          color: "primary.main",
-        }}
-      >
-        <MenuBookOutlinedIcon sx={{ fontSize: 28 }} />
-      </Box>
+export const NotFound: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50">
+    <div className="text-center max-w-sm">
+      <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-indigo-500/10 text-indigo-600">
+        <BookOpen className="w-7 h-7" />
+      </div>
 
-      <Typography
-        variant="h4"
-        sx={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          letterSpacing: "-0.02em",
-          mb: 1,
-        }}
-      >
+      <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1 font-display">
         MyLibrary
-      </Typography>
-      <Typography
-        variant="h2"
-        sx={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: { xs: "3rem", sm: "4rem" },
-          color: "primary.main",
-          lineHeight: 1,
-          mb: 1,
-        }}
-      >
+      </h1>
+      <div className="text-6xl font-black text-indigo-600 tracking-tight leading-none mb-3">
         404
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+      </div>
+      <p className="text-sm text-slate-500 mb-6">
         Nie znaleziono tej strony. Wróć do swojej biblioteki.
-      </Typography>
+      </p>
 
-      <Button
-        component={RouterLink}
-        to="/"
-        variant="contained"
-        startIcon={<HomeOutlinedIcon />}
-        sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
-      >
-        Wróć do biblioteki
+      <Button asChild className="gap-2">
+        <Link to="/">
+          <Home className="w-4 h-4" />
+          <span>Wróć do biblioteki</span>
+        </Link>
       </Button>
 
-      <Typography variant="body2" sx={{ mt: 3 }}>
-        <Link component={RouterLink} to="/sign-in" underline="hover">
+      <p className="text-xs text-slate-400 mt-6">
+        <Link to="/sign-in" className="hover:underline">
           Zaloguj się
         </Link>
-      </Typography>
-    </Box>
-  </Box>
+      </p>
+    </div>
+  </div>
 );
 
 export default NotFound;

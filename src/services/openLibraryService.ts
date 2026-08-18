@@ -490,3 +490,42 @@ export async function pickRandomLotteryBook(
 
   return { winner, reel, numFound };
 }
+
+export interface OpenLibraryQuickBook {
+  title: string;
+  author: string;
+  cover?: string;
+  pages?: number;
+  year?: number;
+  subjects?: string[];
+  rating?: number;
+}
+
+export async function searchOpenLibraryBooksByQuery(
+  query: string,
+  limit = 8,
+): Promise<OpenLibraryQuickBook[]> {
+  if (!query.trim()) return [];
+  try {
+    const params = new URLSearchParams({
+      q: query.trim(),
+      limit: String(limit),
+      fields: 'title,author_name,cover_i,number_of_pages_median,first_publish_year,subject,ratings_average',
+    });
+    const response = await fetch(`${SEARCH_URL}?${params.toString()}`);
+    if (!response.ok) return [];
+    const data = (await response.json()) as OpenLibrarySearchResponse;
+    return (data.docs ?? []).map((doc) => ({
+      title: doc.title || '',
+      author: doc.author_name?.[0] || 'Nieznany autor',
+      cover: doc.cover_i ? `${COVER_BASE}/${doc.cover_i}-L.jpg` : undefined,
+      pages: doc.number_of_pages_median || undefined,
+      year: doc.first_publish_year || undefined,
+      subjects: doc.subject?.slice(0, 3) || [],
+      rating: doc.ratings_average ? Math.min(10, Math.round(doc.ratings_average * 20) / 10) : undefined,
+    }));
+  } catch {
+    return [];
+  }
+}
+

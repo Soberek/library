@@ -297,7 +297,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
 
         queryClient.setQueryData(
           booksKeys.paginatedList(user?.uid || "", sortField, sortDirection),
-          (old: any) => {
+          (old: { pages: PaginatedResult<Book>[]; pageParams: unknown[] } | undefined) => {
             if (!old) return old;
 
             return {
@@ -311,6 +311,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
             };
           },
         );
+
 
         return { previousData };
       } else {
@@ -377,7 +378,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
 
         queryClient.setQueryData(
           booksKeys.paginatedList(user?.uid || "", sortField, sortDirection),
-          (old: any) => {
+          (old: { pages: PaginatedResult<Book>[]; pageParams: unknown[] } | undefined) => {
             if (!old) return old;
 
             return {
@@ -458,7 +459,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
 
         queryClient.setQueryData(
           booksKeys.paginatedList(user?.uid || "", sortField, sortDirection),
-          (old: any) => {
+          (old: { pages: PaginatedResult<Book>[]; pageParams: unknown[] } | undefined) => {
             if (!old) return old;
 
             return {
@@ -541,6 +542,30 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     });
   };
 
+  // Pages Change Helper
+  const handlePagesChange = async (
+    bookId: string,
+    readPages: number,
+    overallPages?: number,
+  ) => {
+    const patch: Partial<Book> = { readPages };
+    if (overallPages !== undefined) {
+      patch.overallPages = overallPages;
+    }
+    if (overallPages && readPages >= overallPages) {
+      patch.read = "Przeczytana";
+    } else if (readPages > 0) {
+      const targetBook = books.find((b) => b.id === bookId);
+      if (targetBook?.read === "Chcę przeczytać") {
+        patch.read = "W trakcie";
+      }
+    }
+    await updateBookMutation.mutateAsync({
+      bookId,
+      updatedBook: patch,
+    });
+  };
+
   return {
     books,
     loading: isLoading || userLoading,
@@ -569,6 +594,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       toggleFavoriteMutation.mutateAsync({ bookId, currentFavorite }),
     handleStatusChange,
     handleRatingChange,
+    handlePagesChange,
 
     // Mutation states
     isAdding: addBookMutation.isPending,
@@ -576,3 +602,4 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
     isDeleting: deleteBookMutation.isPending,
   };
 };
+

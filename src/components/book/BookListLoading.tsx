@@ -1,38 +1,21 @@
-import React from 'react';
-import { Box, Typography, CircularProgress, Paper } from '@mui/material';
+import React from "react";
+import { Loader2 } from "lucide-react";
 
 interface BookListLoadingProps {
   message?: string;
 }
 
-/**
- * Component displayed while books are loading
- */
-export const BookListLoading: React.FC<BookListLoadingProps> = ({ 
-  message = 'Ładowanie książek...' 
+export const BookListLoading: React.FC<BookListLoadingProps> = ({
+  message = "Wczytywanie Twojej biblioteki...",
 }) => {
   return (
-    <Paper 
-      elevation={0}
-      sx={{ 
-        py: 12, 
-        px: 4,
-        textAlign: 'center',
-        bgcolor: 'background.default',
-        borderRadius: 3,
-      }}
-    >
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-        <CircularProgress size={60} thickness={4} />
-        <Typography 
-          variant="h6" 
-          color="text.secondary"
-          sx={{ fontWeight: 500 }}
-        >
-          {message}
-        </Typography>
-      </Box>
-    </Paper>
+    <div className="py-20 px-4 text-center rounded-3xl border border-slate-200/80 bg-white/70 backdrop-blur-xs flex flex-col items-center justify-center gap-4">
+      <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+      <p className="text-sm font-semibold text-slate-500 animate-pulse">
+        {message}
+      </p>
+    </div>
   );
 };
 
+export default BookListLoading;

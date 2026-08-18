@@ -1,149 +1,96 @@
 import React from "react";
-import { AppBar, Toolbar, Box, Typography, ButtonBase, Button } from "@mui/material";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import { BookOpen, Heart, Sparkles } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import UserMenu from "./UserMenu";
 import MagdaIcon from "../ui/MagdaIcon";
+import { cn } from "../../lib/utils";
 
-const Navbar: React.FC = () => {
+export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isMainPage = location.pathname === "/";
   const isMagdaPage = location.pathname === "/magda-losuje";
   const isBookLosujePage = location.pathname === "/losuj-ksiazke";
-  const hideSearch = isMagdaPage || isBookLosujePage;
+  const isPozycjePage = location.pathname === "/pozycje-seksualne";
+  const hideSearch = !isMainPage;
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={0}
-      color="transparent"
-      sx={{
-        display: { xs: "none", md: "block" },
-        bgcolor: "rgba(255, 255, 255, 0.92)",
-        borderBottom: "1px solid",
-        borderColor: "grey.200",
-        boxShadow: "0 1px 2px rgba(26, 32, 44, 0.04)",
-        backdropFilter: "blur(12px)",
-      }}
-    >
-      <Toolbar
-        disableGutters
-        sx={{
-          gap: 2,
-          minHeight: 60,
-          px: { md: 3, lg: 4 },
-          py: 0.75,
-        }}
-      >
-        <ButtonBase
+    <header className="sticky top-0 z-40 hidden md:block w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all shadow-[0_1px_4px_rgba(0,0,0,0.03)]">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        {/* Brand logo */}
+        <button
           onClick={() => navigate("/")}
           aria-label="MyLibrary — strona główna"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            flexShrink: 0,
-            minWidth: 140,
-            borderRadius: 1.5,
-            py: 0.5,
-            px: 0.5,
-            justifyContent: "flex-start",
-          }}
+          className="flex items-center gap-2.5 rounded-2xl py-1 px-1.5 transition-all hover:opacity-90 cursor-pointer text-left shrink-0 group"
         >
-          <Box
-            sx={{
-              width: 34,
-              height: 34,
-              borderRadius: 1.5,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "rgba(102, 126, 234, 0.1)",
-              color: "primary.main",
-            }}
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-black tracking-tight text-slate-900 font-display leading-none">
+              MyLibrary
+            </span>
+            <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">
+              Biblioteka
+            </span>
+          </div>
+        </button>
+
+        {/* Quick navigation links */}
+        <nav className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => navigate("/magda-losuje")}
+            className={cn(
+              "flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold tracking-wide transition-all cursor-pointer select-none border",
+              isMagdaPage
+                ? "bg-amber-100 text-amber-900 border-amber-300 shadow-xs ring-2 ring-amber-400/20"
+                : "bg-amber-50 text-amber-800 border-amber-200/70 hover:bg-amber-100 hover:border-amber-300"
+            )}
           >
-            <MenuBookOutlinedIcon sx={{ fontSize: 20 }} />
-          </Box>
-          <Typography
-            component="span"
-            sx={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              letterSpacing: '-0.02em',
-              color: 'text.primary',
-            }}
+            <MagdaIcon size={18} alt="" />
+            <span>MAGDA LOSUJE</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/losuj-ksiazke")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold tracking-wide transition-all cursor-pointer select-none border",
+              isBookLosujePage
+                ? "bg-emerald-100 text-emerald-900 border-emerald-300 shadow-xs ring-2 ring-emerald-400/20"
+                : "bg-emerald-50 text-emerald-800 border-emerald-200/70 hover:bg-emerald-100 hover:border-emerald-300"
+            )}
           >
-            MyLibrary
-          </Typography>
-        </ButtonBase>
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Losuj książkę</span>
+          </button>
 
-        <Button
-          onClick={() => navigate("/magda-losuje")}
-          startIcon={<MagdaIcon size={22} alt="" />}
-          sx={{
-            flexShrink: 0,
-            borderRadius: 999,
-            px: 1.75,
-            py: 0.75,
-            fontWeight: 700,
-            fontSize: "0.8125rem",
-            letterSpacing: "0.04em",
-            textTransform: "none",
-            color: isMagdaPage ? "#8a6a12" : "text.secondary",
-            bgcolor: isMagdaPage ? "rgba(240, 180, 41, 0.16)" : "transparent",
-            "& .MuiButton-startIcon": { mr: 0.75 },
-            "&:hover": {
-              bgcolor: "rgba(240, 180, 41, 0.18)",
-              color: "#8a6a12",
-            },
-          }}
-        >
-          MAGDA LOSUJE
-        </Button>
+          <button
+            onClick={() => navigate("/pozycje-seksualne")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold tracking-wide transition-all cursor-pointer select-none border",
+              isPozycjePage
+                ? "bg-pink-100 text-pink-900 border-pink-300 shadow-xs ring-2 ring-pink-400/20"
+                : "bg-pink-50 text-pink-800 border-pink-200/70 hover:bg-pink-100 hover:border-pink-300"
+            )}
+          >
+            <Heart className="w-3.5 h-3.5 text-pink-600" />
+            <span>Pozycje</span>
+          </button>
+        </nav>
 
-        <Button
-          onClick={() => navigate("/losuj-ksiazke")}
-          startIcon={<MenuBookOutlinedIcon sx={{ fontSize: 18 }} />}
-          sx={{
-            flexShrink: 0,
-            borderRadius: 999,
-            px: 1.75,
-            py: 0.75,
-            fontWeight: 700,
-            fontSize: "0.8125rem",
-            letterSpacing: "0.02em",
-            textTransform: "none",
-            color: isBookLosujePage ? "#2f6f5e" : "text.secondary",
-            bgcolor: isBookLosujePage ? "rgba(47, 111, 94, 0.12)" : "transparent",
-            "& .MuiButton-startIcon": { mr: 0.75 },
-            "&:hover": {
-              bgcolor: "rgba(47, 111, 94, 0.14)",
-              color: "#2f6f5e",
-            },
-          }}
-        >
-          Losuj książkę
-        </Button>
-
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            justifyContent: "center",
-            maxWidth: 520,
-            mx: "auto",
-          }}
-        >
+        {/* Center Search Bar */}
+        <div className="flex-1 max-w-md mx-auto">
           {!hideSearch && <SearchBar variant="desktop" />}
-        </Box>
+        </div>
 
-        <Box sx={{ flexShrink: 0 }}>
+        {/* Right action controls */}
+        <div className="flex items-center gap-2 shrink-0">
           <UserMenu />
-        </Box>
-      </Toolbar>
-    </AppBar>
+        </div>
+      </div>
+    </header>
   );
 };
 

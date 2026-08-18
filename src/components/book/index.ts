@@ -12,3 +12,5 @@ export { BookListLoading } from './BookListLoading';
 export { BooksViewSwitcher } from './BooksViewSwitcher';
 export { default as AddBookFab } from './AddBookFab';
 export { default as StatusMenuButton } from './StatusMenuButton';
+export { default as ExportImportModal } from './ExportImportModal';
+

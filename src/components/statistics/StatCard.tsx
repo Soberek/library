@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Typography, LinearProgress } from "@mui/material";
+import { Progress } from "../ui/progress";
+import { cn } from "../../lib/utils";
 
 interface StatCardProps {
   title: string;
@@ -7,119 +8,71 @@ interface StatCardProps {
   icon?: React.ReactNode;
   accent?: string;
   hint?: string;
+  percentage?: number;
   progress?: number;
+  className?: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({
+export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon,
-  accent = "#667eea",
+  accent = "#4f46e5",
   hint,
+  percentage,
   progress,
+  className,
 }) => {
   return (
-    <Box
-      sx={{
-        height: "100%",
-        p: 1.25,
-        borderRadius: 1.5,
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "grey.200",
-        position: "relative",
-        overflow: "hidden",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 2.5,
-          bgcolor: accent,
-        },
-      }}
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        className
+      )}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 0.5,
-          mb: 0.5,
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 650,
-            fontSize: "0.65rem",
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            color: "text.secondary",
-            lineHeight: 1.2,
-          }}
-        >
+      {/* Top subtle colored edge */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1"
+        style={{ backgroundColor: accent }}
+      />
+
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate">
           {title}
-        </Typography>
+        </span>
         {icon && (
-          <Box
-            sx={{
-              color: accent,
-              display: "flex",
-              opacity: 0.85,
-              "& .MuiSvgIcon-root": { fontSize: 14 },
-            }}
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style={{ backgroundColor: `${accent}15`, color: accent }}
           >
             {icon}
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Typography
-        sx={{
-          fontWeight: 800,
-          fontSize: "1.25rem",
-          letterSpacing: "-0.03em",
-          lineHeight: 1,
-          color: "text.primary",
-          mb: hint || typeof progress === "number" ? 0.35 : 0,
-        }}
-      >
-        {value}
-      </Typography>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none">
+          {value}
+        </span>
+        {typeof percentage === "number" && (
+          <span className="text-xs font-bold text-slate-400">
+            ({Math.round(percentage)}%)
+          </span>
+        )}
+      </div>
 
       {hint && (
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 500,
-            fontSize: "0.7rem",
-            lineHeight: 1.2,
-          }}
-        >
+        <span className="block text-[11px] text-slate-500 mt-2 font-medium">
           {hint}
-        </Typography>
+        </span>
       )}
 
       {typeof progress === "number" && (
-        <LinearProgress
-          variant="determinate"
-          value={Math.min(Math.max(progress, 0), 100)}
-          sx={{
-            mt: 0.5,
-            height: 3,
-            borderRadius: 2,
-            bgcolor: "grey.100",
-            "& .MuiLinearProgress-bar": {
-              bgcolor: accent,
-              borderRadius: 2,
-            },
-          }}
-        />
+        <div className="mt-2.5">
+          <Progress value={progress} />
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
