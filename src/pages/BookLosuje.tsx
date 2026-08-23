@@ -828,9 +828,9 @@ export const BookLosuje: React.FC = () => {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="p-4 sm:p-6 flex flex-col gap-3.5 sm:gap-4">
+                <div className="p-4 sm:p-6 flex flex-col gap-4">
                   {/* Top Header Ribbon: Badge & Category */}
-                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-amber-200/60">
+                  <div className="flex items-center justify-between gap-2 pb-3 border-b border-amber-200/60">
                     <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-emerald-900 font-serif tracking-wider">
                       <span className="text-amber-600">✦</span>
                       <span>WYBÓR KATALOGU</span>
@@ -860,58 +860,58 @@ export const BookLosuje: React.FC = () => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight font-serif break-words">
+                      <h2 className="text-lg sm:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight font-serif break-words">
                         {drawn.title}
                       </h2>
                       <p className="text-xs sm:text-base font-semibold text-emerald-800 mt-0.5 font-serif italic break-words">
                         {formatAuthors(drawn)}
                       </p>
 
-                      {/* Badges / Rating / Reading time */}
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
+                      {/* Unified Badges: Rating, Year, Pages, Reading Time */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
                         {drawn.rating != null && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 shadow-2xs">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-950 border border-amber-300 shadow-2xs">
                             <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                             <span>{drawn.rating.toFixed(1)}</span>
                           </span>
                         )}
 
                         {drawn.year != null && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                             {drawn.year} r.
                           </span>
                         )}
 
                         {drawn.pages != null && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                             ~{drawn.pages} str.
                           </span>
                         )}
 
                         {readingTime && (
-                          <span className="book-reading-time-pill" title="Szacowany czas lektury">
-                            <Clock className="w-3.5 h-3.5 text-amber-700" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50/80 text-amber-950 border border-amber-200" title="Szacowany czas lektury">
+                            <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                             <span>{readingTime.formatted} ({readingTime.evenings})</span>
                           </span>
                         )}
                       </div>
 
                       {/* Genres & Languages */}
-                      <div className="flex flex-wrap gap-1 mt-2.5">
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {langs && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                             {langs}
                           </span>
                         )}
                         {ebook && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-50 text-slate-700 border border-slate-200">
                             {ebook}
                           </span>
                         )}
                         {drawn.subjects?.slice(0, 3).map((subject) => (
                           <span
                             key={subject}
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[130px]"
+                            className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[130px]"
                           >
                             {subject}
                           </span>
@@ -920,15 +920,15 @@ export const BookLosuje: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Opening Hook / First Sentence Quote */}
+                  {/* Opening Hook / First Sentence Quote in Unified Elegant Box */}
                   {drawn.firstSentence && (
-                    <div className="book-first-sentence-box">
-                      <div className="flex items-center gap-1.5 mb-1 text-xs font-semibold text-emerald-800">
+                    <div className="p-3.5 rounded-xl bg-amber-50/40 border border-amber-200/60 border-l-4 border-l-emerald-800">
+                      <div className="flex items-center gap-1.5 mb-1 text-xs font-bold text-emerald-900 font-serif">
                         <Quote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span className="font-serif italic font-bold">Pierwsze zdanie utworu:</span>
+                        <span>Pierwsze zdanie utworu</span>
                       </div>
-                      <blockquote className="book-quote-text">
-                        &bdquo;{drawn.firstSentence}&rdquo;
+                      <blockquote className="font-serif italic text-sm sm:text-base text-slate-800 leading-relaxed m-0">
+                        „{drawn.firstSentence}”
                       </blockquote>
                     </div>
                   )}
