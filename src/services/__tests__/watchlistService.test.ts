@@ -114,16 +114,18 @@ describe('watchlistService', () => {
       }));
     });
 
-    it('should reject if movie already in watchlist', async () => {
+    it('should return existing ID if movie already in watchlist without duplicate', async () => {
       mockCollection.mockReturnValue({} as never);
       mockQuery.mockReturnValue({} as never);
       mockWhere.mockReturnValue({} as never);
       mockGetDocs.mockResolvedValue({
-        docs: [{ id: 'existing', data: () => ({ tmdbId: 550, userId: 'user-123' }) }],
+        docs: [{ id: 'existing', data: () => ({ tmdbId: 550, userId: 'user-123', watched: false }) }],
       } as never);
 
       const input = movieToWatchlistInput(mockMovie, 'user-123');
-      await expect(addToWatchlist(input)).rejects.toThrow('Ten film jest już na watchliście.');
+      const id = await addToWatchlist(input);
+      expect(id).toBe('existing');
+      expect(mockAddDoc).not.toHaveBeenCalled();
     });
   });
 

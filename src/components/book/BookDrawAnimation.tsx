@@ -1,19 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Sparkles } from 'lucide-react';
 import type { LotteryBook } from '../../types/LotteryBook';
 
-const FRAME_W = 140;
-const FRAME_GAP = 14;
-const FRAME_STRIDE = FRAME_W + FRAME_GAP;
 const PREVIEW_COUNT = 5;
-const SLIDE_MS = 140;
-const HOLD_MS = 200;
+const SLIDE_MS = 150;
+const HOLD_MS = 210;
 
 const PHRASES = [
-  'Kartkuję katalog…',
-  'Szukam trafienia…',
-  'Jeszcze chwila…',
-  'Stop!',
+  'Otwieram katalog…',
+  'Kartkuję tomy biblioteki…',
+  'Wybieram dzieło losu…',
+  '✦ Oto Twoja księga! ✦',
 ];
 
 interface BookDrawAnimationProps {
@@ -77,7 +74,6 @@ function animateTranslateX(
     if (durationMs <= 0 || from === to) {
       el.style.transform = `translate3d(${to}px, 0, 0)`;
       resolve();
-      return;
     }
 
     const start = performance.now();
@@ -124,8 +120,11 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
     if (!stage || !stripEl) return;
 
     const signal = { cancelled: false };
-    const centerOffset = Math.max(0, (stage.clientWidth - FRAME_W) / 2);
-    const xForIndex = (index: number) => -(index * FRAME_STRIDE) + centerOffset;
+    const frameWidth = Math.min(140, Math.max(105, Math.floor(stage.clientWidth * 0.38)));
+    const frameGap = 12;
+    const stride = frameWidth + frameGap;
+    const centerOffset = Math.max(0, (stage.clientWidth - frameWidth) / 2);
+    const xForIndex = (index: number) => -(index * stride) + centerOffset;
 
     stripEl.style.transform = `translate3d(${xForIndex(0)}px, 0, 0)`;
     setActiveIndex(0);
@@ -151,7 +150,7 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
 
       completedRef.current = true;
       setLanded(true);
-      window.setTimeout(() => onCompleteRef.current(), 280);
+      window.setTimeout(() => onCompleteRef.current(), 380);
     })();
 
     return () => {
@@ -171,47 +170,53 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
   }, [landed]);
 
   return (
-    <div className="book-draw" role="status" aria-live="polite">
-      <div className="book-slot" ref={stageRef}>
-        <div className="book-slot-topbar">
-          <span>KATALOG</span>
-          <span className="book-slot-lights" aria-hidden>
-            {Array.from({ length: 7 }).map((_, i) => (
+    <div className="book-draw-container" role="status" aria-live="polite">
+      <div className="book-draw-card" ref={stageRef}>
+        {/* Top Ornamental Bar */}
+        <div className="book-draw-topbar">
+          <span className="book-draw-topbar-tag">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            <span>EX LIBRIS</span>
+          </span>
+          <div className="book-draw-lights" aria-hidden>
+            {Array.from({ length: 5 }).map((_, i) => (
               <i key={i} className={landed ? 'is-win' : undefined} />
             ))}
+          </div>
+          <span className="book-draw-topbar-tag">
+            <span>VOL. MMXXVI</span>
           </span>
-          <span>LOSUJE</span>
         </div>
 
-        <div className={`book-slot-viewport${landed ? ' is-landed' : ''}`}>
-          <div className="book-slot-vignette" />
-          <div className="book-slot-pointer book-slot-pointer--left" />
-          <div className="book-slot-pointer book-slot-pointer--right" />
+        {/* Viewport Strip */}
+        <div className={`book-draw-viewport${landed ? ' is-landed' : ''}`}>
+          <div className="book-draw-vignette" />
+          <div className="book-draw-pointer book-draw-pointer--left" />
+          <div className="book-draw-pointer book-draw-pointer--right" />
 
-          <div className="book-film-track">
-            <div className="book-film-edge book-film-edge--top" aria-hidden>
-              {Array.from({ length: 40 }).map((_, i) => (
-                <span key={`t-${i}`} />
+          <div className="book-draw-reel-track">
+            <div className="book-draw-ornament-edge" aria-hidden>
+              {Array.from({ length: 24 }).map((_, i) => (
+                <span key={`t-${i}`}>✦</span>
               ))}
             </div>
 
-            <div className="book-film-strip" ref={stripRef}>
+            <div className="book-draw-strip" ref={stripRef}>
               {strip.map((book, index) => {
                 const isWinner = landed && index === winnerIndex;
                 const isActive = index === activeIndex;
                 return (
                   <div
                     key={`${book.id}-${index}`}
-                    className={`book-film-frame${isWinner ? ' is-winner' : ''}${isActive ? ' is-active' : ''}`}
-                    style={{ width: FRAME_W }}
+                    className={`book-draw-frame${isWinner ? ' is-winner' : ''}${isActive ? ' is-active' : ''}`}
                   >
-                    <div className="book-film-frame-inner">
+                    <div className="book-draw-frame-inner">
                       {book.cover ? (
                         <img src={book.cover} alt="" draggable={false} />
                       ) : (
-                        <div className="book-film-frame-fallback">
-                          <BookOpen className="w-6 h-6 text-slate-400" />
-                          <span>{book.title}</span>
+                        <div className="book-draw-frame-fallback">
+                          <BookOpen className="w-7 h-7 text-emerald-700 mb-1" />
+                          <span className="line-clamp-2">{book.title}</span>
                         </div>
                       )}
                     </div>
@@ -220,16 +225,16 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
               })}
             </div>
 
-            <div className="book-film-edge book-film-edge--bottom" aria-hidden>
-              {Array.from({ length: 40 }).map((_, i) => (
-                <span key={`b-${i}`} />
+            <div className="book-draw-ornament-edge" aria-hidden>
+              {Array.from({ length: 24 }).map((_, i) => (
+                <span key={`b-${i}`}>✦</span>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      <p className="book-draw-text" key={phraseIndex}>
+      <p className="book-draw-status-phrase font-serif" key={phraseIndex}>
         {PHRASES[phraseIndex]}
       </p>
     </div>

@@ -3,6 +3,9 @@ import {
   pickRandomLotteryBook,
   searchOpenLibraryBooksByQuery,
   BOOK_LOTTERY_SUBJECTS,
+  BOOK_MOOD_PRESETS,
+  cleanDescriptionText,
+  formatReadingTime,
 } from '../openLibraryService';
 import type { BookLotteryFilters } from '../../types/LotteryBook';
 
@@ -23,6 +26,49 @@ describe('openLibraryService', () => {
     yearFrom: null,
     yearTo: null,
   };
+
+  describe('BOOK_MOOD_PRESETS', () => {
+    it('should define curated literary mood presets', () => {
+      expect(BOOK_MOOD_PRESETS.length).toBeGreaterThanOrEqual(5);
+      const ids = BOOK_MOOD_PRESETS.map((p) => p.id);
+      expect(ids).toContain('cozy');
+      expect(ids).toContain('noir');
+      expect(ids).toContain('fantasy');
+      expect(ids).toContain('classics');
+    });
+  });
+
+  describe('cleanDescriptionText', () => {
+    it('should extract string from text object and strip markdown source links', () => {
+      const raw = {
+        type: '/type/text',
+        value: 'Wspaniała powieść fantasy. ([source](https://example.com/source))\r\n---\nSee also:\r\nOther books',
+      };
+      const cleaned = cleanDescriptionText(raw);
+      expect(cleaned).toBe('Wspaniała powieść fantasy.');
+    });
+
+    it('should return undefined for empty or invalid input', () => {
+      expect(cleanDescriptionText('')).toBeUndefined();
+      expect(cleanDescriptionText(null)).toBeUndefined();
+      expect(cleanDescriptionText(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('formatReadingTime', () => {
+    it('should calculate reading time in hours, minutes, and evenings', () => {
+      const result = formatReadingTime(300);
+      expect(result.minutes).toBe(390); // 300 * 1.3
+      expect(result.formatted).toContain('6 godz.');
+      expect(result.evenings).toContain('wieczor');
+    });
+
+    it('should handle zero or undefined pages with defaults', () => {
+      const result = formatReadingTime(undefined);
+      expect(result.formatted).toBeDefined();
+      expect(result.minutes).toBeGreaterThan(0);
+    });
+  });
 
   describe('BOOK_LOTTERY_SUBJECTS', () => {
     it('should contain default subjects list', () => {

@@ -9,6 +9,8 @@ export interface SliderProps {
   step?: number;
   disabled?: boolean;
   className?: string;
+  trackClassName?: string;
+  colorVariant?: 'indigo' | 'emerald' | 'amber';
 }
 
 export const Slider: React.FC<SliderProps> = ({
@@ -19,7 +21,23 @@ export const Slider: React.FC<SliderProps> = ({
   step = 1,
   disabled = false,
   className,
+  trackClassName,
+  colorVariant = 'emerald',
 }) => {
+  const accentClass =
+    colorVariant === 'indigo'
+      ? 'accent-indigo-600'
+      : colorVariant === 'amber'
+        ? 'accent-amber-600'
+        : 'accent-emerald-700';
+
+  const fillClass =
+    trackClassName ||
+    (colorVariant === 'indigo'
+      ? 'bg-indigo-600'
+      : colorVariant === 'amber'
+        ? 'bg-amber-600'
+        : 'bg-emerald-700');
   const isRange = Array.isArray(value);
 
   if (isRange) {
@@ -28,7 +46,7 @@ export const Slider: React.FC<SliderProps> = ({
       <div className={cn("relative flex items-center w-full py-2", className)}>
         <div className="relative w-full h-2 bg-slate-200 rounded-full">
           <div
-            className="absolute h-2 bg-indigo-600 rounded-full"
+            className={cn("absolute h-2 rounded-full", fillClass)}
             style={{
               left: `${((minVal - min) / (max - min)) * 100}%`,
               right: `${100 - ((maxVal - min) / (max - min)) * 100}%`,
@@ -72,7 +90,7 @@ export const Slider: React.FC<SliderProps> = ({
     <div className={cn("relative flex items-center w-full py-2", className)}>
       <div className="relative w-full h-2 bg-slate-200 rounded-full">
         <div
-          className="absolute h-2 bg-indigo-600 rounded-full"
+          className={cn("absolute h-2 rounded-full", fillClass)}
           style={{ width: `${percent}%` }}
         />
         <input
@@ -83,7 +101,7 @@ export const Slider: React.FC<SliderProps> = ({
           value={numValue}
           disabled={disabled}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-2 bg-transparent appearance-none cursor-pointer focus:outline-none accent-indigo-600 relative z-10"
+          className={cn("w-full h-2 bg-transparent appearance-none cursor-pointer focus:outline-none relative z-10", accentClass)}
         />
       </div>
     </div>

@@ -17,7 +17,20 @@ export interface LotteryBook {
   ebookAccess?: EbookAccess | null;
   languages?: string[];
   publishers?: string[];
+  description?: string;
+  firstSentence?: string;
+  excerpts?: string[];
+  readingTimeMinutes?: number;
   openLibraryUrl?: string;
+}
+
+export interface BookMoodPreset {
+  id: string;
+  label: string;
+  icon: string;
+  description: string;
+  tagline: string;
+  filters: Partial<BookLotteryFilters>;
 }
 
 export interface BookLotteryFilters {

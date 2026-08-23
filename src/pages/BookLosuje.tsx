@@ -8,29 +8,39 @@ import {
   SlidersHorizontal,
   BookmarkPlus,
   Check,
-  TrendingUp,
   Loader2,
   AlertCircle,
+  Clock,
+  Sparkles,
+  RotateCcw,
+  Library,
+  BookMarked,
+  Search,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
-import { addBook } from '../services/booksService';
-import type { BookLotteryFilters, LotteryBook } from '../types/LotteryBook';
+import { addBook, getUserBooksData } from '../services/booksService';
+import type { Book } from '../types/Book';
+import type { BookLotteryFilters, BookMoodPreset, LotteryBook } from '../types/LotteryBook';
 import {
   BOOK_EDITION_OPTIONS,
   BOOK_LOTTERY_LANGUAGES,
   BOOK_LOTTERY_SUBJECTS,
+  BOOK_MOOD_PRESETS,
   BOOK_PAGES_OPTIONS,
   BOOK_POPULARITY_OPTIONS,
   BOOK_RATING_COUNT_OPTIONS,
   countAdvancedBookFilters,
   countLotteryBooks,
   ebookLabel,
+  formatReadingTime,
   languageLabel,
   needsClientRatingFilter,
   pickRandomLotteryBook,
 } from '../services/openLibraryService';
 import BookDrawAnimation from '../components/book/BookDrawAnimation';
+import BookMoodPresets from '../components/book/BookMoodPresets';
+import BookFilterDrawer from '../components/book/BookFilterDrawer';
 import { Slider } from '../components/ui/slider';
 import { Select } from '../components/ui/select';
 import { Switch } from '../components/ui/switch';
@@ -78,6 +88,7 @@ function formatLanguages(codes: string[] | undefined, preferred?: string): strin
 export const BookLosuje: React.FC = () => {
   const { user } = useAuth();
   const [filters, setFilters] = useState<BookLotteryFilters>(DEFAULT_FILTERS);
+  const [activeMoodId, setActiveMoodId] = useState<string | null>(null);
   const [drawn, setDrawn] = useState<LotteryBook | null>(null);
   const [spinWinner, setSpinWinner] = useState<LotteryBook | null>(null);
   const [reelBooks, setReelBooks] = useState<LotteryBook[]>([]);
@@ -88,9 +99,12 @@ export const BookLosuje: React.FC = () => {
   const [poolSize, setPoolSize] = useState<number | null>(null);
   const [poolLoading, setPoolLoading] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isSynopsisExpanded, setIsSynopsisExpanded] = useState(false);
   const [savedToLibrary, setSavedToLibrary] = useState(false);
   const [savingToLibrary, setSavingToLibrary] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
+  const [wishlistBooks, setWishlistBooks] = useState<Book[]>([]);
 
   const ratingApprox = needsClientRatingFilter(filters);
   const advancedCount = countAdvancedBookFilters(filters);
@@ -98,12 +112,34 @@ export const BookLosuje: React.FC = () => {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = 'Losuj książkę';
+    document.title = 'LOSUJ KSIĄŻKĘ · Ex Libris';
     return () => {
       document.title = previousTitle;
     };
   }, []);
 
+  // Fetch user's "Chcę przeczytać" shelf if logged in
+  useEffect(() => {
+    if (!user?.uid) {
+      setWishlistBooks([]);
+      return;
+    }
+    let cancelled = false;
+    void getUserBooksData(user.uid)
+      .then((books) => {
+        if (!cancelled) {
+          setWishlistBooks(books.filter((b) => b.read === 'Chcę przeczytać'));
+        }
+      })
+      .catch(() => {
+        // ignore background fetch error
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // Count pool preview
   useEffect(() => {
     let cancelled = false;
     const timer = window.setTimeout(() => {
@@ -126,10 +162,30 @@ export const BookLosuje: React.FC = () => {
     };
   }, [filters]);
 
+  const applyMoodPreset = (preset: BookMoodPreset) => {
+    if (activeMoodId === preset.id) {
+      // Toggle off
+      setActiveMoodId(null);
+      setFilters(DEFAULT_FILTERS);
+      return;
+    }
+    setActiveMoodId(preset.id);
+    setFilters((prev) => ({
+      ...prev,
+      ...preset.filters,
+    }));
+  };
+
+  const handleClearMood = () => {
+    setActiveMoodId(null);
+    setFilters(DEFAULT_FILTERS);
+  };
+
   const handleDraw = useCallback(async () => {
     setError(null);
     setDrawn(null);
     setSavedToLibrary(false);
+    setIsSynopsisExpanded(false);
     setLoading(true);
     setDrawing(true);
     setSpinWinner(null);
@@ -144,7 +200,7 @@ export const BookLosuje: React.FC = () => {
       setReelBooks(reel);
       setSpinWinner(winner);
       setRecentIds((prev) =>
-        [winner.id, ...prev.filter((id) => id !== winner.id)].slice(0, 12),
+        [winner.id, ...prev.filter((id) => id !== winner.id)].slice(0, 15),
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Losowanie nie powiodło się.');
@@ -153,6 +209,32 @@ export const BookLosuje: React.FC = () => {
       setLoading(false);
     }
   }, [filters, recentIds]);
+
+  const handleDrawFromWishlist = useCallback(() => {
+    if (wishlistBooks.length === 0) return;
+    setError(null);
+    setDrawn(null);
+    setSavedToLibrary(true);
+    setIsSynopsisExpanded(false);
+    setDrawing(true);
+
+    const random = wishlistBooks[Math.floor(Math.random() * wishlistBooks.length)];
+    const lotteryItem: LotteryBook = {
+      id: random.id,
+      title: random.title,
+      author: random.author,
+      authors: [random.author],
+      cover: random.cover || undefined,
+      pages: random.overallPages || undefined,
+      rating: random.rating ? random.rating / 2 : undefined,
+      subjects: random.genre ? [random.genre] : [],
+      description: 'Ta książka pochodzi z Twojej prywatnej półki „Chcę przeczytać”. Czas po nią sięgnąć!',
+      readingTimeMinutes: random.overallPages ? Math.round(random.overallPages * 1.3) : undefined,
+    };
+
+    setReelBooks([lotteryItem]);
+    setSpinWinner(lotteryItem);
+  }, [wishlistBooks]);
 
   const handleSpinComplete = useCallback(() => {
     if (!spinWinner) return;
@@ -199,6 +281,7 @@ export const BookLosuje: React.FC = () => {
   };
 
   const resetAdvanced = () => {
+    setActiveMoodId(null);
     setFilters((prev) => ({
       ...prev,
       minRatingsCount: 0,
@@ -211,6 +294,7 @@ export const BookLosuje: React.FC = () => {
 
   const ebook = drawn ? ebookLabel(drawn.ebookAccess) : null;
   const langs = drawn ? formatLanguages(drawn.languages, filters.language || undefined) : null;
+  const readingTime = drawn?.pages ? formatReadingTime(drawn.pages) : null;
   const subjectLabel =
     BOOK_LOTTERY_SUBJECTS.find((s) => s.value === filters.subject)?.label ?? 'Wszystkie';
   const langLabel =
@@ -218,65 +302,159 @@ export const BookLosuje: React.FC = () => {
   const popLabel =
     BOOK_POPULARITY_OPTIONS.find((p) => p.value === filters.minPopularity)?.label ?? 'Luźno';
 
+  const lubimyCzytacUrl = drawn
+    ? `https://lubimyczytac.pl/szukaj/ksiazki?phrase=${encodeURIComponent(`${drawn.title} ${drawn.author}`)}`
+    : null;
+
   return (
     <main className="book-losuje-page">
       <div className="book-losuje-glow book-losuje-glow--left" aria-hidden />
       <div className="book-losuje-glow book-losuje-glow--right" aria-hidden />
 
       <div className="book-losuje-inner">
+        {/* Hero Header — Pure Calligraphy */}
         <motion.header
           className="book-losuje-hero"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="book-losuje-kicker">katalog · open library</p>
-          <h1 className="book-losuje-brand">
-            <span className="book-losuje-brand-line">LOSUJ</span>
-            <span className="book-losuje-brand-line book-losuje-brand-line--accent">
-              KSIĄŻKĘ
-            </span>
+          <p className="book-losuje-kicker">✦ EX LIBRIS · OPEN LIBRARY ✦</p>
+          <h1 className="book-losuje-calligraphy-brand">
+            Losuj Książkę
           </h1>
           <p className="book-losuje-tagline">
-            Ustaw gatunek i próg jakości — resztę wybierze katalog.
+            Wybierz nastrój lub ustaw gatunek — resztę wyłoni biblioteczny katalog.
           </p>
         </motion.header>
 
         {error && (
-          <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 mb-4 shadow-2xs">
+          <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 mb-4 shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
             <span>{error}</span>
           </div>
         )}
 
+        {/* Quick Literary Mood Presets Carousel */}
+        <BookMoodPresets
+          activeMoodId={activeMoodId}
+          onSelectMood={applyMoodPreset}
+          onClearMood={handleClearMood}
+          disabled={busy}
+        />
+
+        {/* Mobile-Only Compact Controls Bar */}
+        <div className="sm:hidden mb-4 p-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap gap-1 items-center overflow-hidden">
+              <span className="book-summary-chip truncate max-w-[120px]">{subjectLabel}</span>
+              <span className="book-summary-chip">{langLabel}</span>
+              {filters.minRating > 0 && (
+                <span className="book-summary-chip">{filters.minRating.toFixed(1)}+ ⭐</span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              disabled={busy}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer shrink-0"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Filtry</span>
+              {advancedCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold">
+                  {advancedCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              className="book-draw-btn flex-1 h-11 text-xs font-bold gap-1.5 cursor-pointer"
+              disabled={busy || poolSize === 0}
+              onClick={() => void handleDraw()}
+            >
+              {busy ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Shuffle className="w-4 h-4" />
+              )}
+              <span>
+                {loading
+                  ? 'Kartkuję…'
+                  : drawing
+                    ? 'Losuję…'
+                    : drawn
+                      ? 'Losuj inną'
+                      : `Losuj (~${(poolSize ?? 0).toLocaleString('pl-PL')})`}
+              </span>
+            </Button>
+
+            {wishlistBooks.length > 0 && (
+              <Button
+                variant="outline"
+                className="h-11 px-3 text-xs font-bold gap-1 border-emerald-300 bg-emerald-50 text-emerald-950 rounded-xl shrink-0"
+                disabled={busy}
+                onClick={handleDrawFromWishlist}
+                title="Losuj z półki 'Chcę przeczytać'"
+              >
+                <BookMarked className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Półka ({wishlistBooks.length})</span>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop-Only Full Controls Section */}
         <motion.section
-          className="book-losuje-controls"
+          className="book-losuje-controls hidden sm:block"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.05 }}
         >
           <div className="book-losuje-controls-head">
             <div>
-              <p className="book-losuje-controls-kicker">filtry</p>
-              <h2 className="book-losuje-controls-title">Co ma wpaść?</h2>
+              <p className="book-losuje-controls-kicker">parametry katalogu</p>
+              <h2 className="book-losuje-controls-title">Kryteria wyboru</h2>
             </div>
-            <div
-              className={`book-pool-badge${poolSize === 0 && !poolLoading ? ' is-empty' : ''}`}
-              aria-live="polite"
-            >
-              {poolLoading ? (
-                <span className="text-slate-400">Liczenie…</span>
-              ) : poolSize != null ? (
-                <>
-                  <strong>
-                    {ratingApprox ? '~' : ''}
-                    {poolSize.toLocaleString('pl-PL')}
-                  </strong>
-                  <span> w puli</span>
-                </>
-              ) : (
-                <span className="text-slate-400">Open Library</span>
-              )}
+            <div className="flex items-center gap-2">
+              <div
+                className={`book-pool-badge${poolSize === 0 && !poolLoading ? ' is-empty' : ''}`}
+                aria-live="polite"
+              >
+                {poolLoading ? (
+                  <span className="text-slate-400">Liczenie…</span>
+                ) : poolSize != null ? (
+                  <>
+                    <strong>
+                      {ratingApprox ? '~' : ''}
+                      {poolSize.toLocaleString('pl-PL')}
+                    </strong>
+                    <span> w puli</span>
+                  </>
+                ) : (
+                  <span className="text-slate-400">Open Library</span>
+                )}
+              </div>
+
+              {/* Mobile Filter Drawer Button */}
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                disabled={busy}
+                className="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer transition-colors"
+                title="Wszystkie filtry"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Filtry</span>
+                {advancedCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold">
+                    {advancedCount}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 
@@ -296,9 +474,10 @@ export const BookLosuje: React.FC = () => {
               <Select
                 value={filters.subject}
                 disabled={busy}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, subject: String(e.target.value) }))
-                }
+                onChange={(e) => {
+                  setActiveMoodId(null);
+                  setFilters((prev) => ({ ...prev, subject: String(e.target.value) }));
+                }}
               >
                 {BOOK_LOTTERY_SUBJECTS.map((s) => (
                   <option key={s.value || 'all'} value={s.value}>
@@ -313,9 +492,10 @@ export const BookLosuje: React.FC = () => {
               <Select
                 value={filters.language}
                 disabled={busy}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, language: String(e.target.value) }))
-                }
+                onChange={(e) => {
+                  setActiveMoodId(null);
+                  setFilters((prev) => ({ ...prev, language: String(e.target.value) }));
+                }}
               >
                 {BOOK_LOTTERY_LANGUAGES.map((lang) => (
                   <option key={lang.code || 'any'} value={lang.code}>
@@ -329,7 +509,7 @@ export const BookLosuje: React.FC = () => {
               <div className="book-field-label-row">
                 <span className="book-field-label">Minimalna ocena</span>
                 <span className="book-rating-pill">
-                  {filters.minRating <= 0 ? 'dowolna' : `${filters.minRating.toFixed(1)}+`}
+                  {filters.minRating <= 0 ? 'dowolna' : `${filters.minRating.toFixed(1)}+ ⭐`}
                 </span>
               </div>
               <Slider
@@ -338,19 +518,20 @@ export const BookLosuje: React.FC = () => {
                 max={5}
                 step={0.5}
                 disabled={busy}
-                onChange={(val) =>
+                onChange={(val) => {
+                  setActiveMoodId(null);
                   setFilters((prev) => ({
                     ...prev,
                     minRating: Array.isArray(val) ? val[0] : val,
-                  }))
-                }
+                  }));
+                }}
               />
             </div>
 
             <div className="book-field book-field--span2">
               <div className="book-field-label-row">
                 <span className="book-field-label">Popularność</span>
-                <span className="book-field-hint-inline">„chcę przeczytać”</span>
+                <span className="book-field-hint-inline">„chcę przeczytać” w OL</span>
               </div>
               <div className="book-seg book-seg--joined" role="group" aria-label="Popularność">
                 {BOOK_POPULARITY_OPTIONS.map((opt) => (
@@ -363,9 +544,10 @@ export const BookLosuje: React.FC = () => {
                         : 'book-seg-btn'
                     }
                     disabled={busy}
-                    onClick={() =>
-                      setFilters((prev) => ({ ...prev, minPopularity: opt.value }))
-                    }
+                    onClick={() => {
+                      setActiveMoodId(null);
+                      setFilters((prev) => ({ ...prev, minPopularity: opt.value }));
+                    }}
                   >
                     {opt.label}
                   </button>
@@ -388,7 +570,7 @@ export const BookLosuje: React.FC = () => {
             </div>
           </div>
 
-          <div className="book-advanced">
+          <div className="book-advanced hidden sm:block">
             <button
               type="button"
               className={`book-advanced-toggle${advancedOpen ? ' is-open' : ''}${advancedCount > 0 ? ' has-active' : ''}`}
@@ -398,7 +580,7 @@ export const BookLosuje: React.FC = () => {
             >
               <span className="book-advanced-toggle-start">
                 <SlidersHorizontal className="book-advanced-icon w-4 h-4" />
-                <span className="book-advanced-toggle-label">Więcej filtrów</span>
+                <span className="book-advanced-toggle-label">Więcej kryteriów</span>
                 {advancedCount > 0 && (
                   <span className="book-advanced-count" aria-label={`${advancedCount} aktywne`}>
                     {advancedCount}
@@ -424,12 +606,13 @@ export const BookLosuje: React.FC = () => {
                               : 'book-seg-btn'
                           }
                           disabled={busy}
-                          onClick={() =>
+                          onClick={() => {
+                            setActiveMoodId(null);
                             setFilters((prev) => ({
                               ...prev,
                               minRatingsCount: opt.value,
-                            }))
-                          }
+                            }));
+                          }}
                         >
                           {opt.label}
                         </button>
@@ -450,9 +633,10 @@ export const BookLosuje: React.FC = () => {
                               : 'book-seg-btn'
                           }
                           disabled={busy}
-                          onClick={() =>
-                            setFilters((prev) => ({ ...prev, minEditions: opt.value }))
-                          }
+                          onClick={() => {
+                            setActiveMoodId(null);
+                            setFilters((prev) => ({ ...prev, minEditions: opt.value }));
+                          }}
                         >
                           {opt.label}
                         </button>
@@ -468,6 +652,7 @@ export const BookLosuje: React.FC = () => {
                         disabled={busy}
                         onChange={(e) => {
                           const val = e.target.value;
+                          setActiveMoodId(null);
                           setFilters((prev) => ({
                             ...prev,
                             yearFrom: val === '' ? null : Number(val),
@@ -489,6 +674,7 @@ export const BookLosuje: React.FC = () => {
                         disabled={busy}
                         onChange={(e) => {
                           const val = e.target.value;
+                          setActiveMoodId(null);
                           setFilters((prev) => ({
                             ...prev,
                             yearTo: val === '' ? null : Number(val),
@@ -518,9 +704,10 @@ export const BookLosuje: React.FC = () => {
                               : 'book-seg-btn'
                           }
                           disabled={busy}
-                          onClick={() =>
-                            setFilters((prev) => ({ ...prev, minPages: opt.value }))
-                          }
+                          onClick={() => {
+                            setActiveMoodId(null);
+                            setFilters((prev) => ({ ...prev, minPages: opt.value }));
+                          }}
                         >
                           {opt.label}
                         </button>
@@ -536,7 +723,7 @@ export const BookLosuje: React.FC = () => {
                     disabled={busy}
                     onClick={resetAdvanced}
                   >
-                    Wyczyść dodatkowe
+                    Wyczyść dodatkowe kryteria
                   </button>
                 )}
               </div>
@@ -549,28 +736,45 @@ export const BookLosuje: React.FC = () => {
             </div>
           )}
 
-          <Button
-            className="book-draw-btn w-full h-12 text-sm font-bold gap-2"
-            disabled={busy || poolSize === 0}
-            onClick={() => void handleDraw()}
-          >
-            {busy ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Shuffle className="w-5 h-5" />
+          {/* Action Row */}
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full">
+            <Button
+              className="book-draw-btn flex-1 w-full h-12 text-sm font-bold gap-2 cursor-pointer"
+              disabled={busy || poolSize === 0}
+              onClick={() => void handleDraw()}
+            >
+              {busy ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Shuffle className="w-5 h-5" />
+              )}
+              <span>
+                {loading
+                  ? 'Kartkuję katalog…'
+                  : drawing
+                    ? 'Losuję dzieło…'
+                    : drawn
+                      ? 'Losuj inną księgę'
+                      : 'Losuj książkę z katalogu'}
+              </span>
+            </Button>
+
+            {wishlistBooks.length > 0 && (
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto h-12 px-4 text-xs sm:text-sm font-bold gap-2 border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-950 shadow-2xs cursor-pointer rounded-xl shrink-0"
+                disabled={busy}
+                onClick={handleDrawFromWishlist}
+                title="Wylosuj spośród książek na Twojej półce 'Chcę przeczytać'"
+              >
+                <BookMarked className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>Moja półka ({wishlistBooks.length})</span>
+              </Button>
             )}
-            <span>
-              {loading
-                ? 'Szukam w katalogu…'
-                : drawing
-                  ? 'Losuję…'
-                  : drawn
-                    ? 'Losuj ponownie'
-                    : 'Losuj książkę'}
-            </span>
-          </Button>
+          </div>
         </motion.section>
 
+        {/* Result Slot */}
         <div className="book-result-slot">
           <AnimatePresence mode="wait">
             {!drawn && !drawing && (
@@ -582,11 +786,11 @@ export const BookLosuje: React.FC = () => {
                 exit={{ opacity: 0 }}
               >
                 <div className="book-empty-icon" aria-hidden>
-                  <BookOpen className="w-8 h-8" />
+                  <BookOpen className="w-8 h-8 text-emerald-700" />
                 </div>
-                <p className="book-empty-title">Półka czeka</p>
+                <p className="book-empty-title">Księgozbiór czeka na Twój wybór</p>
                 <p className="book-empty-text">
-                  Wybierz gatunek i naciśnij losuj — wylosowana pozycja pojawi się tutaj.
+                  Wybierz nastrój lub kliknij losuj — wylosowane dzieło z pełnym opisem pojawi się tutaj.
                 </p>
               </motion.div>
             )}
@@ -599,9 +803,9 @@ export const BookLosuje: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mb-2" />
-                <p className="book-empty-title">Kartkuję katalog…</p>
-                <p className="book-empty-text">Pobieram próbkę z Open Library</p>
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-700 mb-2" />
+                <p className="book-empty-title">Otwieram wiekowy katalog…</p>
+                <p className="book-empty-text">Wybieram najlepsze tomy z Open Library</p>
               </motion.div>
             )}
 
@@ -618,17 +822,22 @@ export const BookLosuje: React.FC = () => {
               <motion.article
                 key={drawn.id}
                 className="book-ticket"
-                initial={{ opacity: 0, scale: 0.92, y: 24 }}
+                initial={{ opacity: 0, scale: 0.94, y: 22 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="book-ticket-ribbon">Wylosowano</div>
-                <div className="book-ticket-ribbon">Wylosowano</div>
+                {/* Ex Libris Seal Badge */}
+                <div className="book-ticket-exlibris">
+                  <Sparkles className="w-3 h-3 text-amber-600" />
+                  <span>EX LIBRIS</span>
+                  <span className="book-ticket-exlibris-script">· Fortuna</span>
+                </div>
+
                 <div className="p-4 sm:p-6 flex flex-col gap-4">
-                  {/* Mobile & Desktop Header: Cover on Left, Info on Right */}
+                  {/* Top Header: Cover Left, Details Right */}
                   <div className="flex gap-3.5 sm:gap-6 items-start">
-                    <div className="w-24 sm:w-36 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden shadow-md bg-slate-100 border border-slate-200/80">
+                    <div className="book-ticket-cover-wrap w-24 sm:w-36 shrink-0 aspect-[2/3]">
                       {drawn.cover ? (
                         <img
                           src={drawn.cover}
@@ -636,25 +845,26 @@ export const BookLosuje: React.FC = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-emerald-50 text-emerald-700">
-                          <BookOpen className="w-8 h-8 text-emerald-600 mb-1" />
-                          <span className="text-[10px] font-bold">Brak okładki</span>
+                        <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-emerald-50 text-emerald-800">
+                          <BookOpen className="w-8 h-8 text-emerald-700 mb-1" />
+                          <span className="text-[10px] font-bold">Księga bez grafiki</span>
                         </div>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-xl font-bold text-slate-900 leading-snug tracking-tight font-display">
+                      <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight font-serif">
                         {drawn.title}
                       </h2>
-                      <p className="text-xs sm:text-sm font-semibold text-emerald-700 mt-0.5">
+                      <p className="text-xs sm:text-base font-semibold text-emerald-800 mt-0.5 font-serif italic">
                         {formatAuthors(drawn)}
                       </p>
 
+                      {/* Badges / Rating / Reading time */}
                       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
                         {drawn.rating != null && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 shadow-2xs">
+                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                             <span>{drawn.rating.toFixed(1)}</span>
                           </span>
                         )}
@@ -670,8 +880,16 @@ export const BookLosuje: React.FC = () => {
                             ~{drawn.pages} str.
                           </span>
                         )}
+
+                        {readingTime && (
+                          <span className="book-reading-time-pill" title="Szacowany czas lektury">
+                            <Clock className="w-3.5 h-3.5 text-amber-700" />
+                            <span>{readingTime.formatted} ({readingTime.evenings})</span>
+                          </span>
+                        )}
                       </div>
 
+                      {/* Genres & Languages */}
                       <div className="flex flex-wrap gap-1 mt-2.5">
                         {langs && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
@@ -683,10 +901,10 @@ export const BookLosuje: React.FC = () => {
                             {ebook}
                           </span>
                         )}
-                        {drawn.subjects?.slice(0, 2).map((subject) => (
+                        {drawn.subjects?.slice(0, 3).map((subject) => (
                           <span
                             key={subject}
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[120px]"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[130px]"
                           >
                             {subject}
                           </span>
@@ -695,16 +913,55 @@ export const BookLosuje: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons: 2-Column on Mobile, Row on Desktop */}
-                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 pt-3 border-t border-slate-100 mt-1">
+                  {/* Opening Hook / First Sentence Quote */}
+                  {drawn.firstSentence && (
+                    <div className="book-first-sentence-box">
+                      <span className="book-first-sentence-lead">W słowach zapisane…</span>
+                      <p className="book-drop-cap">
+                        &bdquo;{drawn.firstSentence}&rdquo;
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Book Description / Synopsis */}
+                  <div className="book-synopsis-box">
+                    <div className="book-synopsis-header">
+                      <h3 className="book-synopsis-title">
+                        <span>❧</span> Zarys fabuły & O czym opowiada
+                      </h3>
+                    </div>
+
+                    <p
+                      className={cn(
+                        'book-synopsis-text',
+                        !isSynopsisExpanded && 'line-clamp-3',
+                      )}
+                    >
+                      {drawn.description ||
+                        'Dzieło z otwartego katalogu Open Library. Wciągająca lektura polecana w wybranym gatunku literackim.'}
+                    </p>
+
+                    {drawn.description && drawn.description.length > 240 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsSynopsisExpanded((v) => !v)}
+                        className="book-synopsis-toggle"
+                      >
+                        {isSynopsisExpanded ? 'Zwiń zarys fabuły ↑' : 'Rozwiń pełny opis fabuły ↓'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 pt-3 border-t border-slate-200/70 mt-1">
                     <Button
                       disabled={savingToLibrary || savedToLibrary}
                       onClick={() => void handleAddToLibrary()}
                       className={cn(
-                        "gap-1.5 h-10 px-3 rounded-xl font-bold text-xs justify-center cursor-pointer",
+                        'gap-1.5 h-10 px-3 rounded-xl font-bold text-xs justify-center cursor-pointer',
                         savedToLibrary
-                          ? "bg-emerald-600 text-white"
-                          : "bg-emerald-700 text-white hover:bg-emerald-800 shadow-xs"
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-emerald-700 text-white hover:bg-emerald-800 shadow-xs',
                       )}
                     >
                       {savedToLibrary ? (
@@ -723,7 +980,7 @@ export const BookLosuje: React.FC = () => {
                       variant="outline"
                       disabled={busy || poolSize === 0}
                       onClick={() => void handleDraw()}
-                      className="gap-1.5 border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 font-bold h-10 px-3 rounded-xl text-xs justify-center cursor-pointer"
+                      className="gap-1.5 border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-950 font-bold h-10 px-3 rounded-xl text-xs justify-center cursor-pointer"
                     >
                       <Shuffle className="w-3.5 h-3.5 text-emerald-700" />
                       <span className="truncate">Losuj inną</span>
@@ -736,11 +993,27 @@ export const BookLosuje: React.FC = () => {
                         rel="noopener noreferrer"
                         className={cn(
                           buttonVariants({ variant: 'outline', size: 'sm' }),
-                          'col-span-2 sm:col-span-1 gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-3 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline'
+                          'col-span-1 gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-3 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline',
                         )}
                       >
                         <span>Open Library</span>
                         <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      </a>
+                    )}
+
+                    {lubimyCzytacUrl && (
+                      <a
+                        href={lubimyCzytacUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          buttonVariants({ variant: 'outline', size: 'sm' }),
+                          'col-span-1 gap-1.5 border-amber-200 bg-amber-50/60 hover:bg-amber-100 text-amber-900 font-bold h-10 px-3 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline',
+                        )}
+                        title="Szukaj opinii na Lubimyczytać.pl"
+                      >
+                        <Search className="w-3 h-3 text-amber-700 shrink-0" />
+                        <span className="truncate">Lubimyczytać</span>
                       </a>
                     )}
                   </div>
@@ -750,9 +1023,78 @@ export const BookLosuje: React.FC = () => {
           </AnimatePresence>
         </div>
 
-        <p className="book-credit">
-          Dane: Open Library · język = edycja w tym języku · ocena ~1–5
+        <p className="text-center text-[11px] text-slate-400 mt-6 font-medium">
+          Dane z Open Library · Wyliczenia czasu lektury na podstawie liczby stron (~220 słów/min)
         </p>
+      </div>
+
+      {/* Mobile Bottom Sheet Drawer for Filters */}
+      <BookFilterDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        filters={filters}
+        onChange={(patch) => {
+          setActiveMoodId(null);
+          setFilters((prev) => ({ ...prev, ...patch }));
+        }}
+        onReset={() => {
+          setActiveMoodId(null);
+          setFilters(DEFAULT_FILTERS);
+        }}
+        poolSize={poolSize}
+        poolLoading={poolLoading}
+        disabled={busy}
+      />
+
+      {/* Mobile Sticky Thumb Zone Dock */}
+      <div className="book-sticky-dock flex items-center gap-2">
+        {drawn ? (
+          <>
+            <Button
+              disabled={savingToLibrary || savedToLibrary}
+              onClick={() => void handleAddToLibrary()}
+              className={cn(
+                'flex-1 h-11 rounded-xl font-bold text-xs justify-center cursor-pointer',
+                savedToLibrary
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-slate-900 text-white hover:bg-slate-800 shadow-xs',
+              )}
+            >
+              {savedToLibrary ? <Check className="w-4 h-4 mr-1" /> : <BookmarkPlus className="w-4 h-4 mr-1" />}
+              <span>{savedToLibrary ? 'W bibliotece' : '+ Do biblioteki'}</span>
+            </Button>
+            <Button
+              disabled={busy || poolSize === 0}
+              onClick={() => void handleDraw()}
+              className="flex-[1.4] h-11 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs gap-1.5 shadow-md cursor-pointer"
+            >
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shuffle className="w-4 h-4" />}
+              <span>Losuj kolejną</span>
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setDrawerOpen(true)}
+              disabled={busy}
+              className="h-11 px-3.5 rounded-xl border-slate-200 bg-white font-bold text-xs gap-1.5 text-slate-700"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Filtry</span>
+            </Button>
+            <Button
+              disabled={busy || poolSize === 0}
+              onClick={() => void handleDraw()}
+              className="flex-1 h-11 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs gap-1.5 shadow-md cursor-pointer"
+            >
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shuffle className="w-4 h-4" />}
+              <span>
+                {loading ? 'Kartkuję…' : `Losuj książkę (~${(poolSize ?? 0).toLocaleString('pl-PL')})`}
+              </span>
+            </Button>
+          </>
+        )}
       </div>
 
       <Toast

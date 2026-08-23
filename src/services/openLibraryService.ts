@@ -1,11 +1,110 @@
 import type {
   BookLotteryFilters,
+  BookMoodPreset,
   LotteryBook,
   LotterySearchResult,
 } from '../types/LotteryBook';
 
 const SEARCH_URL = 'https://openlibrary.org/search.json';
 const COVER_BASE = 'https://covers.openlibrary.org/b/id';
+const WORKS_BASE = 'https://openlibrary.org/works';
+
+export const BOOK_MOOD_PRESETS: BookMoodPreset[] = [
+  {
+    id: 'cozy',
+    label: 'Przytulny wieczór',
+    icon: '☕',
+    description: 'Kojąca lektura do herbaty, ciepły obyczaj, romans lub pełne humoru opowieści.',
+    tagline: 'Ciepły kocyk i herbata',
+    filters: {
+      subject: 'fiction',
+      minRating: 3.5,
+      minPopularity: 50,
+      requireCover: true,
+    },
+  },
+  {
+    id: 'noir',
+    label: 'Mroczny kryminał',
+    icon: '🕯️',
+    description: 'Mroczne śledztwa, tajemnice zbrodni, duszny suspens i thrillery trzymające w napięciu.',
+    tagline: 'Tajemnice, zbrodnie i dreszcz',
+    filters: {
+      subject: 'mystery',
+      minRating: 3.5,
+      minPopularity: 50,
+      minPages: 200,
+      requireCover: true,
+    },
+  },
+  {
+    id: 'fantasy',
+    label: 'Magiczne fantasy',
+    icon: '✨',
+    description: 'Epickie krainy, pradawna magia, mity, baśnie i niezwykłe przygody bohaterów.',
+    tagline: 'Smoki, czary i epickie światy',
+    filters: {
+      subject: 'fantasy',
+      minRating: 3.8,
+      minPopularity: 50,
+      minPages: 250,
+      requireCover: true,
+    },
+  },
+  {
+    id: 'classics',
+    label: 'Mądra klasyka',
+    icon: '🧠',
+    description: 'Ponadczasowe dzieła literatury pięknej, głęboka filozofia i powieści kształtujące epoki.',
+    tagline: 'Arcydzieła literatury światowej',
+    filters: {
+      subject: 'classic literature',
+      yearTo: 1990,
+      minEditions: 5,
+      minRating: 3.5,
+      requireCover: true,
+    },
+  },
+  {
+    id: 'scifi',
+    label: 'Odległe światy',
+    icon: '🚀',
+    description: 'Kosmiczne wyprawy, wizje przyszłości, dystopie, cyberpunki i zderzenia z nieznanym.',
+    tagline: 'Kosmos, technologia i dystopia',
+    filters: {
+      subject: 'science fiction',
+      minRating: 3.5,
+      minPopularity: 50,
+      requireCover: true,
+    },
+  },
+  {
+    id: 'polish',
+    label: 'Polska literatura',
+    icon: '🇵🇱',
+    description: 'Wybitna proza polska, wciągające powieści naszych autorów i klasyczne historie.',
+    tagline: 'Dobre pióro w rodzimym języku',
+    filters: {
+      subject: 'Polish literature',
+      language: 'pol',
+      minRating: 3.0,
+      requireCover: true,
+    },
+  },
+  {
+    id: 'nonfiction',
+    label: 'Prawdziwe historie',
+    icon: '📜',
+    description: 'Biografie wielkich postaci, fascynujące fakty historyczne, wspomnienia i reportaże.',
+    tagline: 'Fakty, ludzie i historia',
+    filters: {
+      subject: 'biography',
+      minRating: 3.5,
+      minPopularity: 0,
+      requireCover: true,
+    },
+  },
+];
 
 export const BOOK_LOTTERY_SUBJECTS: {
   value: string;
@@ -185,6 +284,116 @@ interface OpenLibraryDoc {
   ebook_access?: string;
   number_of_pages_median?: number;
   publisher?: string[];
+  first_sentence?: string | { value?: string } | string[];
+}
+
+export function cleanDescriptionText(raw: unknown): string | undefined {
+  if (!raw) return undefined;
+  let text = '';
+  if (typeof raw === 'string') {
+    text = raw;
+  } else if (
+    typeof raw === 'object' &&
+    raw !== null &&
+    'value' in raw &&
+    typeof (raw as { value: unknown }).value === 'string'
+  ) {
+    text = (raw as { value: string }).value;
+  }
+  if (!text) return undefined;
+
+  // Clean markdown source links
+  text = text.replace(/\(\[source\]\(.*?\)\)/gi, '');
+  text = text.replace(/\[source\]\(.*?\)/gi, '');
+  text = text.replace(/\[source:[^\]]+\]/gi, '');
+  text = text.replace(/---\s*[\r\n]+See also:[\s\S]*$/i, '');
+  text = text.replace(/----------[\s\S]*$/i, '');
+  text = text.replace(/Contains:\s*[\r\n]+- [\s\S]*$/i, '');
+
+  text = text.trim();
+  return text.length > 0 ? text : undefined;
+}
+
+export async function fetchWorkDetails(
+  workIdOrKey: string,
+): Promise<{ description?: string; firstSentence?: string; excerpts?: string[] }> {
+  const cleanId = workIdOrKey.replace('/works/', '').replace('/books/', '');
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`${WORKS_BASE}/${cleanId}.json`, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) return {};
+    const data = (await res.json()) as {
+      description?: unknown;
+      first_sentence?: string | { value?: string };
+      excerpts?: Array<string | { excerpt?: string; comment?: string }>;
+    };
+    const description = cleanDescriptionText(data.description);
+
+    let firstSentence: string | undefined = undefined;
+    if (typeof data.first_sentence === 'string') {
+      firstSentence = data.first_sentence;
+    } else if (
+      data.first_sentence &&
+      typeof data.first_sentence === 'object' &&
+      'value' in data.first_sentence
+    ) {
+      firstSentence = String(data.first_sentence.value);
+    }
+
+    const excerpts: string[] = [];
+    if (Array.isArray(data.excerpts)) {
+      for (const item of data.excerpts) {
+        if (typeof item === 'string') {
+          excerpts.push(item);
+        } else if (
+          item &&
+          typeof item === 'object' &&
+          'excerpt' in item &&
+          typeof item.excerpt === 'string'
+        ) {
+          excerpts.push(item.excerpt);
+          if (
+            !firstSentence &&
+            (item.comment?.toLowerCase().includes('first') || excerpts.length === 1)
+          ) {
+            firstSentence = item.excerpt;
+          }
+        }
+      }
+    }
+
+    return {
+      description,
+      firstSentence: firstSentence?.trim() || undefined,
+      excerpts: excerpts.length > 0 ? excerpts : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+export function formatReadingTime(pages?: number | null): {
+  formatted: string;
+  evenings: string;
+  minutes: number;
+} {
+  const p = pages && pages > 0 ? pages : 280;
+  const minutes = Math.round(p * 1.3);
+  const hours = Math.floor(minutes / 60);
+  const remMins = minutes % 60;
+  const evenings = Math.max(1, Math.ceil(minutes / 90));
+  const evenWord = evenings === 1 ? 'wieczór' : evenings < 5 ? 'wieczory' : 'wieczorów';
+
+  const formatted =
+    hours > 0 ? `~${hours} godz.${remMins > 0 ? ` ${remMins} min` : ''}` : `~${remMins} min`;
+
+  return {
+    formatted,
+    evenings: `ok. ${evenings} ${evenWord}`,
+    minutes,
+  };
 }
 
 interface OpenLibrarySearchResponse {
@@ -301,6 +510,20 @@ function mapDoc(doc: OpenLibraryDoc, preferredSubject?: string): LotteryBook | n
   if (!doc.key || !doc.title) return null;
   const id = doc.key.replace('/works/', '').replace('/books/', '');
   const authors = doc.author_name?.filter(Boolean) ?? [];
+
+  let firstSentence: string | undefined = undefined;
+  if (typeof doc.first_sentence === 'string') {
+    firstSentence = doc.first_sentence;
+  } else if (
+    doc.first_sentence &&
+    typeof doc.first_sentence === 'object' &&
+    'value' in doc.first_sentence
+  ) {
+    firstSentence = String(doc.first_sentence.value);
+  } else if (Array.isArray(doc.first_sentence) && doc.first_sentence.length > 0) {
+    firstSentence = String(doc.first_sentence[0]);
+  }
+
   return {
     id,
     title: doc.title,
@@ -317,6 +540,7 @@ function mapDoc(doc: OpenLibraryDoc, preferredSubject?: string): LotteryBook | n
     ebookAccess: doc.ebook_access ?? null,
     languages: doc.language ?? [],
     publishers: doc.publisher?.slice(0, 8) ?? [],
+    firstSentence: firstSentence?.trim() || undefined,
     openLibraryUrl: `https://openlibrary.org${doc.key}`,
   };
 }
@@ -382,6 +606,7 @@ const SEARCH_FIELDS = [
   'ebook_access',
   'number_of_pages_median',
   'publisher',
+  'first_sentence',
 ].join(',');
 
 function passesClientFilters(book: LotteryBook, filters: BookLotteryFilters): boolean {
@@ -482,7 +707,28 @@ export async function pickRandomLotteryBook(
 
   const candidates = pool.filter((b) => !excludeIds.has(b.id));
   const source = candidates.length > 0 ? candidates : pool;
-  const winner = weightedPick(source, filters);
+  const winner = { ...weightedPick(source, filters) };
+
+  // Calculate reading time
+  if (winner.pages && winner.pages > 0) {
+    winner.readingTimeMinutes = Math.round(winner.pages * 1.3);
+  }
+
+  // Fetch full work details for description and first sentence in parallel with reel preparation
+  try {
+    const details = await fetchWorkDetails(winner.id);
+    if (details.description) {
+      winner.description = details.description;
+    }
+    if (details.firstSentence && !winner.firstSentence) {
+      winner.firstSentence = details.firstSentence;
+    }
+    if (details.excerpts?.length) {
+      winner.excerpts = details.excerpts;
+    }
+  } catch {
+    // Continue even if work details fetch fails
+  }
 
   const reel = [...pool].sort(
     (a, b) => pickScore(b, filters) - pickScore(a, filters),

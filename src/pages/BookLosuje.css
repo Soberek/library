@@ -1,50 +1,62 @@
-/* BookLosuje — 100% Pure Light Theme in shadcn/ui style */
+/* ==========================================================================
+   BookLosuje — Luksusowa Estetyka Biblioteczna (Emerald, Antique Gold & Parchment)
+   ========================================================================== */
+
 .book-losuje-page {
-  --book-ink: #0f172a;
-  --book-panel: #ffffff;
-  --book-moss: #059669;
-  --book-leaf: #10b981;
-  --book-cream: #0f172a;
-  --book-fog: #64748b;
+  --book-ink: #1c1917;
+  --book-ink-secondary: #57534e;
+  --book-ink-muted: #78716c;
+  --book-emerald-deep: #062e24;
+  --book-emerald-main: #064e3b;
+  --book-emerald-light: #059669;
+  --book-emerald-50: #f0fdf4;
+  --book-emerald-100: #d1fae5;
+  --book-gold-dark: #854d0e;
+  --book-gold-base: #b45309;
+  --book-gold-leaf: #d4af37;
+  --book-gold-shimmer: #fbbf24;
+  --book-parchment: #fcfbfa;
+  --book-parchment-card: #fbf9f4;
+  --book-paper-border: #e8e2d4;
 
   position: relative;
   min-height: calc(100vh - 64px);
-  overflow: hidden;
-  color: var(--book-cream);
+  padding-bottom: 7.5rem;
+  overflow-x: hidden;
+  color: var(--book-ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(16, 185, 129, 0.08), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 100% 30%, rgba(5, 150, 105, 0.05), transparent 50%),
-    #f8fafc;
+    radial-gradient(ellipse 70% 40% at 50% -5%, rgba(6, 78, 59, 0.09), transparent 70%),
+    radial-gradient(ellipse 50% 30% at 100% 30%, rgba(212, 175, 55, 0.06), transparent 60%),
+    #f8f7f4;
 }
 
-.book-losuje-grain {
-  display: none;
+@media (min-width: 768px) {
+  .book-losuje-page {
+    padding-bottom: 3.5rem;
+  }
 }
 
 .book-losuje-glow {
   pointer-events: none;
   position: absolute;
-  width: 320px;
-  height: 320px;
+  width: 380px;
+  height: 380px;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
+  filter: blur(90px);
+  opacity: 0.16;
 }
 
 .book-losuje-glow--left {
-  top: 5%;
-  left: -60px;
-  background: rgba(16, 185, 129, 0.3);
+  top: 4%;
+  left: -80px;
+  background: rgba(16, 185, 129, 0.35);
 }
 
 .book-losuje-glow--right {
-  bottom: 10%;
-  right: -60px;
-  background: rgba(5, 150, 105, 0.2);
-}
-
-.book-losuje-shelf {
-  display: none;
+  bottom: 15%;
+  right: -80px;
+  background: rgba(217, 119, 6, 0.25);
 }
 
 .book-losuje-inner {
@@ -52,71 +64,137 @@
   z-index: 1;
   max-width: 900px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 3.5rem;
+  padding: 1.25rem 1rem 2rem;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 640px) {
   .book-losuje-inner {
-    padding: 2rem 1.5rem 4rem;
+    padding: 2rem 1.5rem 3rem;
   }
 }
 
+/* ==========================================================================
+   Hero Header — Pure Calligraphy & Editorial Elegance
+   ========================================================================== */
+
 .book-losuje-hero {
   text-align: center;
-  margin: 0 0 1.5rem;
-  padding: 0.5rem;
+  margin: 0 0 1.35rem;
+  padding: 0.4rem 0.25rem 0.2rem;
 }
 
 .book-losuje-kicker {
-  margin: 0 0 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #059669;
-}
-
-.book-losuje-brand {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
+  margin: 0 auto 0.2rem;
+  display: inline-flex;
   align-items: center;
-  line-height: 0.92;
-  gap: 0.1rem;
-}
-
-.book-losuje-brand-line {
-  font-family: var(--font-display, Fraunces, Georgia, serif);
+  gap: 0.4rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
   font-weight: 800;
-  font-size: clamp(2.4rem, 8vw, 3.8rem);
-  letter-spacing: -0.03em;
-  color: #0f172a;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--book-emerald-main);
+  opacity: 0.92;
 }
 
-.book-losuje-brand-line--accent {
-  color: #059669;
-  background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+.book-losuje-calligraphy-brand {
+  margin: 0.15rem 0 0.25rem;
+  font-family: 'Great Vibes', 'Alex Brush', 'Allura', 'Marck Script', cursive;
+  font-size: clamp(3.6rem, 12vw, 5.6rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  padding: 0 0.5rem;
+  background: linear-gradient(135deg, #064e3b 0%, #047857 32%, #b45309 68%, #d97706 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 12px rgba(180, 83, 9, 0.18));
 }
 
 .book-losuje-tagline {
-  margin: 0.75rem auto 0;
+  margin: 0.35rem auto 0;
   max-width: 28rem;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   line-height: 1.5;
-  color: #64748b;
+  color: #57534e;
   font-weight: 500;
 }
 
+/* ==========================================================================
+   Mood Presets Carousel
+   ========================================================================== */
+
+.book-mood-section {
+  margin-bottom: 1.25rem;
+}
+
+.book-mood-carousel {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.book-mood-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.book-mood-chip {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid var(--book-paper-border);
+  background: #ffffff;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.book-mood-chip:hover {
+  border-color: #cbd5e1;
+  background: #fcfbfa;
+  transform: translateY(-1px);
+}
+
+.book-mood-chip.is-selected {
+  background: #ecfdf5;
+  border-color: var(--book-emerald-main);
+  box-shadow: 0 0 0 1.5px var(--book-emerald-main), 0 4px 12px rgba(6, 78, 59, 0.12);
+}
+
+.book-mood-chip.is-selected .book-mood-label {
+  color: var(--book-emerald-deep);
+}
+
+.book-mood-chip.is-selected .book-mood-tagline {
+  color: var(--book-emerald-light);
+}
+
+/* ==========================================================================
+   Controls Card & Quick Filters
+   ========================================================================== */
+
 .book-losuje-controls {
   background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--book-paper-border);
+  border-radius: 22px;
+  padding: 1.25rem 1.25rem 1.4rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 10px 24px -4px rgba(6, 78, 59, 0.05);
   margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .book-losuje-controls {
+    padding: 1.5rem 1.5rem 1.6rem;
+  }
 }
 
 .book-losuje-controls-head {
@@ -129,21 +207,22 @@
 }
 
 .book-losuje-controls-kicker {
-  margin: 0 0 0.2rem;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  margin: 0 0 0.15rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #059669;
+  color: var(--book-emerald-main);
 }
 
 .book-losuje-controls-title {
   margin: 0;
-  font-family: var(--font-display, Fraunces, Georgia, serif);
-  font-size: 1.4rem;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.35rem;
   font-weight: 750;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--book-emerald-deep);
 }
 
 .book-pool-badge {
@@ -168,22 +247,22 @@
 .book-pool-badge strong {
   font-variant-numeric: tabular-nums;
   color: #059669;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 
 .book-summary-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .book-summary-chip {
-  padding: 0.25rem 0.65rem;
+  padding: 0.22rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   font-weight: 700;
   color: #065f46;
   background: #f0fdf4;
@@ -192,7 +271,7 @@
 
 .book-losuje-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
   margin-bottom: 1rem;
 }
 
@@ -209,13 +288,13 @@
 .book-field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
   min-width: 0;
 }
 
 .book-field-label {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 750;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #475569;
@@ -233,7 +312,7 @@
   text-align: center;
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: #ffffff;
   background: #059669;
@@ -242,7 +321,7 @@
 .book-seg {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .book-seg--joined {
@@ -262,7 +341,7 @@
   border: none;
   border-right: 1px solid #e2e8f0;
   background: transparent;
-  padding: 0.55rem 0.4rem;
+  padding: 0.55rem 0.35rem;
   color: #475569;
 }
 
@@ -270,19 +349,15 @@
   border-right: none;
 }
 
-.book-seg--wrap {
-  gap: 0.35rem;
-}
-
 .book-seg-btn {
   flex: 1 1 auto;
-  min-width: 3.2rem;
-  padding: 0.5rem 0.45rem;
+  min-width: 3rem;
+  padding: 0.48rem 0.4rem;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   color: #475569;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -296,10 +371,10 @@
 
 .book-seg-btn.is-active,
 .book-seg--joined .book-seg-btn.is-active {
-  background: #059669;
-  border-color: #059669;
+  background: #064e3b;
+  border-color: #064e3b;
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+  box-shadow: 0 1px 4px rgba(6, 78, 59, 0.3);
 }
 
 .book-seg-btn:disabled {
@@ -307,15 +382,8 @@
   cursor: not-allowed;
 }
 
-.book-field-hint-inline {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
-
 .book-advanced {
-  margin: 0.5rem 0 1.25rem;
+  margin: 0.4rem 0 1.1rem;
 }
 
 .book-advanced-toggle {
@@ -324,13 +392,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.85rem;
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 1rem;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   color: #334155;
-  font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -361,45 +428,34 @@
 }
 
 .book-advanced-count {
-  min-width: 1.35rem;
-  height: 1.35rem;
+  min-width: 1.3rem;
+  height: 1.3rem;
   padding: 0 0.35rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   color: #ffffff;
   background: #059669;
 }
 
-.book-advanced-chevron {
-  flex-shrink: 0;
-  transition: transform 0.25s ease;
-  color: #64748b;
-}
-
-.book-advanced-toggle.is-open .book-advanced-chevron {
-  transform: rotate(180deg);
-  color: #059669;
-}
-
 .book-advanced-body {
-  margin-top: 0.75rem;
-  padding: 1.25rem 1rem 1rem;
+  margin-top: 0.65rem;
+  padding: 1.1rem 1rem 1rem;
   border-radius: 14px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
 }
 
 .book-reset-advanced {
-  margin-top: 0.75rem;
+  margin-top: 0.65rem;
   padding: 0;
   border: none;
   background: none;
   color: #059669;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   text-decoration: underline;
@@ -407,157 +463,276 @@
 }
 
 .book-draw-btn {
-  width: 100%;
-  min-height: 48px;
   border-radius: 14px !important;
   font-weight: 800 !important;
-  font-size: 1rem !important;
+  font-size: 0.95rem !important;
   color: #ffffff !important;
-  background: #059669 !important;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3) !important;
+  background: linear-gradient(135deg, #064e3b 0%, #059669 100%) !important;
+  box-shadow: 0 4px 16px rgba(6, 78, 59, 0.28) !important;
   transition: all 0.18s ease !important;
 }
 
 .book-draw-btn:hover:not(:disabled) {
-  background: #047857 !important;
-  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4) !important;
+  background: linear-gradient(135deg, #04382a 0%, #047857 100%) !important;
+  box-shadow: 0 6px 20px rgba(6, 78, 59, 0.38) !important;
 }
 
-.book-result-slot {
-  min-height: 280px;
+/* ==========================================================================
+   The Literary Ticket Card (Królewska Karta Biblioteczna)
+   ========================================================================== */
+
+.book-ticket {
+  position: relative;
+  border-radius: 24px;
+  background: var(--book-parchment-card);
+  border: 1px solid var(--book-paper-border);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.03),
+    0 16px 42px -8px rgba(6, 78, 59, 0.14);
+  overflow: hidden;
 }
 
-.book-empty {
+.book-ticket-exlibris {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 240px;
-  padding: 2rem 1.25rem;
-  border: 2px dashed #cbd5e1;
-  border-radius: 20px;
-  background: #ffffff;
-  color: #64748b;
-  text-align: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.9), 0 2px 6px rgba(180, 83, 9, 0.1);
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #92400e;
 }
 
-.book-empty-icon {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 0.35rem;
-  display: grid;
-  place-items: center;
+.book-ticket-exlibris-script {
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.15rem;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #b45309;
+}
+
+.book-ticket-cover-wrap {
+  position: relative;
   border-radius: 16px;
-  color: #059669;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  overflow: hidden;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 12px 24px -4px rgba(6, 78, 59, 0.22);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  background: #ffffff;
 }
 
-.book-empty-title {
-  margin: 0;
-  font-family: var(--font-display, Fraunces, Georgia, serif);
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #0f172a;
+/* Pierwsze zdanie / Opening Hook with Drop-Cap */
+.book-first-sentence-box {
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: #ffffff;
+  border-left: 3px solid var(--book-emerald-main);
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
 }
 
-.book-empty-text {
-  margin: 0;
-  max-width: 20rem;
-  font-size: 0.88rem;
+.book-first-sentence-lead {
+  display: block;
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.25rem;
+  color: var(--book-gold-base);
+  margin-bottom: 0.1rem;
+  line-height: 1;
+}
+
+.book-drop-cap {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.12rem;
   line-height: 1.5;
-  color: #64748b;
+  color: #292524;
+  margin: 0;
 }
 
-/* Slot Reel Animation */
-.book-draw {
+.book-drop-cap::first-letter {
+  float: left;
+  font-family: 'Cinzel', 'Fraunces', serif;
+  font-style: normal;
+  font-size: 2.5rem;
+  line-height: 0.8;
+  padding-top: 2px;
+  padding-right: 6px;
+  padding-bottom: 0;
+  color: var(--book-emerald-main);
+  text-shadow: 1px 1px 0px rgba(212, 175, 55, 0.4);
+  font-weight: 700;
+}
+
+/* Streszczenie fabuły (Synopsis) */
+.book-synopsis-box {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--book-paper-border);
+}
+
+.book-synopsis-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.book-synopsis-title {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--book-emerald-main);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.book-reading-time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-family: 'Caveat', cursive;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+.book-synopsis-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #44403c;
+  margin: 0;
+}
+
+.book-synopsis-toggle {
+  margin-top: 0.4rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--book-emerald-main);
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ==========================================================================
+   Literary Slot Reel Animation
+   ========================================================================== */
+
+.book-draw-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  min-height: 300px;
-  padding: 1.5rem;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
+  min-height: 290px;
+  padding: 1.5rem 1rem;
+  border-radius: 24px;
+  border: 1px solid var(--book-paper-border);
   background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 28px rgba(6, 78, 59, 0.06);
 }
 
-.book-slot {
-  width: min(500px, 100%);
-  padding: 1rem;
-  border-radius: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+.book-draw-card {
+  width: min(520px, 100%);
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: var(--book-parchment-card);
+  border: 1px solid var(--book-paper-border);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.03);
 }
 
-.book-slot-topbar {
+.book-draw-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
-  font-family: var(--font-display, Fraunces, Georgia, serif);
-  font-size: 0.75rem;
+  margin-bottom: 0.65rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
-  color: #059669;
+  letter-spacing: 0.12em;
+  color: var(--book-emerald-main);
 }
 
-.book-slot-lights {
+.book-draw-topbar-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.book-draw-lights {
   display: flex;
   gap: 6px;
 }
 
-.book-slot-lights i {
-  width: 8px;
-  height: 8px;
+.book-draw-lights i {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #a7f3d0;
   animation: book-blink 0.55s steps(2) infinite;
 }
 
-.book-slot-lights i.is-win {
-  background: #059669;
-  box-shadow: 0 0 10px rgba(5, 150, 105, 0.6);
+.book-draw-lights i.is-win {
+  background: #d97706;
+  box-shadow: 0 0 10px rgba(217, 119, 6, 0.8);
   animation: none;
 }
 
-@keyframes book-blink {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-.book-slot-viewport {
+.book-draw-viewport {
   position: relative;
-  height: 220px;
-  border-radius: 12px;
+  height: 210px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: #f4f1ea;
   border: 2px solid #a7f3d0;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
-.book-slot-viewport.is-landed {
-  box-shadow: 0 0 24px rgba(16, 185, 129, 0.25);
+.book-draw-viewport.is-landed {
+  border-color: #d4af37;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.35);
 }
 
-.book-slot-vignette {
+.book-draw-vignette {
   pointer-events: none;
   position: absolute;
   inset: 0;
   z-index: 4;
   background: linear-gradient(
     90deg,
-    rgba(248, 250, 252, 0.8) 0%,
+    rgba(244, 241, 234, 0.85) 0%,
     transparent 18%,
     transparent 82%,
-    rgba(248, 250, 252, 0.8) 100%
+    rgba(244, 241, 234, 0.85) 100%
   );
 }
 
-.book-slot-pointer {
+.book-draw-pointer {
   pointer-events: none;
   position: absolute;
   top: 50%;
@@ -567,337 +742,129 @@
   transform: translateY(-50%);
 }
 
-.book-slot-pointer--left {
+.book-draw-pointer--left {
   left: 0;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-left: 14px solid #059669;
+  border-left: 14px solid var(--book-emerald-main);
 }
 
-.book-slot-pointer--right {
+.book-draw-pointer--right {
   right: 0;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-right: 14px solid #059669;
+  border-right: 14px solid var(--book-emerald-main);
 }
 
-.book-film-track {
+.book-draw-reel-track {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  background: #e2e8f0;
+  background: #e7e2d6;
 }
 
-.book-film-edge {
+.book-draw-ornament-edge {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   height: 16px;
   padding: 0 8px;
   align-items: center;
-  background: #cbd5e1;
+  background: #d8d0c0;
   overflow: hidden;
-  animation: book-edge 1s linear infinite;
+  color: #854d0e;
+  font-size: 0.55rem;
 }
 
-.book-slot-viewport.is-landed .book-film-edge {
-  animation: none;
-}
-
-@keyframes book-edge {
-  to {
-    transform: translateX(-21px);
-  }
-}
-
-.book-film-edge span {
-  flex-shrink: 0;
-  width: 11px;
-  height: 7px;
-  border-radius: 1px;
-  background: #ffffff;
-}
-
-.book-film-strip {
+.book-draw-strip {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   height: calc(100% - 32px);
   padding: 6px 0;
   will-change: transform;
 }
 
-.book-film-frame {
+.book-draw-frame {
   flex-shrink: 0;
   height: 100%;
+  width: 120px;
 }
 
-.book-film-frame-inner {
+@media (min-width: 480px) {
+  .book-draw-frame {
+    width: 140px;
+  }
+}
+
+.book-draw-frame-inner {
   height: 100%;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
   border: 1px solid #cbd5e1;
   transform: scale(0.88);
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.book-film-frame.is-active .book-film-frame-inner,
-.book-film-frame.is-winner .book-film-frame-inner {
+.book-draw-frame.is-active .book-draw-frame-inner,
+.book-draw-frame.is-winner .book-draw-frame-inner {
   transform: scale(1);
-  border-color: #059669;
-  box-shadow: 0 0 16px rgba(5, 150, 105, 0.3);
+  border-color: #d4af37;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
 }
 
-.book-film-frame img {
+.book-draw-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.book-film-frame-fallback {
+.book-draw-frame-fallback {
   width: 100%;
   height: 100%;
-  min-height: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.3rem;
   padding: 0.5rem;
   text-align: center;
-  color: #059669;
+  color: #064e3b;
   background: #ecfdf5;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
-.book-draw-text {
+.book-draw-status-phrase {
   margin: 0 !important;
-  font-family: var(--font-display, Fraunces, Georgia, serif) !important;
-  font-weight: 750 !important;
-  font-size: 1.1rem !important;
-  color: #0f172a !important;
-}
-
-/* Result ticket */
-.book-ticket {
-  position: relative;
-  border-radius: 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
-
-.book-ticket-ribbon {
-  position: absolute;
-  top: 14px;
-  right: -28px;
-  z-index: 2;
-  padding: 0.28rem 2.2rem;
-  transform: rotate(32deg);
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #ffffff;
-  background: #059669;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
-}
-
-.book-ticket-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.25rem 1rem;
-}
-
-@media (min-width: 680px) {
-  .book-ticket-body {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 1.75rem;
-    padding: 2rem;
-    align-items: start;
-  }
-}
-
-.book-ticket-cover {
-  position: relative;
-  width: 140px;
-  margin: 0 auto;
-  align-self: center;
-  flex-shrink: 0;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 10px 24px -2px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-@media (min-width: 680px) {
-  .book-ticket-cover {
-    width: 180px;
-    margin: 0;
-    align-self: start;
-    border-radius: 16px;
-  }
-}
-
-.book-ticket-cover img {
-  width: 100%;
-  display: block;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-}
-
-.book-ticket-cover-fallback {
-  aspect-ratio: 2 / 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  text-align: center;
-  background: #ecfdf5;
-  color: #059669;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.book-ticket-title {
-  margin: 0 !important;
-  padding-right: 2.5rem;
-  font-family: var(--font-display, Fraunces, Georgia, serif) !important;
-  font-size: clamp(1.4rem, 3vw, 1.9rem) !important;
-  font-weight: 750 !important;
-  line-height: 1.2 !important;
-  color: #0f172a !important;
-}
-
-.book-ticket-author {
-  margin: 0.45rem 0 0 !important;
-  font-size: 0.95rem !important;
-  color: #64748b !important;
-  font-weight: 600;
-}
-
-.book-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
-  gap: 0.55rem 0.7rem;
-  margin: 1rem 0 0;
-  padding: 0.8rem 0.9rem;
-  border-radius: 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-}
-
-.book-meta div {
-  min-width: 0;
-}
-
-.book-meta dt {
-  margin: 0;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.book-meta dd {
-  margin: 0.15rem 0 0;
-  font-size: 0.92rem;
-  font-weight: 750;
-  font-variant-numeric: tabular-nums;
-  color: #0f172a;
-}
-
-.book-chip {
-  background: #ecfdf5 !important;
-  color: #065f46 !important;
+  font-size: 1.15rem !important;
   font-weight: 700 !important;
-  border: 1px solid #a7f3d0 !important;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  color: var(--book-emerald-deep) !important;
 }
 
-.book-chip--accent {
-  background: #f0fdf4 !important;
-  border-color: #86efac !important;
-  color: #15803d !important;
+/* ==========================================================================
+   Mobile Sticky Action Dock (Thumb Zone)
+   ========================================================================== */
+
+.book-sticky-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  padding: 0.5rem 1rem 0.65rem;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
 }
 
-.book-ticket-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-}
-
-.book-draw-again {
-  min-height: 40px !important;
-  border-radius: 999px !important;
-  font-weight: 750 !important;
-  color: #ffffff !important;
-  background: #059669 !important;
-}
-
-.book-year-row {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 0.55rem;
-  align-items: center;
-}
-
-.book-year-sep {
-  color: #059669;
-  font-weight: 700;
-}
-
-.book-ol-link {
-  min-height: 40px !important;
-  border-radius: 999px !important;
-  font-weight: 700 !important;
-  color: #059669 !important;
-  border-color: #a7f3d0 !important;
-  background: #ecfdf5 !important;
-}
-
-.book-ol-link:hover {
-  background: #d1fae5 !important;
-}
-
-.book-credit {
-  margin: 1.5rem 0 0 !important;
-  text-align: center;
-  font-size: 0.75rem !important;
-  color: #94a3b8 !important;
-  font-weight: 500;
-}
-
-@media (max-width: 420px) {
-  .book-seg--joined {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .book-seg--joined .book-seg-btn:nth-child(2) {
-    border-right: none;
-  }
-
-  .book-seg--joined .book-seg-btn:nth-child(1),
-  .book-seg--joined .book-seg-btn:nth-child(2) {
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  .book-ticket-ribbon {
-    font-size: 0.58rem;
-    top: 12px;
-    right: -34px;
+@media (min-width: 768px) {
+  .book-sticky-dock {
+    display: none;
   }
 }
