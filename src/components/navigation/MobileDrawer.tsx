@@ -136,8 +136,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => 
         </div>
 
         {/* Footer actions */}
-        {user && (
-          <div className="p-3 border-t border-slate-100">
+        <div className="p-3 border-t border-slate-100 space-y-1">
+          {user && (
             <button
               onClick={handleLogout}
               className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
@@ -145,8 +145,8 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => 
               <LogOut className="w-4 h-4 shrink-0" />
               <span>Wyloguj się</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

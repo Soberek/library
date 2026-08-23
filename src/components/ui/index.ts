@@ -23,3 +23,4 @@ export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as MagdaIcon } from './MagdaIcon';
 export { default as SpecialButton } from './SpecialButton';
 export { default as ResetPasswordModal } from './ResetPasswordModal';
+export { default as PwaInstallPrompt } from './PwaInstallPrompt';

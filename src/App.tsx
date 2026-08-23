@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
-
 import { Navbar, MobileNavbar, ErrorBoundary } from './components';
+import { PwaInstallPrompt } from './components/ui';
 import './App.css';
 
 function App() {
@@ -9,6 +9,7 @@ function App() {
       <Navbar />
       <MobileNavbar />
       <Outlet />
+      <PwaInstallPrompt />
     </ErrorBoundary>
   );
 }
