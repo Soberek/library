@@ -35,7 +35,7 @@ import MagdaDrawAnimation from '../components/magda/MagdaDrawAnimation';
 import { useWatchlistQuery } from '../hooks/useWatchlistQuery';
 import { Slider } from '../components/ui/slider';
 import { Select } from '../components/ui/select';
-import { Button } from '../components/ui/button';
+import { Button, buttonVariants } from '../components/ui/button';
 import { MOOD_PRESETS, DEFAULT_FILTERS } from '../constants/movieFilters';
 import { cn } from '../lib/utils';
 import './MagdaLosuje.css';
@@ -550,10 +550,10 @@ export const MagdaLosuje: React.FC = () => {
               <motion.article
                 key={movie.id}
                 className="magda-ticket"
-                initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16, scale: 0.98 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 {backdrop && (
                   <div
@@ -562,6 +562,7 @@ export const MagdaLosuje: React.FC = () => {
                   />
                 )}
                 <div className="magda-ticket-body">
+                  {/* Left: Poster */}
                   <div className="magda-poster-wrap">
                     {poster ? (
                       <img
@@ -572,96 +573,110 @@ export const MagdaLosuje: React.FC = () => {
                       />
                     ) : (
                       <div className="magda-poster magda-poster--fallback">
-                        <Film className="w-10 h-10 text-amber-600" />
+                        <Film className="w-12 h-12 text-amber-600" />
                       </div>
                     )}
                   </div>
 
+                  {/* Right: Info */}
                   <div className="magda-ticket-info">
-                    <h2 className="magda-movie-title">
-                      {movie.title}
-                    </h2>
+                    {/* Title & Tagline */}
+                    <div>
+                      <h2 className="magda-movie-title text-slate-900 font-extrabold tracking-tight font-display">
+                        {movie.title}
+                      </h2>
 
-                    {movie.original_title && movie.original_title !== movie.title && (
-                      <p className="magda-original-title">
-                        {movie.original_title}
-                      </p>
-                    )}
+                      {movie.original_title && movie.original_title !== movie.title && (
+                        <p className="text-xs text-slate-500 font-medium italic mt-0.5">
+                          {movie.original_title}
+                        </p>
+                      )}
 
-                    {movie.tagline && (
-                      <p className="text-xs text-amber-800 font-semibold italic mt-1 mb-2">
-                        &bdquo;{movie.tagline}&rdquo;
-                      </p>
-                    )}
+                      {movie.tagline && (
+                        <p className="text-xs sm:text-sm font-semibold italic text-amber-800/90 mt-1 mb-1">
+                          &bdquo;{movie.tagline}&rdquo;
+                        </p>
+                      )}
+                    </div>
 
-                    <div className="flex flex-wrap gap-1.5 my-3">
-                      <span className="magda-chip">
-                        <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline -mt-0.5" />{' '}
-                        {movie.vote_average.toFixed(1)} / 10
+                    {/* Badges / Chips */}
+                    <div className="flex flex-wrap items-center gap-1.5 my-3">
+                      {/* Rating */}
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300/80 shadow-2xs">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span>{movie.vote_average.toFixed(1)}</span>
+                        <span className="text-[10px] text-amber-800/60 font-normal">/ 10</span>
                         {movie.vote_count > 0 && (
-                          <span className="text-[10px] text-amber-900/60 font-normal">
+                          <span className="text-[10px] text-amber-800/60 font-normal ml-0.5">
                             ({movie.vote_count.toLocaleString()})
                           </span>
                         )}
                       </span>
 
-                      <span className="magda-chip">
+                      {/* Year */}
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
                         {releaseYear(movie.release_date)}
                       </span>
 
+                      {/* Runtime */}
                       {runtimeDisplay && (
-                        <span className="magda-chip">
-                          <Clock className="w-3 h-3 text-amber-700 inline -mt-0.5" />{' '}
-                          {runtimeDisplay}
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
+                          <Clock className="w-3.5 h-3.5 text-slate-500" />
+                          <span>{runtimeDisplay}</span>
                         </span>
                       )}
 
-                      {movie.genre_ids.slice(0, 3).map((id) => {
+                      {/* Genres */}
+                      {movie.genre_ids.slice(0, 4).map((id) => {
                         const name = genreName(id);
                         return name ? (
-                          <span key={id} className="magda-chip">
+                          <span
+                            key={id}
+                            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/70"
+                          >
                             {name}
                           </span>
                         ) : null;
                       })}
                     </div>
 
+                    {/* Director */}
                     {movie.director && (
-                      <p className="text-xs text-slate-600 font-medium mb-2 flex items-center gap-1.5">
-                        <Clapperboard className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Reżyseria: <strong className="text-slate-800 font-bold">{movie.director}</strong></span>
-                      </p>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mb-2.5">
+                        <Clapperboard className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span>
+                          Reżyseria: <strong className="text-slate-900 font-bold">{movie.director}</strong>
+                        </span>
+                      </div>
                     )}
 
-                    {movie.overview ? (
-                      <p className="magda-overview">{movie.overview}</p>
-                    ) : (
-                      <p className="magda-overview magda-overview--muted">
-                        Brak szczegółowego opisu dla tego tytułu.
-                      </p>
-                    )}
+                    {/* Overview */}
+                    <p className="magda-overview text-slate-600">
+                      {movie.overview || "Brak szczegółowego opisu dla tego tytułu."}
+                    </p>
 
-                    <div className="flex flex-col sm:flex-row gap-2 flex-wrap pt-3.5 border-t border-slate-100 mt-3">
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2.5 flex-wrap pt-4 border-t border-slate-100 mt-4">
                       {savedEntry ? (
                         <>
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="default"
                             disabled
-                            className="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800"
+                            className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-4 rounded-xl"
                           >
                             <BookmarkCheck className="w-4 h-4 text-emerald-600" />
                             <span>Na watchliście</span>
                           </Button>
                           <Button
-                            size="sm"
+                            size="default"
                             disabled={toggling}
                             onClick={() => void handleToggleCurrentWatched()}
                             className={cn(
-                              "gap-1.5",
+                              "gap-2 font-bold h-10 px-4 rounded-xl",
                               savedEntry.watched
                                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                                : "bg-amber-600 hover:bg-amber-700 text-white"
+                                : "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
                             )}
                           >
                             {toggling ? (
@@ -676,10 +691,10 @@ export const MagdaLosuje: React.FC = () => {
                         </>
                       ) : (
                         <Button
-                          size="sm"
+                          size="default"
                           disabled={adding}
                           onClick={() => void handleAddToWatchlist()}
-                          className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
+                          className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-5 rounded-xl cursor-pointer"
                         >
                           {adding ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -690,21 +705,18 @@ export const MagdaLosuje: React.FC = () => {
                         </Button>
                       )}
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
+                      <a
+                        href={`https://www.themoviedb.org/movie/${movie.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          buttonVariants({ variant: 'outline', size: 'default' }),
+                          'gap-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-4 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-sm no-underline shrink-0'
+                        )}
                       >
-                        <a
-                          href={`https://www.themoviedb.org/movie/${movie.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span>Profil TMDB</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </Button>
+                        <span>Profil TMDB</span>
+                        <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
+                      </a>
                     </div>
                   </div>
                 </div>

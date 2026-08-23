@@ -734,20 +734,18 @@ export const BookLosuje: React.FC = () => {
                       </Button>
 
                       {drawn.openLibraryUrl && (
-                        <Button
-                          variant="outline"
-                          asChild
-                          className="book-ol-link gap-1.5"
+                        <a
+                          href={drawn.openLibraryUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            buttonVariants({ variant: 'outline', size: 'sm' }),
+                            'book-ol-link gap-1.5 inline-flex items-center justify-center whitespace-nowrap text-xs font-bold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 no-underline shrink-0'
+                          )}
                         >
-                          <a
-                            href={drawn.openLibraryUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <span>Open Library</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        </Button>
+                          <span>Open Library</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
                       )}
                     </div>
                   </div>
