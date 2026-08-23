@@ -86,14 +86,20 @@ export async function addToWatchlist(input: WatchlistMovieInput): Promise<string
     }
 
     const existing = await getUserWatchlist(input.userId);
-    if (existing.some((item) => item.tmdbId === input.tmdbId)) {
-      throw new Error('Ten film jest już na watchliście.');
+    const found = existing.find((item) => item.tmdbId === input.tmdbId);
+    if (found) {
+      if (input.watched && !found.watched) {
+        await setWatchlistWatched(found.id, true);
+        return found.id;
+      }
+      return found.id;
     }
 
+    const isWatched = Boolean(input.watched);
     const payload = {
       ...input,
-      watched: false,
-      watchedAt: null,
+      watched: isWatched,
+      watchedAt: isWatched ? new Date().toISOString() : null,
       createdAt: new Date().toISOString(),
     };
 

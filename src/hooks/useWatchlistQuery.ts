@@ -26,10 +26,11 @@ export function useWatchlistQuery() {
     watchlist.find((item) => item.tmdbId === tmdbId);
 
   const addMutation = useMutation({
-    mutationFn: (movie: Movie) =>
-      watchlistService.addToWatchlist(
-        watchlistService.movieToWatchlistInput(movie, userId),
-      ),
+    mutationFn: ({ movie, watched = false }: { movie: Movie; watched?: boolean }) => {
+      const input = watchlistService.movieToWatchlistInput(movie, userId);
+      input.watched = watched;
+      return watchlistService.addToWatchlist(input);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: watchlistKeys.list(userId) });
     },
@@ -55,7 +56,8 @@ export function useWatchlistQuery() {
     loading: query.isLoading,
     error: query.error,
     findByTmdbId,
-    addToWatchlist: addMutation.mutateAsync,
+    addToWatchlist: (movie: Movie) => addMutation.mutateAsync({ movie, watched: false }),
+    markAsWatched: (movie: Movie) => addMutation.mutateAsync({ movie, watched: true }),
     adding: addMutation.isPending,
     toggleWatched: toggleWatchedMutation.mutateAsync,
     toggling: toggleWatchedMutation.isPending,

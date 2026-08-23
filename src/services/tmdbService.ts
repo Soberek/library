@@ -202,31 +202,30 @@ export async function pickRandomMovie(
     throw new Error('Brak filmów dla wybranych filtrów. Poluzuj kryteria i spróbuj ponownie.');
   }
 
-  // Only sample from the top-quality pages (never draw from obscure pages 50..500)
+  // Only sample from the top-quality pages
   const maxSamplePage = Math.min(
     firstPage.total_pages,
-    filters.minVotes >= 500 ? 4 : filters.minVotes >= 100 ? 6 : 8,
+    filters.minVotes >= 500 ? 5 : filters.minVotes >= 100 ? 8 : 12,
   );
 
-  const pagesToFetch: number[] = [1];
-  if (maxSamplePage > 1) {
+  const pagesToFetch = new Set<number>([1]);
+  const sampleCount = Math.min(3, maxSamplePage);
+  while (pagesToFetch.size < sampleCount) {
     const randomPage = Math.floor(Math.random() * maxSamplePage) + 1;
-    if (!pagesToFetch.includes(randomPage)) {
-      pagesToFetch.push(randomPage);
-    }
+    pagesToFetch.add(randomPage);
   }
 
   const responses = await Promise.all(
-    pagesToFetch.map((p) =>
+    Array.from(pagesToFetch).map((p) =>
       p === 1 ? Promise.resolve(firstPage) : discoverMovies(filters, p).catch(() => null),
     ),
   );
 
-  const allFetched = responses.flatMap((r) => r?.results ?? []);
+  let allFetched = responses.flatMap((r) => r?.results ?? []);
 
   // Filter high-quality candidates:
   // 1. Must have poster path
-  // 2. Not in excludeIds
+  // 2. NOT in excludeIds
   // 3. Decent popularity & vote count
   let candidates = allFetched.filter(
     (m) =>
@@ -235,17 +234,36 @@ export async function pickRandomMovie(
       m.vote_count >= Math.max(10, filters.minVotes / 2),
   );
 
+  // If initial batch was all excluded, fetch remaining top pages to find unseen movies
+  if (candidates.length === 0 && maxSamplePage > pagesToFetch.size) {
+    const nextPages = Array.from({ length: maxSamplePage }, (_, i) => i + 1).filter(
+      (p) => !pagesToFetch.has(p),
+    );
+    const extraResponses = await Promise.all(
+      nextPages.slice(0, 4).map((p) => discoverMovies(filters, p).catch(() => null)),
+    );
+    const extraFetched = extraResponses.flatMap((r) => r?.results ?? []);
+    allFetched = [...allFetched, ...extraFetched];
+    candidates = allFetched.filter(
+      (m) =>
+        m.poster_path &&
+        !excludeIds.has(m.id) &&
+        m.vote_count >= Math.max(10, filters.minVotes / 2),
+    );
+  }
+
+  // If still empty (all unseen exhausted), check if non-excluded movies with poster exist
   if (candidates.length === 0) {
-    // If all are excluded, relax exclude filter
+    candidates = allFetched.filter((m) => m.poster_path && !excludeIds.has(m.id));
+  }
+
+  // If literally all movies are excluded in these filters, inform user or fallback
+  if (candidates.length === 0) {
     candidates = allFetched.filter((m) => m.poster_path);
   }
 
   if (candidates.length === 0) {
-    candidates = firstPage.results;
-  }
-
-  if (candidates.length === 0) {
-    throw new Error('Nie znaleziono odpowiedniego filmu. Spróbuj zmienić filtry.');
+    throw new Error('Wszystkie filmy z tej kategorii zostały już przez Ciebie obejrzane! Zmień filtry lub zresetuj listę.');
   }
 
   const picked = candidates[Math.floor(Math.random() * candidates.length)];

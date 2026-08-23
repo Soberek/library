@@ -16,7 +16,8 @@ export interface WatchlistMovie {
 
 export type WatchlistMovieInput = Omit<
   WatchlistMovie,
-  'id' | 'createdAt' | 'watched' | 'watchedAt' | 'userId'
+  'id' | 'createdAt' | 'watchedAt' | 'userId' | 'watched'
 > & {
   userId: string;
+  watched?: boolean;
 };

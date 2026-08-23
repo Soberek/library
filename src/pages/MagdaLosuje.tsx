@@ -14,6 +14,7 @@ import {
   Clapperboard,
   Sparkles,
   RotateCcw,
+  Eye,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Movie, MovieFilters, MovieGenre, MoodPreset } from '../types/Movie';
@@ -42,6 +43,7 @@ import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1949 }, (_, i) => CURRENT_YEAR - i);
+const SEEN_STORAGE_KEY = 'magda_seen_movies';
 
 export const MagdaLosuje: React.FC = () => {
   const [genres, setGenres] = useState<MovieGenre[]>([]);
@@ -53,6 +55,14 @@ export const MagdaLosuje: React.FC = () => {
   const [activeMoodId, setActiveMoodId] = useState<string | null>(null);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [recentIds, setRecentIds] = useState<number[]>([]);
+  const [seenIds, setSeenIds] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem(SEEN_STORAGE_KEY);
+      return saved ? (JSON.parse(saved) as number[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [drawing, setDrawing] = useState(false);
   const [reelMovies, setReelMovies] = useState<Movie[]>([]);
@@ -68,6 +78,7 @@ export const MagdaLosuje: React.FC = () => {
     loading: watchlistLoading,
     findByTmdbId,
     addToWatchlist,
+    markAsWatched,
     adding,
     toggleWatched,
     toggling,
@@ -156,6 +167,8 @@ export const MagdaLosuje: React.FC = () => {
     });
   };
 
+  const isMovieSeen = Boolean(savedEntry?.watched || (movie && seenIds.includes(movie.id)));
+
   const handleDraw = useCallback(async () => {
     setDrawing(true);
     setError(null);
@@ -168,6 +181,7 @@ export const MagdaLosuje: React.FC = () => {
       const exclude = new Set([
         ...recentIds,
         ...watchlist.map((item) => item.tmdbId),
+        ...seenIds,
       ]);
 
       const [picked, reelPage] = await Promise.all([
@@ -190,7 +204,7 @@ export const MagdaLosuje: React.FC = () => {
       setSpinWinner(null);
       setReelMovies([]);
     }
-  }, [filters, recentIds, watchlist]);
+  }, [filters, recentIds, watchlist, seenIds]);
 
   const handleSpinComplete = useCallback(() => {
     if (!spinWinner) return;
@@ -211,6 +225,58 @@ export const MagdaLosuje: React.FC = () => {
       );
     }
   }, [movie, addToWatchlist]);
+
+  const markMovieAsSeen = useCallback(
+    async (targetMovie: Movie) => {
+      setWatchlistActionError(null);
+      setSeenIds((prev) => {
+        const next = Array.from(new Set([...prev, targetMovie.id]));
+        try {
+          localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // ignore storage error
+        }
+        return next;
+      });
+
+      try {
+        if (savedEntry) {
+          if (!savedEntry.watched) {
+            await toggleWatched({ entryId: savedEntry.id, watched: true });
+          }
+        } else {
+          await markAsWatched(targetMovie);
+        }
+      } catch (err) {
+        console.warn('Could not sync watched movie to watchlist:', err);
+      }
+    },
+    [savedEntry, toggleWatched, markAsWatched],
+  );
+
+  const unmarkMovieAsSeen = useCallback(
+    async (targetMovie: Movie) => {
+      setWatchlistActionError(null);
+      setSeenIds((prev) => {
+        const next = prev.filter((id) => id !== targetMovie.id);
+        try {
+          localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // ignore storage error
+        }
+        return next;
+      });
+
+      try {
+        if (savedEntry && savedEntry.watched) {
+          await toggleWatched({ entryId: savedEntry.id, watched: false });
+        }
+      } catch (err) {
+        console.warn('Could not sync unwatched movie to watchlist:', err);
+      }
+    },
+    [savedEntry, toggleWatched],
+  );
 
   const handleToggleCurrentWatched = useCallback(async () => {
     if (!savedEntry) return;
@@ -602,6 +668,14 @@ export const MagdaLosuje: React.FC = () => {
 
                       {/* Badges / Chips */}
                       <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 my-2">
+                        {/* Seen badge */}
+                        {isMovieSeen && (
+                          <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
+                            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 shrink-0" />
+                            <span>Widziałam (wykluczony)</span>
+                          </span>
+                        )}
+
                         {/* Rating */}
                         <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300/80 shadow-2xs">
                           <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-500 text-amber-500" />
@@ -657,52 +731,76 @@ export const MagdaLosuje: React.FC = () => {
 
                       {/* Desktop Action Buttons */}
                       <div className="hidden sm:flex items-center gap-2.5 flex-wrap pt-4 border-t border-slate-100 mt-4">
-                        {savedEntry ? (
+                        {!isMovieSeen ? (
                           <>
+                            {savedEntry ? (
+                              <Button
+                                variant="outline"
+                                size="default"
+                                disabled
+                                className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-4 rounded-xl"
+                              >
+                                <BookmarkCheck className="w-4 h-4 text-emerald-600" />
+                                <span>Na watchliście</span>
+                              </Button>
+                            ) : (
+                              <Button
+                                size="default"
+                                disabled={adding || toggling}
+                                onClick={() => void handleAddToWatchlist()}
+                                className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-4 rounded-xl cursor-pointer"
+                              >
+                                {adding ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <BookmarkPlus className="w-4 h-4" />
+                                )}
+                                <span>Dodaj do watchlisty</span>
+                              </Button>
+                            )}
+
                             <Button
-                              variant="outline"
                               size="default"
-                              disabled
-                              className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-4 rounded-xl"
-                            >
-                              <BookmarkCheck className="w-4 h-4 text-emerald-600" />
-                              <span>Na watchliście</span>
-                            </Button>
-                            <Button
-                              size="default"
-                              disabled={toggling}
-                              onClick={() => void handleToggleCurrentWatched()}
-                              className={cn(
-                                "gap-2 font-bold h-10 px-4 rounded-xl",
-                                savedEntry.watched
-                                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                                  : "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
-                              )}
+                              disabled={adding || toggling}
+                              onClick={() => void markMovieAsSeen(movie)}
+                              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 px-4 rounded-xl shadow-xs cursor-pointer"
                             >
                               {toggling ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : savedEntry.watched ? (
-                                <CheckCircle2 className="w-4 h-4" />
                               ) : (
-                                <Circle className="w-4 h-4" />
+                                <Eye className="w-4 h-4" />
                               )}
-                              <span>{savedEntry.watched ? 'Obejrzane' : 'Oznacz jako obejrzane'}</span>
+                              <span>Widziałam ten film</span>
                             </Button>
                           </>
                         ) : (
-                          <Button
-                            size="default"
-                            disabled={adding}
-                            onClick={() => void handleAddToWatchlist()}
-                            className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-5 rounded-xl cursor-pointer"
-                          >
-                            {adding ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <BookmarkPlus className="w-4 h-4" />
-                            )}
-                            <span>Dodaj do watchlisty</span>
-                          </Button>
+                          <>
+                            <Button
+                              size="default"
+                              disabled={toggling}
+                              onClick={() => void unmarkMovieAsSeen(movie)}
+                              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 px-4 rounded-xl shadow-xs"
+                              title="Kliknij, aby cofnąć oznaczenie jako obejrzany"
+                            >
+                              {toggling ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <CheckCircle2 className="w-4 h-4" />
+                              )}
+                              <span>Obejrzane ✓ (wykluczony)</span>
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="default"
+                              disabled={drawing}
+                              onClick={() => void handleDraw()}
+                              className="gap-2 border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold h-10 px-4 rounded-xl"
+                            >
+                              <Shuffle className="w-4 h-4 text-amber-600" />
+                              <span>Losuj inny film</span>
+                            </Button>
+                          </>
                         )}
 
                         <a
@@ -728,37 +826,48 @@ export const MagdaLosuje: React.FC = () => {
                     </p>
 
                     <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 mt-3">
-                      {savedEntry ? (
+                      {!isMovieSeen ? (
                         <>
+                          {savedEntry ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled
+                              className="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-2 rounded-xl text-xs justify-center"
+                            >
+                              <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="truncate">Na watchliście</span>
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={adding || toggling}
+                              onClick={() => void handleAddToWatchlist()}
+                              className="gap-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-2 rounded-xl cursor-pointer text-xs justify-center"
+                            >
+                              {adding ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                              ) : (
+                                <BookmarkPlus className="w-3.5 h-3.5 shrink-0" />
+                              )}
+                              <span className="truncate">Do watchlisty</span>
+                            </Button>
+                          )}
+
                           <Button
-                            variant="outline"
                             size="sm"
-                            disabled
-                            className="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-2 rounded-xl text-xs justify-center"
-                          >
-                            <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span className="truncate">Na watchliście</span>
-                          </Button>
-                          <Button
-                            size="sm"
-                            disabled={toggling}
-                            onClick={() => void handleToggleCurrentWatched()}
-                            className={cn(
-                              "gap-1.5 font-bold h-10 px-2 rounded-xl text-xs justify-center",
-                              savedEntry.watched
-                                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                                : "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
-                            )}
+                            disabled={adding || toggling}
+                            onClick={() => void markMovieAsSeen(movie)}
+                            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 px-2 rounded-xl text-xs justify-center cursor-pointer"
                           >
                             {toggling ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
-                            ) : savedEntry.watched ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                             ) : (
-                              <Circle className="w-3.5 h-3.5 shrink-0" />
+                              <Eye className="w-3.5 h-3.5 shrink-0" />
                             )}
-                            <span className="truncate">{savedEntry.watched ? 'Obejrzane' : 'Oznacz'}</span>
+                            <span className="truncate">Widziałam film</span>
                           </Button>
+
                           <a
                             href={`https://www.themoviedb.org/movie/${movie.id}`}
                             target="_blank"
@@ -776,16 +885,27 @@ export const MagdaLosuje: React.FC = () => {
                         <>
                           <Button
                             size="sm"
-                            disabled={adding}
-                            onClick={() => void handleAddToWatchlist()}
-                            className="gap-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-2 rounded-xl cursor-pointer text-xs justify-center"
+                            disabled={toggling}
+                            onClick={() => void unmarkMovieAsSeen(movie)}
+                            className="gap-1.5 font-bold h-10 px-2 rounded-xl text-xs justify-center bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
                           >
-                            {adding ? (
+                            {toggling ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                             ) : (
-                              <BookmarkPlus className="w-3.5 h-3.5 shrink-0" />
+                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                             )}
-                            <span className="truncate">Do watchlisty</span>
+                            <span className="truncate">Obejrzane ✓</span>
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={drawing}
+                            onClick={() => void handleDraw()}
+                            className="gap-1.5 border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold h-10 px-2 rounded-xl text-xs justify-center"
+                          >
+                            <Shuffle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span className="truncate">Losuj inny</span>
                           </Button>
 
                           <a
@@ -794,7 +914,7 @@ export const MagdaLosuje: React.FC = () => {
                             rel="noopener noreferrer"
                             className={cn(
                               buttonVariants({ variant: 'outline', size: 'sm' }),
-                              'gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-2 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline justify-center'
+                              'col-span-2 gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-3 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline'
                             )}
                           >
                             <span>Profil TMDB</span>
