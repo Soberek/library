@@ -41,109 +41,130 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex md:hidden">
+    <div className="fixed inset-0 z-50 flex md:hidden items-end justify-center">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity animate-in fade-in-0 duration-200"
         onClick={onClose}
       />
 
-      {/* Drawer surface */}
-      <div className="relative z-50 w-72 max-w-[80vw] h-full bg-white border-r border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-left duration-250">
+      {/* Material 3 Bottom Sheet */}
+      <div className="relative z-50 w-full max-w-lg bg-[#f3f4fa] rounded-t-[28px] border-t border-[#e2e4ef] shadow-2xl flex flex-col max-h-[85vh] animate-in slide-in-from-bottom duration-250 pb-[max(env(safe-area-inset-bottom),1rem)]">
+        {/* M3 Drag handle */}
+        <div className="w-8 h-1 bg-[#74777f] rounded-full mx-auto mt-3 mb-1 opacity-70" />
+
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200/60 shadow-xs">
-              <BookOpen className="w-4 h-4" />
+        <div className="px-5 py-3 border-b border-[#e2e4ef] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#dbe1ff] text-[#00174c] shadow-xs">
+              <BookOpen className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 font-display">
+              <h2 className="text-base font-bold text-[#1a1b24] font-sans">
                 MyLibrary
               </h2>
-              {user?.email && (
-                <p className="text-xs text-slate-500 truncate max-w-[150px]">
+              {user?.email ? (
+                <p className="text-xs font-medium text-[#44474e] truncate max-w-[200px]">
                   {user.email}
                 </p>
+              ) : (
+                <p className="text-xs text-[#74777f]">Niezalogowany</p>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Zamknij menu"
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-2 rounded-full text-[#44474e] hover:bg-[#e6e8f2] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Links */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+        {/* Navigation list */}
+        <div className="overflow-y-auto p-4 space-y-2">
           <Link
             to="/"
             onClick={onClose}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              "flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all bg-white border border-[#e2e4ef] shadow-2xs",
               location.pathname === "/"
-                ? "bg-indigo-50 text-indigo-700 font-bold"
-                : "text-slate-700 hover:bg-slate-100"
+                ? "bg-[#dbe1ff] text-[#00174c] border-indigo-300 font-bold"
+                : "text-[#1a1b24] hover:bg-slate-50"
             )}
           >
-            <Home className="w-4 h-4 shrink-0 text-indigo-600" />
-            <span>Moja biblioteka</span>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                <Home className="w-4 h-4" />
+              </div>
+              <span>Moja biblioteka</span>
+            </div>
           </Link>
 
           <Link
             to="/magda-losuje"
             onClick={onClose}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              "flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all bg-white border border-[#e2e4ef] shadow-2xs",
               location.pathname === "/magda-losuje"
-                ? "bg-amber-100 text-amber-900 font-bold"
-                : "text-slate-700 hover:bg-amber-50 hover:text-amber-800"
+                ? "bg-[#ffe088] text-[#3b2800] border-amber-400 font-bold"
+                : "text-[#1a1b24] hover:bg-amber-50"
             )}
           >
-            <MagdaIcon size={20} alt="" />
-            <span>MAGDA LOSUJE</span>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center">
+                <MagdaIcon size={18} alt="" />
+              </div>
+              <span>MAGDA LOSUJE (Filmy)</span>
+            </div>
           </Link>
 
           <Link
             to="/losuj-ksiazke"
             onClick={onClose}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              "flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all bg-white border border-[#e2e4ef] shadow-2xs",
               location.pathname === "/losuj-ksiazke"
-                ? "bg-emerald-100 text-emerald-900 font-bold"
-                : "text-slate-700 hover:bg-emerald-50 hover:text-emerald-800"
+                ? "bg-[#a6f4c5] text-[#00381e] border-emerald-300 font-bold"
+                : "text-[#1a1b24] hover:bg-emerald-50"
             )}
           >
-            <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Losuj książkę</span>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <span>Losuj książkę</span>
+            </div>
           </Link>
 
           <Link
             to="/pozycje-seksualne"
             onClick={onClose}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+              "flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all bg-white border border-[#e2e4ef] shadow-2xs",
               location.pathname === "/pozycje-seksualne"
-                ? "bg-pink-100 text-pink-900 font-bold"
-                : "text-slate-700 hover:bg-pink-50 hover:text-pink-800"
+                ? "bg-[#ffd9e2] text-[#3e001d] border-pink-300 font-bold"
+                : "text-[#1a1b24] hover:bg-pink-50"
             )}
           >
-            <Heart className="w-4 h-4 text-pink-600 shrink-0" />
-            <span>Pozycje</span>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-pink-50 text-pink-700 flex items-center justify-center">
+                <Heart className="w-4 h-4" />
+              </div>
+              <span>Pozycje dla par</span>
+            </div>
           </Link>
         </div>
 
         {/* Footer actions */}
-        <div className="p-3 border-t border-slate-100 space-y-1">
+        <div className="p-4 border-t border-[#e2e4ef]">
           {user && (
             <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              className="flex w-full items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold text-[#ba1a1a] bg-[#ffdad6] hover:bg-[#ffb4ab] transition-colors cursor-pointer"
             >
-              <LogOut className="w-4 h-4 shrink-0" />
-              <span>Wyloguj się</span>
+              <LogOut className="w-4 h-4" />
+              <span>Wyloguj się z konta</span>
             </button>
           )}
         </div>

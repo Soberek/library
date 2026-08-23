@@ -144,6 +144,8 @@ export async function fetchMovieDetails(
   tagline?: string;
   director?: string;
   overview?: string;
+  trailer_key?: string;
+  watch_providers?: WatchProvider[];
 }> {
   try {
     interface TmdbDetailResponse {
@@ -153,27 +155,49 @@ export async function fetchMovieDetails(
       credits?: {
         crew?: { job: string; name: string }[];
       };
+      videos?: {
+        results?: { key: string; site: string; type: string; official?: boolean }[];
+      };
+      'watch/providers'?: {
+        results?: {
+          PL?: {
+            flatrate?: { provider_id: number; provider_name: string; logo_path: string | null }[];
+          };
+        };
+      };
     }
 
     const data = await tmdbFetch<TmdbDetailResponse>(`/movie/${movieId}`, {
-      append_to_response: 'credits',
+      append_to_response: 'credits,videos,watch/providers',
     });
 
     const director = data.credits?.crew?.find((c) => c.job === 'Director')?.name;
     let overview = data.overview;
+    let trailerKey = data.videos?.results?.find(
+      (v) => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'),
+    )?.key;
 
-    // If Polish overview is empty, fallback to English overview
-    if (!overview || overview.trim() === '') {
+    // Fallback: If Polish overview or trailer is empty, fetch English details
+    if (!overview || overview.trim() === '' || !trailerKey) {
       try {
         const apiKey = getApiKey();
         const enUrl = new URL(`${TMDB_BASE}/movie/${movieId}`);
         enUrl.searchParams.set('api_key', apiKey);
         enUrl.searchParams.set('language', 'en-US');
+        enUrl.searchParams.set('append_to_response', 'videos');
         const enRes = await fetch(enUrl.toString());
         if (enRes.ok) {
-          const enData = (await enRes.json()) as { overview?: string };
-          if (enData.overview) {
+          const enData = (await enRes.json()) as {
+            overview?: string;
+            videos?: { results?: { key: string; site: string; type: string }[] };
+          };
+          if (!overview || overview.trim() === '') {
             overview = enData.overview;
+          }
+          if (!trailerKey) {
+            trailerKey = enData.videos?.results?.find(
+              (v) => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'),
+            )?.key;
           }
         }
       } catch {
@@ -181,11 +205,19 @@ export async function fetchMovieDetails(
       }
     }
 
+    const plProviders = data['watch/providers']?.results?.PL?.flatrate?.map((p) => ({
+      provider_id: p.provider_id,
+      provider_name: p.provider_name,
+      logo_path: p.logo_path,
+    }));
+
     return {
       runtime: data.runtime,
       tagline: data.tagline,
       director,
       overview: overview || undefined,
+      trailer_key: trailerKey,
+      watch_providers: plProviders && plProviders.length > 0 ? plProviders : undefined,
     };
   } catch {
     return {};

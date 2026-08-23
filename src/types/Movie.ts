@@ -19,6 +19,8 @@ export interface Movie {
   runtime?: number;
   tagline?: string;
   director?: string;
+  trailer_key?: string;
+  watch_providers?: WatchProvider[];
 }
 
 export interface MoodPreset {
