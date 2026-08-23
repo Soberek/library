@@ -673,11 +673,17 @@
 /* Result Ticket */
 .magda-ticket {
   position: relative;
-  border-radius: 24px;
+  border-radius: 20px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.03);
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .magda-ticket {
+    border-radius: 24px;
+  }
 }
 
 .magda-ticket-backdrop {
@@ -685,7 +691,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 200px;
+  height: 180px;
   background-size: cover;
   background-position: center top;
   opacity: 0.18;
@@ -697,38 +703,27 @@
 .magda-ticket-body {
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  padding: 1.15rem 1rem;
 }
 
-@media (min-width: 680px) {
+@media (min-width: 640px) {
   .magda-ticket-body {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 1.75rem;
-    padding: 2rem;
-    align-items: start;
+    padding: 1.75rem;
   }
 }
 
 .magda-poster-wrap {
   position: relative;
-  width: 150px;
-  align-self: start;
-  flex-shrink: 0;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.2), 0 4px 10px -2px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px -3px rgba(0, 0, 0, 0.22), 0 3px 8px -2px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #f8fafc;
 }
 
-@media (min-width: 680px) {
+@media (min-width: 640px) {
   .magda-poster-wrap {
-    width: 180px;
+    border-radius: 16px;
   }
 }
 

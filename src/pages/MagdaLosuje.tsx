@@ -562,161 +562,246 @@ export const MagdaLosuje: React.FC = () => {
                   />
                 )}
                 <div className="magda-ticket-body">
-                  {/* Left: Poster */}
-                  <div className="magda-poster-wrap">
-                    {poster ? (
-                      <img
-                        className="magda-poster"
-                        src={poster}
-                        alt={`Plakat: ${movie.title}`}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="magda-poster magda-poster--fallback">
-                        <Film className="w-12 h-12 text-amber-600" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right: Info */}
-                  <div className="magda-ticket-info text-center sm:text-left">
-                    {/* Title & Tagline */}
-                    <div>
-                      <h2 className="magda-movie-title text-slate-900 font-extrabold tracking-tight font-display">
-                        {movie.title}
-                      </h2>
-
-                      {movie.original_title && movie.original_title !== movie.title && (
-                        <p className="text-xs text-slate-500 font-medium italic mt-0.5">
-                          {movie.original_title}
-                        </p>
-                      )}
-
-                      {movie.tagline && (
-                        <p className="text-xs sm:text-sm font-semibold italic text-amber-800/90 mt-1 mb-1">
-                          &bdquo;{movie.tagline}&rdquo;
-                        </p>
+                  {/* Top Section: Poster (left) + Header Info (right) */}
+                  <div className="flex flex-row gap-3 sm:gap-6 items-start">
+                    {/* Left: Poster */}
+                    <div className="magda-poster-wrap w-[100px] xs:w-[115px] sm:w-[170px] md:w-[180px] shrink-0">
+                      {poster ? (
+                        <img
+                          className="magda-poster"
+                          src={poster}
+                          alt={`Plakat: ${movie.title}`}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="magda-poster magda-poster--fallback flex items-center justify-center bg-amber-50">
+                          <Film className="w-10 h-10 text-amber-600" />
+                        </div>
                       )}
                     </div>
 
-                    {/* Badges / Chips */}
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 my-3">
-                      {/* Rating */}
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300/80 shadow-2xs">
-                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                        <span>{movie.vote_average.toFixed(1)}</span>
-                        <span className="text-[10px] text-amber-800/60 font-normal">/ 10</span>
-                        {movie.vote_count > 0 && (
-                          <span className="text-[10px] text-amber-800/60 font-normal ml-0.5">
-                            ({movie.vote_count.toLocaleString()})
+                    {/* Right: Info */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-start text-left">
+                      <div>
+                        <h2 className="text-base xs:text-lg sm:text-2xl font-extrabold tracking-tight text-slate-900 font-display leading-snug">
+                          {movie.title}
+                        </h2>
+
+                        {movie.original_title && movie.original_title !== movie.title && (
+                          <p className="text-[11px] sm:text-xs text-slate-500 font-medium italic mt-0.5 truncate">
+                            {movie.original_title}
+                          </p>
+                        )}
+
+                        {movie.tagline && (
+                          <p className="text-[11px] sm:text-sm font-semibold italic text-amber-800/90 mt-1 line-clamp-1">
+                            &bdquo;{movie.tagline}&rdquo;
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Badges / Chips */}
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 my-2">
+                        {/* Rating */}
+                        <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300/80 shadow-2xs">
+                          <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-500 text-amber-500" />
+                          <span>{movie.vote_average.toFixed(1)}</span>
+                          {movie.vote_count > 0 && (
+                            <span className="text-[9px] sm:text-[10px] text-amber-800/60 font-normal">
+                              ({movie.vote_count.toLocaleString()})
+                            </span>
+                          )}
+                        </span>
+
+                        {/* Year */}
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
+                          {releaseYear(movie.release_date)}
+                        </span>
+
+                        {/* Runtime */}
+                        {runtimeDisplay && (
+                          <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
+                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500" />
+                            <span>{runtimeDisplay}</span>
                           </span>
                         )}
-                      </span>
 
-                      {/* Year */}
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
-                        {releaseYear(movie.release_date)}
-                      </span>
+                        {/* Genres */}
+                        {movie.genre_ids.slice(0, 3).map((id) => {
+                          const name = genreName(id);
+                          return name ? (
+                            <span
+                              key={id}
+                              className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/70"
+                            >
+                              {name}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
 
-                      {/* Runtime */}
-                      {runtimeDisplay && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
-                          <Clock className="w-3.5 h-3.5 text-slate-500" />
-                          <span>{runtimeDisplay}</span>
-                        </span>
+                      {/* Director */}
+                      {movie.director && (
+                        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-600 font-medium mt-0.5">
+                          <Clapperboard className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">
+                            Reżyseria: <strong className="text-slate-900 font-bold">{movie.director}</strong>
+                          </span>
+                        </div>
                       )}
 
-                      {/* Genres */}
-                      {movie.genre_ids.slice(0, 4).map((id) => {
-                        const name = genreName(id);
-                        return name ? (
-                          <span
-                            key={id}
-                            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/70"
+                      {/* Desktop Overview */}
+                      <p className="hidden sm:block text-sm text-slate-600 leading-relaxed mt-3 pt-3 border-t border-slate-100">
+                        {movie.overview || "Brak szczegółowego opisu dla tego tytułu."}
+                      </p>
+
+                      {/* Desktop Action Buttons */}
+                      <div className="hidden sm:flex items-center gap-2.5 flex-wrap pt-4 border-t border-slate-100 mt-4">
+                        {savedEntry ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="default"
+                              disabled
+                              className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-4 rounded-xl"
+                            >
+                              <BookmarkCheck className="w-4 h-4 text-emerald-600" />
+                              <span>Na watchliście</span>
+                            </Button>
+                            <Button
+                              size="default"
+                              disabled={toggling}
+                              onClick={() => void handleToggleCurrentWatched()}
+                              className={cn(
+                                "gap-2 font-bold h-10 px-4 rounded-xl",
+                                savedEntry.watched
+                                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                                  : "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
+                              )}
+                            >
+                              {toggling ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : savedEntry.watched ? (
+                                <CheckCircle2 className="w-4 h-4" />
+                              ) : (
+                                <Circle className="w-4 h-4" />
+                              )}
+                              <span>{savedEntry.watched ? 'Obejrzane' : 'Oznacz jako obejrzane'}</span>
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="default"
+                            disabled={adding}
+                            onClick={() => void handleAddToWatchlist()}
+                            className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-5 rounded-xl cursor-pointer"
                           >
-                            {name}
-                          </span>
-                        ) : null;
-                      })}
-                    </div>
+                            {adding ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <BookmarkPlus className="w-4 h-4" />
+                            )}
+                            <span>Dodaj do watchlisty</span>
+                          </Button>
+                        )}
 
-                    {/* Director */}
-                    {movie.director && (
-                      <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-slate-600 font-medium mb-2.5">
-                        <Clapperboard className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>
-                          Reżyseria: <strong className="text-slate-900 font-bold">{movie.director}</strong>
-                        </span>
+                        <a
+                          href={`https://www.themoviedb.org/movie/${movie.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            buttonVariants({ variant: 'outline', size: 'default' }),
+                            'gap-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-4 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-sm no-underline shrink-0'
+                          )}
+                        >
+                          <span>Profil TMDB</span>
+                          <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
+                        </a>
                       </div>
-                    )}
+                    </div>
+                  </div>
 
-                    {/* Overview */}
-                    <p className="magda-overview text-slate-600 text-left">
+                  {/* Mobile Overview & Action Buttons */}
+                  <div className="block sm:hidden pt-3 border-t border-slate-100 mt-3">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       {movie.overview || "Brak szczegółowego opisu dla tego tytułu."}
                     </p>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full pt-4 border-t border-slate-100 mt-4">
+                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 mt-3">
                       {savedEntry ? (
                         <>
                           <Button
                             variant="outline"
-                            size="default"
+                            size="sm"
                             disabled
-                            className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-11 sm:h-10 px-4 rounded-xl w-full sm:w-auto justify-center"
+                            className="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-2 rounded-xl text-xs justify-center"
                           >
-                            <BookmarkCheck className="w-4 h-4 text-emerald-600" />
-                            <span>Na watchliście</span>
+                            <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span className="truncate">Na watchliście</span>
                           </Button>
                           <Button
-                            size="default"
+                            size="sm"
                             disabled={toggling}
                             onClick={() => void handleToggleCurrentWatched()}
                             className={cn(
-                              "gap-2 font-bold h-11 sm:h-10 px-4 rounded-xl w-full sm:w-auto justify-center",
+                              "gap-1.5 font-bold h-10 px-2 rounded-xl text-xs justify-center",
                               savedEntry.watched
                                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                                 : "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
                             )}
                           >
                             {toggling ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                             ) : savedEntry.watched ? (
-                              <CheckCircle2 className="w-4 h-4" />
+                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                             ) : (
-                              <Circle className="w-4 h-4" />
+                              <Circle className="w-3.5 h-3.5 shrink-0" />
                             )}
-                            <span>{savedEntry.watched ? 'Obejrzane' : 'Oznacz jako obejrzane'}</span>
+                            <span className="truncate">{savedEntry.watched ? 'Obejrzane' : 'Oznacz'}</span>
                           </Button>
+                          <a
+                            href={`https://www.themoviedb.org/movie/${movie.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(
+                              buttonVariants({ variant: 'outline', size: 'sm' }),
+                              'col-span-2 gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-3 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline'
+                            )}
+                          >
+                            <span>Profil TMDB</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          </a>
                         </>
                       ) : (
-                        <Button
-                          size="default"
-                          disabled={adding}
-                          onClick={() => void handleAddToWatchlist()}
-                          className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-11 sm:h-10 px-5 rounded-xl cursor-pointer w-full sm:w-auto justify-center"
-                        >
-                          {adding ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <BookmarkPlus className="w-4 h-4" />
-                          )}
-                          <span>Dodaj do watchlisty</span>
-                        </Button>
-                      )}
+                        <>
+                          <Button
+                            size="sm"
+                            disabled={adding}
+                            onClick={() => void handleAddToWatchlist()}
+                            className="gap-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-2 rounded-xl cursor-pointer text-xs justify-center"
+                          >
+                            {adding ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                            ) : (
+                              <BookmarkPlus className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                            <span className="truncate">Do watchlisty</span>
+                          </Button>
 
-                      <a
-                        href={`https://www.themoviedb.org/movie/${movie.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={cn(
-                          buttonVariants({ variant: 'outline', size: 'default' }),
-                          'gap-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-11 sm:h-10 px-4 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-sm no-underline w-full sm:w-auto shrink-0'
-                        )}
-                      >
-                        <span>Profil TMDB</span>
-                        <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
-                      </a>
+                          <a
+                            href={`https://www.themoviedb.org/movie/${movie.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(
+                              buttonVariants({ variant: 'outline', size: 'sm' }),
+                              'gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-2 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline justify-center'
+                            )}
+                          >
+                            <span>Profil TMDB</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          </a>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
