@@ -16,6 +16,17 @@ export interface Movie {
   genre_ids: number[];
   adult: boolean;
   popularity: number;
+  runtime?: number;
+  tagline?: string;
+  director?: string;
+}
+
+export interface MoodPreset {
+  id: string;
+  label: string;
+  icon: string;
+  description: string;
+  filters: Partial<MovieFilters>;
 }
 
 export interface MovieDiscoverResponse {

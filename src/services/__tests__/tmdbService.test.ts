@@ -4,6 +4,7 @@ import {
   providerLogoUrl,
   releaseYear,
   countAdvancedFilters,
+  formatRuntime,
 } from '../tmdbService';
 import { DEFAULT_FILTERS } from '../../constants/movieFilters';
 
@@ -71,6 +72,21 @@ describe('tmdbService', () => {
       };
 
       expect(countAdvancedFilters(filters)).toBe(3);
+    });
+  });
+
+  describe('formatRuntime', () => {
+    it('should format minutes into hours and minutes', () => {
+      expect(formatRuntime(135)).toBe('2h 15min');
+      expect(formatRuntime(120)).toBe('2h');
+      expect(formatRuntime(90)).toBe('1h 30min');
+      expect(formatRuntime(45)).toBe('45 min');
+    });
+
+    it('should return empty string for zero or undefined', () => {
+      expect(formatRuntime(undefined)).toBe('');
+      expect(formatRuntime(0)).toBe('');
+      expect(formatRuntime(-10)).toBe('');
     });
   });
 });

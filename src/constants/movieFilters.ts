@@ -25,6 +25,102 @@ export const DEFAULT_FILTERS: MovieFilters = {
   certificationCountry: 'US',
 };
 
+export const MOOD_PRESETS: import('../types/Movie').MoodPreset[] = [
+  {
+    id: 'pewniaki',
+    label: 'Pewniaki & Klasyki',
+    icon: '🌟',
+    description: 'Najwyżej oceniane, kultowe pozycje kinowe (ocena 7.4+, min. 500 głosów)',
+    filters: {
+      minRating: 7.4,
+      minVotes: 500,
+      maxRating: null,
+      sortBy: 'vote_average.desc',
+      excludeGenreId: null,
+      runtimeMin: null,
+      runtimeMax: null,
+    },
+  },
+  {
+    id: 'perelki',
+    label: 'Ukryte Perełki',
+    icon: '💎',
+    description: 'Wybitne filmy poza głównym nurtem (ocena 7.4+, umiarkowana popularność)',
+    filters: {
+      minRating: 7.4,
+      minVotes: 100,
+      maxRating: null,
+      sortBy: 'vote_average.desc',
+      excludeGenreId: null,
+      runtimeMin: null,
+      runtimeMax: null,
+    },
+  },
+  {
+    id: 'wieczor',
+    label: 'Lekki seans na wieczór',
+    icon: '🍿',
+    description: 'Przyjemne komedie, przygoda i relaks bez ciężkich dramatów (ocena 6.6+)',
+    filters: {
+      genreId: 35, // Komedia
+      minRating: 6.6,
+      minVotes: 250,
+      maxRating: null,
+      sortBy: 'popularity.desc',
+      excludeGenreId: 27, // Wyklucz horror
+      runtimeMin: null,
+      runtimeMax: 120,
+    },
+  },
+  {
+    id: 'mocne',
+    label: 'Mocne wrażenia & Thriller',
+    icon: '🔥',
+    description: 'Trzymające w napięciu kryminały, sci-fi i thrillery (ocena 7.0+)',
+    filters: {
+      genreId: 53, // Thriller
+      minRating: 7.0,
+      minVotes: 300,
+      maxRating: null,
+      sortBy: 'popularity.desc',
+      excludeGenreId: null,
+      runtimeMin: null,
+      runtimeMax: null,
+    },
+  },
+  {
+    id: 'nowosci',
+    label: 'Świeże hity',
+    icon: '🎬',
+    description: 'Najnowsze, głośne premiery z ostatnich lat (od 2021 roku, ocena 6.8+)',
+    filters: {
+      yearFrom: 2021,
+      yearTo: null,
+      minRating: 6.8,
+      minVotes: 250,
+      maxRating: null,
+      sortBy: 'popularity.desc',
+      excludeGenreId: null,
+      runtimeMin: null,
+      runtimeMax: null,
+    },
+  },
+  {
+    id: 'szybki',
+    label: 'Szybki seans (≤ 95 min)',
+    icon: '⚡',
+    description: 'Świetne, skondensowane historie na krótki wieczór',
+    filters: {
+      runtimeMin: null,
+      runtimeMax: 95,
+      minRating: 6.6,
+      minVotes: 150,
+      maxRating: null,
+      sortBy: 'popularity.desc',
+    },
+  },
+];
+
 
 export const MOVIE_SORT_OPTIONS: { value: MovieSortBy; label: string }[] = [
   { value: 'popularity.desc', label: 'Popularność ↓' },

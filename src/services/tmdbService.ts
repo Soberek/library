@@ -24,9 +24,6 @@ export function hasTmdbApiKey(): boolean {
   return Boolean(TMDB_API_KEY?.trim());
 }
 
-
-
-
 export function posterUrl(path: string | null, size: 'w342' | 'w500' | 'w780' = 'w500'): string | null {
   if (!path) return null;
   return `${TMDB_IMAGE}/${size}${path}`;
@@ -140,6 +137,61 @@ export async function discoverMovies(
   return tmdbFetch<MovieDiscoverResponse>('/discover/movie', buildDiscoverParams(filters, page));
 }
 
+export async function fetchMovieDetails(
+  movieId: number,
+): Promise<{
+  runtime?: number;
+  tagline?: string;
+  director?: string;
+  overview?: string;
+}> {
+  try {
+    interface TmdbDetailResponse {
+      runtime?: number;
+      tagline?: string;
+      overview?: string;
+      credits?: {
+        crew?: { job: string; name: string }[];
+      };
+    }
+
+    const data = await tmdbFetch<TmdbDetailResponse>(`/movie/${movieId}`, {
+      append_to_response: 'credits',
+    });
+
+    const director = data.credits?.crew?.find((c) => c.job === 'Director')?.name;
+    let overview = data.overview;
+
+    // If Polish overview is empty, fallback to English overview
+    if (!overview || overview.trim() === '') {
+      try {
+        const apiKey = getApiKey();
+        const enUrl = new URL(`${TMDB_BASE}/movie/${movieId}`);
+        enUrl.searchParams.set('api_key', apiKey);
+        enUrl.searchParams.set('language', 'en-US');
+        const enRes = await fetch(enUrl.toString());
+        if (enRes.ok) {
+          const enData = (await enRes.json()) as { overview?: string };
+          if (enData.overview) {
+            overview = enData.overview;
+          }
+        }
+      } catch {
+        // ignore fallback errors
+      }
+    }
+
+    return {
+      runtime: data.runtime,
+      tagline: data.tagline,
+      director,
+      overview: overview || undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
 export async function pickRandomMovie(
   filters: MovieFilters,
   excludeIds: Set<number> = new Set(),
@@ -150,26 +202,80 @@ export async function pickRandomMovie(
     throw new Error('Brak filmów dla wybranych filtrów. Poluzuj kryteria i spróbuj ponownie.');
   }
 
-  const maxPage = Math.min(firstPage.total_pages, 500);
-  const attempts = Math.min(8, maxPage);
+  // Only sample from the top-quality pages (never draw from obscure pages 50..500)
+  const maxSamplePage = Math.min(
+    firstPage.total_pages,
+    filters.minVotes >= 500 ? 4 : filters.minVotes >= 100 ? 6 : 8,
+  );
 
-  for (let i = 0; i < attempts; i++) {
-    const page = Math.floor(Math.random() * maxPage) + 1;
-    const data = page === 1 ? firstPage : await discoverMovies(filters, page);
-    const candidates = data.results.filter((m) => !excludeIds.has(m.id));
-    const pool = candidates.length > 0 ? candidates : data.results;
-
-    if (pool.length > 0) {
-      return pool[Math.floor(Math.random() * pool.length)];
+  const pagesToFetch: number[] = [1];
+  if (maxSamplePage > 1) {
+    const randomPage = Math.floor(Math.random() * maxSamplePage) + 1;
+    if (!pagesToFetch.includes(randomPage)) {
+      pagesToFetch.push(randomPage);
     }
   }
 
-  throw new Error('Nie udało się wylosować filmu. Spróbuj ponownie.');
+  const responses = await Promise.all(
+    pagesToFetch.map((p) =>
+      p === 1 ? Promise.resolve(firstPage) : discoverMovies(filters, p).catch(() => null),
+    ),
+  );
+
+  const allFetched = responses.flatMap((r) => r?.results ?? []);
+
+  // Filter high-quality candidates:
+  // 1. Must have poster path
+  // 2. Not in excludeIds
+  // 3. Decent popularity & vote count
+  let candidates = allFetched.filter(
+    (m) =>
+      m.poster_path &&
+      !excludeIds.has(m.id) &&
+      m.vote_count >= Math.max(10, filters.minVotes / 2),
+  );
+
+  if (candidates.length === 0) {
+    // If all are excluded, relax exclude filter
+    candidates = allFetched.filter((m) => m.poster_path);
+  }
+
+  if (candidates.length === 0) {
+    candidates = firstPage.results;
+  }
+
+  if (candidates.length === 0) {
+    throw new Error('Nie znaleziono odpowiedniego filmu. Spróbuj zmienić filtry.');
+  }
+
+  const picked = candidates[Math.floor(Math.random() * candidates.length)];
+
+  // Enrich with runtime, director, and fallback overview
+  try {
+    const details = await fetchMovieDetails(picked.id);
+    return {
+      ...picked,
+      ...details,
+      overview: details.overview || picked.overview,
+    };
+  } catch {
+    return picked;
+  }
 }
 
 export function releaseYear(date: string | undefined): string {
   if (!date || date.length < 4) return '—';
   return date.slice(0, 4);
+}
+
+export function formatRuntime(minutes?: number): string {
+  if (!minutes || minutes <= 0) return '';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
+  }
+  return `${mins} min`;
 }
 
 export function countAdvancedFilters(filters: MovieFilters): number {

@@ -10,14 +10,19 @@ import {
   Circle,
   Loader2,
   AlertCircle,
+  Clock,
+  Clapperboard,
+  Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { Movie, MovieFilters, MovieGenre } from '../types/Movie';
+import type { Movie, MovieFilters, MovieGenre, MoodPreset } from '../types/Movie';
 import {
   backdropUrl,
   countAdvancedFilters,
   discoverMovies,
   fetchMovieGenres,
+  formatRuntime,
   hasTmdbApiKey,
   pickRandomMovie,
   posterUrl,
@@ -31,40 +36,21 @@ import { useWatchlistQuery } from '../hooks/useWatchlistQuery';
 import { Slider } from '../components/ui/slider';
 import { Select } from '../components/ui/select';
 import { Button } from '../components/ui/button';
+import { MOOD_PRESETS, DEFAULT_FILTERS } from '../constants/movieFilters';
 import { cn } from '../lib/utils';
 import './MagdaLosuje.css';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1949 }, (_, i) => CURRENT_YEAR - i);
 
-const DEFAULT_FILTERS: MovieFilters = {
-  genreId: null,
-  yearFrom: null,
-  yearTo: null,
-  minRating: 6,
-  minVotes: 100,
-  maxRating: null,
-  runtimeMin: null,
-  runtimeMax: null,
-  originalLanguage: null,
-  originCountry: null,
-  excludeGenreId: null,
-  sortBy: 'popularity.desc',
-  castId: null,
-  castName: null,
-  crewId: null,
-  crewName: null,
-  companyId: null,
-  companyName: null,
-  watchProviderId: null,
-  watchRegion: 'PL',
-  certification: null,
-  certificationCountry: 'US',
-};
-
 export const MagdaLosuje: React.FC = () => {
   const [genres, setGenres] = useState<MovieGenre[]>([]);
-  const [filters, setFilters] = useState<MovieFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<MovieFilters>({
+    ...DEFAULT_FILTERS,
+    minRating: 6.5,
+    minVotes: 200,
+  });
+  const [activeMoodId, setActiveMoodId] = useState<string | null>(null);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [recentIds, setRecentIds] = useState<number[]>([]);
   const [loadingGenres, setLoadingGenres] = useState(true);
@@ -142,6 +128,34 @@ export const MagdaLosuje: React.FC = () => {
     };
   }, []);
 
+  const applyMoodPreset = (preset: MoodPreset) => {
+    if (activeMoodId === preset.id) {
+      // Toggle off preset
+      setActiveMoodId(null);
+      setFilters({
+        ...DEFAULT_FILTERS,
+        minRating: 6.5,
+        minVotes: 200,
+      });
+      return;
+    }
+
+    setActiveMoodId(preset.id);
+    setFilters((prev) => ({
+      ...prev,
+      ...preset.filters,
+    }));
+  };
+
+  const resetFiltersToDefault = () => {
+    setActiveMoodId(null);
+    setFilters({
+      ...DEFAULT_FILTERS,
+      minRating: 6.5,
+      minVotes: 200,
+    });
+  };
+
   const handleDraw = useCallback(async () => {
     setDrawing(true);
     setError(null);
@@ -158,7 +172,7 @@ export const MagdaLosuje: React.FC = () => {
 
       const [picked, reelPage] = await Promise.all([
         pickRandomMovie(filters, exclude),
-        discoverMovies(filters, Math.floor(Math.random() * 5) + 1).catch(() => null),
+        discoverMovies(filters, 1).catch(() => null),
       ]);
 
       const reelPool = (reelPage?.results ?? []).filter((m) => m.poster_path);
@@ -169,7 +183,7 @@ export const MagdaLosuje: React.FC = () => {
 
       setReelMovies(pool);
       setSpinWinner(picked);
-      setRecentIds((prev) => [picked.id, ...prev.filter((id) => id !== picked.id)].slice(0, 12));
+      setRecentIds((prev) => [picked.id, ...prev.filter((id) => id !== picked.id)].slice(0, 15));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Losowanie nie powiodło się.');
       setDrawing(false);
@@ -214,6 +228,7 @@ export const MagdaLosuje: React.FC = () => {
 
   const backdrop = movie ? backdropUrl(movie.backdrop_path) : null;
   const poster = movie ? posterUrl(movie.poster_path, 'w500') : null;
+  const runtimeDisplay = movie ? formatRuntime(movie.runtime) : '';
 
   return (
     <main className="magda-page">
@@ -247,7 +262,7 @@ export const MagdaLosuje: React.FC = () => {
           </h1>
 
           <p className="magda-tagline">
-            Gatunek, lata, ocena — resztę zostaw Magdzie.
+            Trafne filmy dopasowane do Twojego nastroju — szybko i bez szukania.
           </p>
         </motion.header>
 
@@ -283,9 +298,59 @@ export const MagdaLosuje: React.FC = () => {
           <div className="magda-controls-head">
             <div>
               <p className="magda-controls-kicker">konsola Magdy</p>
-              <h2 className="magda-controls-title">Ustaw i losuj</h2>
+              <h2 className="magda-controls-title">Wybierz klimat & losuj</h2>
             </div>
-            <p className="magda-controls-hint">Im ciaśniejsze filtry, tym rzadsze trafienia.</p>
+            <div className="flex items-center gap-2">
+              {(activeMoodId || advancedCount > 0) && (
+                <button
+                  type="button"
+                  onClick={resetFiltersToDefault}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Domyślne</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Curated Mood Presets Bar */}
+          <div className="mb-4">
+            <span className="magda-field-label block mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>Szybki klimat (Trafne propozycje)</span>
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {MOOD_PRESETS.map((preset) => {
+                const isSelected = activeMoodId === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    disabled={!apiConfigured}
+                    onClick={() => applyMoodPreset(preset)}
+                    className={cn(
+                      "flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer select-none",
+                      isSelected
+                        ? "bg-amber-500 text-white border-amber-600 shadow-sm shadow-amber-500/25 ring-2 ring-amber-400/30"
+                        : "bg-slate-50/80 hover:bg-slate-100/80 border-slate-200/80 text-slate-700 hover:border-slate-300"
+                    )}
+                  >
+                    <span className="text-base shrink-0">{preset.icon}</span>
+                    <div className="min-w-0">
+                      <div className={cn("text-xs font-bold truncate", isSelected ? "text-white" : "text-slate-900")}>
+                        {preset.label}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {activeMoodId && (
+              <p className="text-[11px] text-amber-700 font-medium mt-2 bg-amber-50/60 p-2 rounded-lg border border-amber-200/60">
+                {MOOD_PRESETS.find((p) => p.id === activeMoodId)?.description}
+              </p>
+            )}
           </div>
 
           <div className="magda-controls-grid">
@@ -296,6 +361,7 @@ export const MagdaLosuje: React.FC = () => {
                 disabled={!apiConfigured || loadingGenres}
                 onChange={(e) => {
                   const value = e.target.value;
+                  setActiveMoodId(null);
                   setFilters((prev) => ({
                     ...prev,
                     genreId: value === '' ? null : Number(value),
@@ -319,6 +385,7 @@ export const MagdaLosuje: React.FC = () => {
                   disabled={!apiConfigured}
                   onChange={(e) => {
                     const value = e.target.value;
+                    setActiveMoodId(null);
                     setFilters((prev) => ({
                       ...prev,
                       yearFrom: value === '' ? null : Number(value),
@@ -340,6 +407,7 @@ export const MagdaLosuje: React.FC = () => {
                   disabled={!apiConfigured}
                   onChange={(e) => {
                     const value = e.target.value;
+                    setActiveMoodId(null);
                     setFilters((prev) => ({
                       ...prev,
                       yearTo: value === '' ? null : Number(value),
@@ -367,12 +435,13 @@ export const MagdaLosuje: React.FC = () => {
                 max={9}
                 step={0.5}
                 disabled={!apiConfigured}
-                onChange={(value) =>
+                onChange={(value) => {
+                  setActiveMoodId(null);
                   setFilters((prev) => ({
                     ...prev,
                     minRating: Array.isArray(value) ? value[0] : value,
-                  }))
-                }
+                  }));
+                }}
               />
               <div className="magda-rating-ends">
                 <span>0</span>
@@ -381,14 +450,14 @@ export const MagdaLosuje: React.FC = () => {
             </div>
 
             <div className="magda-field magda-field--votes">
-              <span className="magda-field-label">Popularność</span>
+              <span className="magda-field-label">Popularność / Rozpoznawalność</span>
               <div className="magda-seg" role="group" aria-label="Popularność">
                 {(
                   [
-                    { value: 20, label: 'Luźno' },
-                    { value: 100, label: 'Środek' },
+                    { value: 50, label: 'Niszowe' },
+                    { value: 200, label: 'Dobre' },
                     { value: 500, label: 'Znane' },
-                    { value: 2000, label: 'Hity' },
+                    { value: 1500, label: 'Wielkie Hity' },
                   ] as const
                 ).map((opt) => (
                   <button
@@ -396,12 +465,13 @@ export const MagdaLosuje: React.FC = () => {
                     type="button"
                     className={`magda-seg-btn${filters.minVotes === opt.value ? ' is-active' : ''}`}
                     disabled={!apiConfigured}
-                    onClick={() =>
+                    onClick={() => {
+                      setActiveMoodId(null);
                       setFilters((prev) => ({
                         ...prev,
                         minVotes: opt.value,
-                      }))
-                    }
+                      }));
+                    }}
                   >
                     {opt.label}
                   </button>
@@ -417,7 +487,10 @@ export const MagdaLosuje: React.FC = () => {
             open={advancedOpen}
             activeCount={advancedCount}
             onToggle={() => setAdvancedOpen((prev) => !prev)}
-            onChange={(patch) => setFilters((prev) => ({ ...prev, ...patch }))}
+            onChange={(patch) => {
+              setActiveMoodId(null);
+              setFilters((prev) => ({ ...prev, ...patch }));
+            }}
           />
 
           <Button
@@ -430,7 +503,7 @@ export const MagdaLosuje: React.FC = () => {
             ) : (
               <Shuffle className="w-5 h-5" />
             )}
-            <span>{drawing ? 'Losuję…' : movie ? 'Losuj ponownie' : 'Losuj film'}</span>
+            <span>{drawing ? 'Magda losuje film…' : movie ? 'Wylosuj inny film' : 'Losuj film'}</span>
           </Button>
         </motion.section>
 
@@ -446,7 +519,7 @@ export const MagdaLosuje: React.FC = () => {
               >
                 <Film className="w-10 h-10 text-slate-400 mb-2" />
                 <p className="text-sm font-semibold text-slate-600 text-center">
-                  Tu pojawi się wylosowany film.
+                  Wybierz nastrój lub ustaw filtry i kliknij &quot;Losuj film&quot;.
                 </p>
               </motion.div>
             )}
@@ -469,7 +542,7 @@ export const MagdaLosuje: React.FC = () => {
                 exit={{ opacity: 0 }}
               >
                 <div className="magda-spinner-ring" />
-                <p className="magda-drawing-text">Ładuję taśmę…</p>
+                <p className="magda-drawing-text">Dobieram najlepsze propozycje…</p>
               </motion.div>
             )}
 
@@ -509,9 +582,15 @@ export const MagdaLosuje: React.FC = () => {
                       {movie.title}
                     </h2>
 
-                    {movie.original_title !== movie.title && (
+                    {movie.original_title && movie.original_title !== movie.title && (
                       <p className="magda-original-title">
                         {movie.original_title}
+                      </p>
+                    )}
+
+                    {movie.tagline && (
+                      <p className="text-xs text-amber-800 font-semibold italic mt-1 mb-2">
+                        &bdquo;{movie.tagline}&rdquo;
                       </p>
                     )}
 
@@ -519,10 +598,24 @@ export const MagdaLosuje: React.FC = () => {
                       <span className="magda-chip">
                         <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline -mt-0.5" />{' '}
                         {movie.vote_average.toFixed(1)} / 10
+                        {movie.vote_count > 0 && (
+                          <span className="text-[10px] text-amber-900/60 font-normal">
+                            ({movie.vote_count.toLocaleString()})
+                          </span>
+                        )}
                       </span>
+
                       <span className="magda-chip">
                         {releaseYear(movie.release_date)}
                       </span>
+
+                      {runtimeDisplay && (
+                        <span className="magda-chip">
+                          <Clock className="w-3 h-3 text-amber-700 inline -mt-0.5" />{' '}
+                          {runtimeDisplay}
+                        </span>
+                      )}
+
                       {movie.genre_ids.slice(0, 3).map((id) => {
                         const name = genreName(id);
                         return name ? (
@@ -533,15 +626,22 @@ export const MagdaLosuje: React.FC = () => {
                       })}
                     </div>
 
+                    {movie.director && (
+                      <p className="text-xs text-slate-600 font-medium mb-2 flex items-center gap-1.5">
+                        <Clapperboard className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Reżyseria: <strong className="text-slate-800 font-bold">{movie.director}</strong></span>
+                      </p>
+                    )}
+
                     {movie.overview ? (
                       <p className="magda-overview">{movie.overview}</p>
                     ) : (
                       <p className="magda-overview magda-overview--muted">
-                        Brak opisu po polsku dla tego tytułu.
+                        Brak szczegółowego opisu dla tego tytułu.
                       </p>
                     )}
 
-                    <div className="flex flex-col sm:flex-row gap-2 flex-wrap pt-3">
+                    <div className="flex flex-col sm:flex-row gap-2 flex-wrap pt-3.5 border-t border-slate-100 mt-3">
                       {savedEntry ? (
                         <>
                           <Button
@@ -579,7 +679,7 @@ export const MagdaLosuje: React.FC = () => {
                           size="sm"
                           disabled={adding}
                           onClick={() => void handleAddToWatchlist()}
-                          className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
+                          className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
                         >
                           {adding ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -601,7 +701,7 @@ export const MagdaLosuje: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <span>TMDB</span>
+                          <span>Profil TMDB</span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       </Button>
@@ -647,7 +747,7 @@ export const MagdaLosuje: React.FC = () => {
         />
 
         <p className="magda-credit">
-          Dane filmów: The Movie Database (TMDB)
+          Dane filmów i rekomendacje: The Movie Database (TMDB)
         </p>
       </div>
     </main>
