@@ -320,7 +320,7 @@ export const MagdaLosuje: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>Szybki klimat (Trafne propozycje)</span>
             </span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
               {MOOD_PRESETS.map((preset) => {
                 const isSelected = activeMoodId === preset.id;
                 return (
@@ -330,15 +330,15 @@ export const MagdaLosuje: React.FC = () => {
                     disabled={!apiConfigured}
                     onClick={() => applyMoodPreset(preset)}
                     className={cn(
-                      "flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer select-none",
+                      "flex items-center gap-2 p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer select-none",
                       isSelected
                         ? "bg-amber-500 text-white border-amber-600 shadow-sm shadow-amber-500/25 ring-2 ring-amber-400/30"
                         : "bg-slate-50/80 hover:bg-slate-100/80 border-slate-200/80 text-slate-700 hover:border-slate-300"
                     )}
                   >
                     <span className="text-base shrink-0">{preset.icon}</span>
-                    <div className="min-w-0">
-                      <div className={cn("text-xs font-bold truncate", isSelected ? "text-white" : "text-slate-900")}>
+                    <div className="min-w-0 flex-1">
+                      <div className={cn("text-[11px] sm:text-xs font-bold leading-tight line-clamp-1", isSelected ? "text-white" : "text-slate-900")}>
                         {preset.label}
                       </div>
                     </div>
@@ -579,7 +579,7 @@ export const MagdaLosuje: React.FC = () => {
                   </div>
 
                   {/* Right: Info */}
-                  <div className="magda-ticket-info">
+                  <div className="magda-ticket-info text-center sm:text-left">
                     {/* Title & Tagline */}
                     <div>
                       <h2 className="magda-movie-title text-slate-900 font-extrabold tracking-tight font-display">
@@ -600,7 +600,7 @@ export const MagdaLosuje: React.FC = () => {
                     </div>
 
                     {/* Badges / Chips */}
-                    <div className="flex flex-wrap items-center gap-1.5 my-3">
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 my-3">
                       {/* Rating */}
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300/80 shadow-2xs">
                         <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -642,7 +642,7 @@ export const MagdaLosuje: React.FC = () => {
 
                     {/* Director */}
                     {movie.director && (
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mb-2.5">
+                      <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-slate-600 font-medium mb-2.5">
                         <Clapperboard className="w-4 h-4 text-slate-400 shrink-0" />
                         <span>
                           Reżyseria: <strong className="text-slate-900 font-bold">{movie.director}</strong>
@@ -651,19 +651,19 @@ export const MagdaLosuje: React.FC = () => {
                     )}
 
                     {/* Overview */}
-                    <p className="magda-overview text-slate-600">
+                    <p className="magda-overview text-slate-600 text-left">
                       {movie.overview || "Brak szczegółowego opisu dla tego tytułu."}
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-2.5 flex-wrap pt-4 border-t border-slate-100 mt-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full pt-4 border-t border-slate-100 mt-4">
                       {savedEntry ? (
                         <>
                           <Button
                             variant="outline"
                             size="default"
                             disabled
-                            className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-10 px-4 rounded-xl"
+                            className="gap-2 border-emerald-300 bg-emerald-50 text-emerald-800 font-bold h-11 sm:h-10 px-4 rounded-xl w-full sm:w-auto justify-center"
                           >
                             <BookmarkCheck className="w-4 h-4 text-emerald-600" />
                             <span>Na watchliście</span>
@@ -673,7 +673,7 @@ export const MagdaLosuje: React.FC = () => {
                             disabled={toggling}
                             onClick={() => void handleToggleCurrentWatched()}
                             className={cn(
-                              "gap-2 font-bold h-10 px-4 rounded-xl",
+                              "gap-2 font-bold h-11 sm:h-10 px-4 rounded-xl w-full sm:w-auto justify-center",
                               savedEntry.watched
                                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                                 : "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
@@ -694,7 +694,7 @@ export const MagdaLosuje: React.FC = () => {
                           size="default"
                           disabled={adding}
                           onClick={() => void handleAddToWatchlist()}
-                          className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-10 px-5 rounded-xl cursor-pointer"
+                          className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold shadow-sm shadow-amber-600/20 h-11 sm:h-10 px-5 rounded-xl cursor-pointer w-full sm:w-auto justify-center"
                         >
                           {adding ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -711,7 +711,7 @@ export const MagdaLosuje: React.FC = () => {
                         rel="noopener noreferrer"
                         className={cn(
                           buttonVariants({ variant: 'outline', size: 'default' }),
-                          'gap-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-4 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-sm no-underline shrink-0'
+                          'gap-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-11 sm:h-10 px-4 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-sm no-underline w-full sm:w-auto shrink-0'
                         )}
                       >
                         <span>Profil TMDB</span>
@@ -720,6 +720,7 @@ export const MagdaLosuje: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
               </motion.article>
             )}
           </AnimatePresence>

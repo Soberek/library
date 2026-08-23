@@ -52,10 +52,10 @@ export const WatchlistPanel: React.FC<WatchlistPanelProps> = ({
   };
 
   return (
-    <section className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm mt-8">
+    <section className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm mt-6 sm:mt-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 font-display">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 font-display">
             Watchlista filmowa
           </h2>
           <p className="text-xs font-semibold text-slate-500 mt-0.5">
@@ -64,12 +64,12 @@ export const WatchlistPanel: React.FC<WatchlistPanelProps> = ({
         </div>
 
         {/* Tab pill filter */}
-        <div className="flex p-1 bg-slate-100 border border-slate-200 rounded-xl text-xs">
+        <div className="flex w-full sm:w-auto overflow-x-auto p-1 bg-slate-100 border border-slate-200 rounded-xl text-xs">
           <button
             type="button"
             onClick={() => setFilter('all')}
             className={cn(
-              "px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer",
+              "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap text-[11px] sm:text-xs text-center",
               filter === 'all'
                 ? "bg-white text-amber-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -81,7 +81,7 @@ export const WatchlistPanel: React.FC<WatchlistPanelProps> = ({
             type="button"
             onClick={() => setFilter('todo')}
             className={cn(
-              "px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer",
+              "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap text-[11px] sm:text-xs text-center",
               filter === 'todo'
                 ? "bg-white text-amber-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -93,7 +93,7 @@ export const WatchlistPanel: React.FC<WatchlistPanelProps> = ({
             type="button"
             onClick={() => setFilter('watched')}
             className={cn(
-              "px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer",
+              "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap text-[11px] sm:text-xs text-center",
               filter === 'watched'
                 ? "bg-white text-amber-700 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"

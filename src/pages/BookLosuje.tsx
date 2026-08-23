@@ -704,12 +704,12 @@ export const BookLosuje: React.FC = () => {
                       ))}
                     </div>
 
-                    <div className="book-ticket-actions flex flex-wrap items-center gap-2 pt-2">
+                    <div className="book-ticket-actions flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-slate-100 mt-3 w-full">
                       <Button
                         variant="default"
                         disabled={busy || poolSize === 0}
                         onClick={() => void handleDraw()}
-                        className="book-draw-again gap-1.5"
+                        className="book-draw-again gap-1.5 w-full sm:w-auto justify-center"
                       >
                         <Shuffle className="w-4 h-4" />
                         <span>Losuj ponownie</span>
@@ -719,7 +719,7 @@ export const BookLosuje: React.FC = () => {
                         disabled={savingToLibrary || savedToLibrary}
                         onClick={() => void handleAddToLibrary()}
                         className={cn(
-                          "gap-1.5",
+                          "gap-1.5 w-full sm:w-auto justify-center",
                           savedToLibrary ? "bg-emerald-600 text-white" : "bg-emerald-700 text-white hover:bg-emerald-800"
                         )}
                       >
@@ -740,7 +740,7 @@ export const BookLosuje: React.FC = () => {
                           rel="noopener noreferrer"
                           className={cn(
                             buttonVariants({ variant: 'outline', size: 'sm' }),
-                            'book-ol-link gap-1.5 inline-flex items-center justify-center whitespace-nowrap text-xs font-bold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 no-underline shrink-0'
+                            'book-ol-link gap-1.5 inline-flex items-center justify-center whitespace-nowrap text-xs font-bold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 no-underline w-full sm:w-auto shrink-0'
                           )}
                         >
                           <span>Open Library</span>
