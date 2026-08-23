@@ -24,17 +24,20 @@ export function hasTmdbApiKey(): boolean {
   return Boolean(TMDB_API_KEY?.trim());
 }
 
-export function posterUrl(path: string | null, size: 'w342' | 'w500' | 'w780' = 'w500'): string | null {
+export function posterUrl(
+  path: string | null | undefined,
+  size: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' = 'w500',
+): string | null {
   if (!path) return null;
   return `${TMDB_IMAGE}/${size}${path}`;
 }
 
-export function backdropUrl(path: string | null): string | null {
+export function backdropUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   return `${TMDB_IMAGE}/w1280${path}`;
 }
 
-export function providerLogoUrl(path: string | null): string | null {
+export function providerLogoUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   return `${TMDB_IMAGE}/w92${path}`;
 }

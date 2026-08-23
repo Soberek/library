@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Shuffle,
   Film,
@@ -15,6 +15,9 @@ import {
   Sparkles,
   RotateCcw,
   Eye,
+  Play,
+  X,
+  Tv,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Movie, MovieFilters, MovieGenre, MoodPreset } from '../types/Movie';
@@ -22,6 +25,7 @@ import {
   backdropUrl,
   countAdvancedFilters,
   discoverMovies,
+  fetchMovieDetails,
   fetchMovieGenres,
   formatRuntime,
   hasTmdbApiKey,
@@ -65,6 +69,7 @@ export const MagdaLosuje: React.FC = () => {
   });
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [drawing, setDrawing] = useState(false);
+  const [trailerOpen, setTrailerOpen] = useState(false);
   const [reelMovies, setReelMovies] = useState<Movie[]>([]);
   const [spinWinner, setSpinWinner] = useState<Movie | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +210,53 @@ export const MagdaLosuje: React.FC = () => {
       setReelMovies([]);
     }
   }, [filters, recentIds, watchlist, seenIds]);
+
+  const unwatchedWatchlist = useMemo(
+    () => watchlist.filter((item) => !item.watched),
+    [watchlist],
+  );
+
+  const handleDrawFromWatchlist = useCallback(async () => {
+    if (unwatchedWatchlist.length === 0) return;
+    setDrawing(true);
+    setError(null);
+    setWatchlistActionError(null);
+    setMovie(null);
+
+    const randomItem =
+      unwatchedWatchlist[Math.floor(Math.random() * unwatchedWatchlist.length)];
+
+    try {
+      let enriched: Movie = {
+        id: randomItem.tmdbId,
+        title: randomItem.title,
+        original_title: randomItem.originalTitle,
+        overview: randomItem.overview,
+        poster_path: randomItem.posterPath,
+        backdrop_path: null,
+        release_date: randomItem.releaseDate,
+        vote_average: randomItem.voteAverage,
+        vote_count: 0,
+        genre_ids: randomItem.genreIds,
+        adult: false,
+        popularity: 0,
+      };
+
+      try {
+        const details = await fetchMovieDetails(randomItem.tmdbId);
+        enriched = { ...enriched, ...details };
+      } catch {
+        // use basic details
+      }
+
+      setReelMovies([enriched]);
+      setSpinWinner(enriched);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nie udało się wylosować z watchlisty.');
+      setDrawing(false);
+      setSpinWinner(null);
+    }
+  }, [unwatchedWatchlist]);
 
   const handleSpinComplete = useCallback(() => {
     if (!spinWinner) return;
@@ -559,18 +611,33 @@ export const MagdaLosuje: React.FC = () => {
             }}
           />
 
-          <Button
-            className="magda-draw-btn w-full h-12 text-sm font-bold gap-2"
-            disabled={!apiConfigured || drawing || loadingGenres}
-            onClick={handleDraw}
-          >
-            {drawing ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Shuffle className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full">
+            <Button
+              className="magda-draw-btn flex-1 w-full h-12 text-sm font-bold gap-2 rounded-2xl shadow-md cursor-pointer"
+              disabled={!apiConfigured || drawing || loadingGenres}
+              onClick={handleDraw}
+            >
+              {drawing ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Shuffle className="w-5 h-5" />
+              )}
+              <span>{drawing ? 'Magda losuje film…' : movie ? 'Wylosuj inny film' : 'Losuj film z bazy'}</span>
+            </Button>
+
+            {unwatchedWatchlist.length > 0 && (
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto h-12 px-4 text-xs sm:text-sm font-bold gap-2 border-amber-300 bg-amber-50/90 hover:bg-amber-100 text-amber-950 shadow-xs cursor-pointer rounded-2xl shrink-0"
+                disabled={drawing}
+                onClick={() => void handleDrawFromWatchlist()}
+                title="Wylosuj spośród filmów dodanych do Twojej watchlisty"
+              >
+                <BookmarkCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Losuj z Watchlisty ({unwatchedWatchlist.length})</span>
+              </Button>
             )}
-            <span>{drawing ? 'Magda losuje film…' : movie ? 'Wylosuj inny film' : 'Losuj film'}</span>
-          </Button>
+          </div>
         </motion.section>
 
         <div className="magda-result-slot">
@@ -724,6 +791,32 @@ export const MagdaLosuje: React.FC = () => {
                         </div>
                       )}
 
+                      {/* Watch Providers (Gdzie obejrzeć w Polsce) */}
+                      {movie.watch_providers && movie.watch_providers.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-slate-100">
+                          <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                            <Tv className="w-3 h-3 text-slate-400" />
+                            <span>Obejrzysz:</span>
+                          </span>
+                          {movie.watch_providers.slice(0, 5).map((p) => (
+                            <span
+                              key={p.provider_id}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-700 shadow-2xs"
+                              title={p.provider_name}
+                            >
+                              {p.logo_path && (
+                                <img
+                                  src={posterUrl(p.logo_path, 'w92') ?? ''}
+                                  alt={p.provider_name}
+                                  className="w-3.5 h-3.5 rounded-xs shrink-0 object-cover"
+                                />
+                              )}
+                              <span>{p.provider_name}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
                       {/* Desktop Overview */}
                       <p className="hidden sm:block text-sm text-slate-600 leading-relaxed mt-3 pt-3 border-t border-slate-100">
                         {movie.overview || "Brak szczegółowego opisu dla tego tytułu."}
@@ -803,6 +896,18 @@ export const MagdaLosuje: React.FC = () => {
                           </>
                         )}
 
+                        {movie.trailer_key && (
+                          <Button
+                            variant="outline"
+                            size="default"
+                            onClick={() => setTrailerOpen(true)}
+                            className="gap-2 border-red-200 bg-red-50/80 hover:bg-red-100 text-red-700 font-bold h-10 px-4 rounded-xl cursor-pointer"
+                          >
+                            <Play className="w-4 h-4 text-red-600 fill-red-600 shrink-0" />
+                            <span>Zwiastun</span>
+                          </Button>
+                        )}
+
                         <a
                           href={`https://www.themoviedb.org/movie/${movie.id}`}
                           target="_blank"
@@ -868,6 +973,18 @@ export const MagdaLosuje: React.FC = () => {
                             <span className="truncate">Widziałam film</span>
                           </Button>
 
+                          {movie.trailer_key && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setTrailerOpen(true)}
+                              className="col-span-2 gap-1.5 border-red-200 bg-red-50/80 hover:bg-red-100 text-red-700 font-bold h-10 px-3 rounded-xl text-xs justify-center cursor-pointer"
+                            >
+                              <Play className="w-3.5 h-3.5 text-red-600 fill-red-600 shrink-0" />
+                              <span>Obejrzyj Zwiastun</span>
+                            </Button>
+                          )}
+
                           <a
                             href={`https://www.themoviedb.org/movie/${movie.id}`}
                             target="_blank"
@@ -907,6 +1024,18 @@ export const MagdaLosuje: React.FC = () => {
                             <Shuffle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                             <span className="truncate">Losuj inny</span>
                           </Button>
+
+                          {movie.trailer_key && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setTrailerOpen(true)}
+                              className="col-span-2 gap-1.5 border-red-200 bg-red-50/80 hover:bg-red-100 text-red-700 font-bold h-10 px-3 rounded-xl text-xs justify-center cursor-pointer"
+                            >
+                              <Play className="w-3.5 h-3.5 text-red-600 fill-red-600 shrink-0" />
+                              <span>Obejrzyj Zwiastun</span>
+                            </Button>
+                          )}
 
                           <a
                             href={`https://www.themoviedb.org/movie/${movie.id}`}
@@ -968,6 +1097,40 @@ export const MagdaLosuje: React.FC = () => {
           Dane filmów i rekomendacje: The Movie Database (TMDB)
         </p>
       </div>
+
+      {/* Trailer Video Modal */}
+      {trailerOpen && movie?.trailer_key && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-3xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-700">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/90">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-red-600/20 text-red-500 flex items-center justify-center shrink-0">
+                  <Play className="w-3.5 h-3.5 fill-red-500" />
+                </div>
+                <h3 className="text-xs sm:text-sm font-bold text-white truncate font-display">
+                  Zwiastun: {movie.title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setTrailerOpen(false)}
+                aria-label="Zamknij zwiastun"
+                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="relative w-full pb-[56.25%] bg-black">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${movie.trailer_key}?autoplay=1&rel=0`}
+                title={`Zwiastun: ${movie.title}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full border-0"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
