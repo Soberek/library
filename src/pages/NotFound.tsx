@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Home } from "lucide-react";
-import { Button } from "../components/ui/button";
+import { buttonVariants } from "../components/ui/button";
+import { cn } from "../lib/utils";
 
 export const NotFound: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50">
@@ -20,12 +21,16 @@ export const NotFound: React.FC = () => (
         Nie znaleziono tej strony. Wróć do swojej biblioteki.
       </p>
 
-      <Button asChild className="gap-2">
-        <Link to="/">
-          <Home className="w-4 h-4" />
-          <span>Wróć do biblioteki</span>
-        </Link>
-      </Button>
+      <Link
+        to="/"
+        className={cn(
+          buttonVariants({ variant: "default" }),
+          "gap-2 inline-flex items-center justify-center whitespace-nowrap"
+        )}
+      >
+        <Home className="w-4 h-4" />
+        <span>Wróć do biblioteki</span>
+      </Link>
 
       <p className="text-xs text-slate-400 mt-6">
         <Link to="/sign-in" className="hover:underline">

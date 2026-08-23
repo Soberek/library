@@ -34,7 +34,7 @@ import BookDrawAnimation from '../components/book/BookDrawAnimation';
 import { Slider } from '../components/ui/slider';
 import { Select } from '../components/ui/select';
 import { Switch } from '../components/ui/switch';
-import { Button } from '../components/ui/button';
+import { Button, buttonVariants } from '../components/ui/button';
 import { Toast } from '../components/ui/toast';
 import { cn } from '../lib/utils';
 import './BookLosuje.css';
