@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Sparkles } from 'lucide-react';
 import type { LotteryBook } from '../../types/LotteryBook';
 
+const FRAME_W = 140;
+const FRAME_GAP = 14;
+const FRAME_STRIDE = FRAME_W + FRAME_GAP;
 const PREVIEW_COUNT = 5;
-const SLIDE_MS = 150;
-const HOLD_MS = 210;
+const SLIDE_MS = 140;
+const HOLD_MS = 200;
 
 const PHRASES = [
   'Otwieram katalog…',
@@ -23,23 +26,17 @@ function buildStrip(pool: LotteryBook[], winner: LotteryBook): LotteryBook[] {
   const others = pool.filter((b) => b.id !== winner.id);
   const picks: LotteryBook[] = [];
 
-  for (const book of others) {
-    if (picks.length >= PREVIEW_COUNT) break;
-    picks.push(book);
-  }
-
-  let i = 0;
-  while (
-    picks.length < Math.min(PREVIEW_COUNT, Math.max(others.length, 1)) &&
-    others.length > 0
-  ) {
-    picks.push(others[i % others.length]);
-    i += 1;
-    if (i > PREVIEW_COUNT * 2) break;
-  }
-
-  if (picks.length === 0) {
-    picks.push(winner);
+  if (others.length > 0) {
+    let i = 0;
+    while (picks.length < PREVIEW_COUNT) {
+      picks.push(others[i % others.length]);
+      i += 1;
+    }
+  } else {
+    // If only winner is in pool (e.g. wishlist with 1 item or 1 search result)
+    for (let i = 0; i < PREVIEW_COUNT; i++) {
+      picks.push(winner);
+    }
   }
 
   return [...picks, winner];
@@ -74,6 +71,7 @@ function animateTranslateX(
     if (durationMs <= 0 || from === to) {
       el.style.transform = `translate3d(${to}px, 0, 0)`;
       resolve();
+      return;
     }
 
     const start = performance.now();
@@ -120,11 +118,8 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
     if (!stage || !stripEl) return;
 
     const signal = { cancelled: false };
-    const frameWidth = Math.min(140, Math.max(105, Math.floor(stage.clientWidth * 0.38)));
-    const frameGap = 12;
-    const stride = frameWidth + frameGap;
-    const centerOffset = Math.max(0, (stage.clientWidth - frameWidth) / 2);
-    const xForIndex = (index: number) => -(index * stride) + centerOffset;
+    const centerOffset = Math.max(0, (stage.clientWidth - FRAME_W) / 2);
+    const xForIndex = (index: number) => -(index * FRAME_STRIDE) + centerOffset;
 
     stripEl.style.transform = `translate3d(${xForIndex(0)}px, 0, 0)`;
     setActiveIndex(0);
@@ -150,7 +145,7 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
 
       completedRef.current = true;
       setLanded(true);
-      window.setTimeout(() => onCompleteRef.current(), 380);
+      window.setTimeout(() => onCompleteRef.current(), 280);
     })();
 
     return () => {
@@ -209,6 +204,7 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
                   <div
                     key={`${book.id}-${index}`}
                     className={`book-draw-frame${isWinner ? ' is-winner' : ''}${isActive ? ' is-active' : ''}`}
+                    style={{ width: FRAME_W }}
                   >
                     <div className="book-draw-frame-inner">
                       {book.cover ? (
@@ -216,7 +212,8 @@ export const BookDrawAnimation: React.FC<BookDrawAnimationProps> = ({
                       ) : (
                         <div className="book-draw-frame-fallback">
                           <BookOpen className="w-7 h-7 text-emerald-700 mb-1" />
-                          <span className="line-clamp-2">{book.title}</span>
+                          <span className="line-clamp-2 text-[11px] font-bold leading-tight">{book.title}</span>
+                          {book.author && <span className="text-[9px] text-emerald-900 line-clamp-1 italic">{book.author}</span>}
                         </div>
                       )}
                     </div>

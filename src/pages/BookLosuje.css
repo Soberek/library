@@ -490,14 +490,11 @@
     0 2px 6px rgba(0, 0, 0, 0.03),
     0 16px 42px -8px rgba(6, 78, 59, 0.14);
   overflow: hidden;
+  margin-bottom: 4rem;
 }
 
 .book-ticket-exlibris {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 2;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.25rem 0.7rem;
@@ -510,6 +507,7 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #92400e;
+  flex-shrink: 0;
 }
 
 .book-ticket-exlibris-script {
@@ -531,49 +529,27 @@
   background: #ffffff;
 }
 
-/* Pierwsze zdanie / Opening Hook with Drop-Cap */
+/* Pierwsze zdanie / Opening Hook Quote */
 .book-first-sentence-box {
-  margin-top: 0.85rem;
+  margin-top: 0.25rem;
   padding: 0.85rem 1rem;
   border-radius: 14px;
   background: #ffffff;
-  border-left: 3px solid var(--book-emerald-main);
+  border-left: 3.5px solid var(--book-emerald-main);
   border-top: 1px solid #f1f5f9;
   border-right: 1px solid #f1f5f9;
   border-bottom: 1px solid #f1f5f9;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
 }
 
-.book-first-sentence-lead {
-  display: block;
-  font-family: 'Great Vibes', cursive;
-  font-size: 1.25rem;
-  color: var(--book-gold-base);
-  margin-bottom: 0.1rem;
-  line-height: 1;
-}
-
-.book-drop-cap {
+.book-quote-text {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: 1.12rem;
-  line-height: 1.5;
+  font-size: 1.14rem;
+  line-height: 1.55;
   color: #292524;
   margin: 0;
-}
-
-.book-drop-cap::first-letter {
-  float: left;
-  font-family: 'Cinzel', 'Fraunces', serif;
-  font-style: normal;
-  font-size: 2.5rem;
-  line-height: 0.8;
-  padding-top: 2px;
-  padding-right: 6px;
-  padding-bottom: 0;
-  color: var(--book-emerald-main);
-  text-shadow: 1px 1px 0px rgba(212, 175, 55, 0.4);
-  font-weight: 700;
+  padding: 0;
 }
 
 /* Streszczenie fabuły (Synopsis) */
@@ -779,7 +755,7 @@
 .book-draw-strip {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   height: calc(100% - 32px);
   padding: 6px 0;
   will-change: transform;
@@ -788,13 +764,7 @@
 .book-draw-frame {
   flex-shrink: 0;
   height: 100%;
-  width: 120px;
-}
-
-@media (min-width: 480px) {
-  .book-draw-frame {
-    width: 140px;
-  }
+  width: 140px;
 }
 
 .book-draw-frame-inner {

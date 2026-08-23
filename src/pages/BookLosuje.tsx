@@ -16,6 +16,7 @@ import {
   Library,
   BookMarked,
   Search,
+  Quote,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
@@ -827,15 +828,21 @@ export const BookLosuje: React.FC = () => {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                {/* Ex Libris Seal Badge */}
-                <div className="book-ticket-exlibris">
-                  <Sparkles className="w-3 h-3 text-amber-600" />
-                  <span>EX LIBRIS</span>
-                  <span className="book-ticket-exlibris-script">· Fortuna</span>
-                </div>
+                <div className="p-4 sm:p-6 flex flex-col gap-3.5 sm:gap-4">
+                  {/* Top Header Ribbon: Badge & Category */}
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-amber-200/60">
+                    <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-emerald-900 font-serif tracking-wider">
+                      <span className="text-amber-600">✦</span>
+                      <span>WYBÓR KATALOGU</span>
+                    </div>
+                    <div className="book-ticket-exlibris">
+                      <Sparkles className="w-3 h-3 text-amber-600" />
+                      <span>EX LIBRIS</span>
+                      <span className="book-ticket-exlibris-script">· Fortuna</span>
+                    </div>
+                  </div>
 
-                <div className="p-4 sm:p-6 flex flex-col gap-4">
-                  {/* Top Header: Cover Left, Details Right */}
+                  {/* Main Header: Cover Left, Details Right */}
                   <div className="flex gap-3.5 sm:gap-6 items-start">
                     <div className="book-ticket-cover-wrap w-24 sm:w-36 shrink-0 aspect-[2/3]">
                       {drawn.cover ? (
@@ -853,10 +860,10 @@ export const BookLosuje: React.FC = () => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight font-serif">
+                      <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight font-serif break-words">
                         {drawn.title}
                       </h2>
-                      <p className="text-xs sm:text-base font-semibold text-emerald-800 mt-0.5 font-serif italic">
+                      <p className="text-xs sm:text-base font-semibold text-emerald-800 mt-0.5 font-serif italic break-words">
                         {formatAuthors(drawn)}
                       </p>
 
@@ -916,10 +923,13 @@ export const BookLosuje: React.FC = () => {
                   {/* Opening Hook / First Sentence Quote */}
                   {drawn.firstSentence && (
                     <div className="book-first-sentence-box">
-                      <span className="book-first-sentence-lead">W słowach zapisane…</span>
-                      <p className="book-drop-cap">
+                      <div className="flex items-center gap-1.5 mb-1 text-xs font-semibold text-emerald-800">
+                        <Quote className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span className="font-serif italic font-bold">Pierwsze zdanie utworu:</span>
+                      </div>
+                      <blockquote className="book-quote-text">
                         &bdquo;{drawn.firstSentence}&rdquo;
-                      </p>
+                      </blockquote>
                     </div>
                   )}
 
