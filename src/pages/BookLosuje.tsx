@@ -624,130 +624,125 @@ export const BookLosuje: React.FC = () => {
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="book-ticket-ribbon">Wylosowano</div>
-                <div className="book-ticket-body">
-                  <div className="book-ticket-cover">
-                    {drawn.cover ? (
-                      <img src={drawn.cover} alt={`Okładka: ${drawn.title}`} />
-                    ) : (
-                      <div className="book-ticket-cover-fallback">
-                        <BookOpen className="w-10 h-10 text-emerald-600" />
-                        <span>Brak okładki</span>
+                <div className="book-ticket-ribbon">Wylosowano</div>
+                <div className="p-4 sm:p-6 flex flex-col gap-4">
+                  {/* Mobile & Desktop Header: Cover on Left, Info on Right */}
+                  <div className="flex gap-3.5 sm:gap-6 items-start">
+                    <div className="w-24 sm:w-36 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden shadow-md bg-slate-100 border border-slate-200/80">
+                      {drawn.cover ? (
+                        <img
+                          src={drawn.cover}
+                          alt={`Okładka: ${drawn.title}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-emerald-50 text-emerald-700">
+                          <BookOpen className="w-8 h-8 text-emerald-600 mb-1" />
+                          <span className="text-[10px] font-bold">Brak okładki</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-base sm:text-xl font-bold text-slate-900 leading-snug tracking-tight font-display">
+                        {drawn.title}
+                      </h2>
+                      <p className="text-xs sm:text-sm font-semibold text-emerald-700 mt-0.5">
+                        {formatAuthors(drawn)}
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
+                        {drawn.rating != null && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <span>{drawn.rating.toFixed(1)}</span>
+                          </span>
+                        )}
+
+                        {drawn.year != null && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                            {drawn.year} r.
+                          </span>
+                        )}
+
+                        {drawn.pages != null && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                            ~{drawn.pages} str.
+                          </span>
+                        )}
                       </div>
-                    )}
+
+                      <div className="flex flex-wrap gap-1 mt-2.5">
+                        {langs && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            {langs}
+                          </span>
+                        )}
+                        {ebook && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                            {ebook}
+                          </span>
+                        )}
+                        {drawn.subjects?.slice(0, 2).map((subject) => (
+                          <span
+                            key={subject}
+                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[120px]"
+                          >
+                            {subject}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="book-ticket-info">
-                    <h2 className="book-ticket-title">
-                      {drawn.title}
-                    </h2>
-                    <p className="book-ticket-author">
-                      {formatAuthors(drawn)}
-                    </p>
+                  {/* Action Buttons: 2-Column on Mobile, Row on Desktop */}
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 pt-3 border-t border-slate-100 mt-1">
+                    <Button
+                      disabled={savingToLibrary || savedToLibrary}
+                      onClick={() => void handleAddToLibrary()}
+                      className={cn(
+                        "gap-1.5 h-10 px-3 rounded-xl font-bold text-xs justify-center cursor-pointer",
+                        savedToLibrary
+                          ? "bg-emerald-600 text-white"
+                          : "bg-emerald-700 text-white hover:bg-emerald-800 shadow-xs"
+                      )}
+                    >
+                      {savedToLibrary ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : savingToLibrary ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <BookmarkPlus className="w-3.5 h-3.5" />
+                      )}
+                      <span className="truncate">
+                        {savedToLibrary ? 'W bibliotece' : 'Do biblioteki'}
+                      </span>
+                    </Button>
 
-                    <dl className="book-meta">
-                      {drawn.year != null && (
-                        <div>
-                          <dt>Rok</dt>
-                          <dd>{drawn.year}</dd>
-                        </div>
-                      )}
-                      {drawn.pages != null && (
-                        <div>
-                          <dt>Strony</dt>
-                          <dd>~{drawn.pages}</dd>
-                        </div>
-                      )}
-                      {drawn.editionCount != null && drawn.editionCount > 0 && (
-                        <div>
-                          <dt>Edycje</dt>
-                          <dd>{drawn.editionCount}</dd>
-                        </div>
-                      )}
-                      {drawn.rating != null && (
-                        <div>
-                          <dt>Ocena</dt>
-                          <dd>
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline -mt-0.5" />{' '}
-                            {drawn.rating.toFixed(1)}
-                            {drawn.ratingsCount != null && drawn.ratingsCount > 0 && (
-                              <span className="text-xs text-slate-500 font-normal"> · {drawn.ratingsCount}</span>
-                            )}
-                          </dd>
-                        </div>
-                      )}
-                      {drawn.wantToReadCount != null && drawn.wantToReadCount > 0 && (
-                        <div>
-                          <dt>Popularność</dt>
-                          <dd>
-                            <TrendingUp className="w-3.5 h-3.5 inline -mt-0.5 text-emerald-600" />{' '}
-                            {drawn.wantToReadCount.toLocaleString('pl-PL')}
-                          </dd>
-                        </div>
-                      )}
-                    </dl>
+                    <Button
+                      variant="outline"
+                      disabled={busy || poolSize === 0}
+                      onClick={() => void handleDraw()}
+                      className="gap-1.5 border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 font-bold h-10 px-3 rounded-xl text-xs justify-center cursor-pointer"
+                    >
+                      <Shuffle className="w-3.5 h-3.5 text-emerald-700" />
+                      <span className="truncate">Losuj inną</span>
+                    </Button>
 
-                    <div className="flex flex-wrap gap-1.5 my-3">
-                      {langs && (
-                        <span className="book-chip" title="Języki edycji">
-                          {langs}
-                        </span>
-                      )}
-                      {ebook && (
-                        <span className="book-chip book-chip--accent">
-                          {ebook}
-                        </span>
-                      )}
-                      {drawn.subjects?.slice(0, 3).map((subject) => (
-                        <span key={subject} className="book-chip">
-                          {subject}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="book-ticket-actions flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-slate-100 mt-3 w-full">
-                      <Button
-                        variant="default"
-                        disabled={busy || poolSize === 0}
-                        onClick={() => void handleDraw()}
-                        className="book-draw-again gap-1.5 w-full sm:w-auto justify-center"
-                      >
-                        <Shuffle className="w-4 h-4" />
-                        <span>Losuj ponownie</span>
-                      </Button>
-
-                      <Button
-                        disabled={savingToLibrary || savedToLibrary}
-                        onClick={() => void handleAddToLibrary()}
+                    {drawn.openLibraryUrl && (
+                      <a
+                        href={drawn.openLibraryUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={cn(
-                          "gap-1.5 w-full sm:w-auto justify-center",
-                          savedToLibrary ? "bg-emerald-600 text-white" : "bg-emerald-700 text-white hover:bg-emerald-800"
+                          buttonVariants({ variant: 'outline', size: 'sm' }),
+                          'col-span-2 sm:col-span-1 gap-1.5 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold h-10 px-3 rounded-xl inline-flex items-center justify-center whitespace-nowrap text-xs no-underline'
                         )}
                       >
-                        {savedToLibrary ? (
-                          <Check className="w-4 h-4" />
-                        ) : savingToLibrary ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <BookmarkPlus className="w-4 h-4" />
-                        )}
-                        <span>{savedToLibrary ? 'W Twojej bibliotece' : 'Dodaj do biblioteki'}</span>
-                      </Button>
-
-                      {drawn.openLibraryUrl && (
-                        <a
-                          href={drawn.openLibraryUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(
-                            buttonVariants({ variant: 'outline', size: 'sm' }),
-                            'book-ol-link gap-1.5 inline-flex items-center justify-center whitespace-nowrap text-xs font-bold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 no-underline w-full sm:w-auto shrink-0'
-                          )}
-                        >
-                          <span>Open Library</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                    </div>
+                        <span>Open Library</span>
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </motion.article>
