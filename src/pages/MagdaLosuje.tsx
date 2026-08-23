@@ -374,13 +374,14 @@ export const MagdaLosuje: React.FC = () => {
             <MagdaIcon size={84} />
           </div>
 
-          <h1 className="magda-brand">
-            <span className="magda-brand-line magda-brand-line--name">MAGDA</span>
-            <span className="magda-brand-line magda-brand-line--verb">LOSUJE</span>
+          <p className="magda-kicker">✦ KINEMATOGRAFIA · WYBÓR SEANSU ✦</p>
+
+          <h1 className="magda-calligraphy-brand">
+            Magda Losuje
           </h1>
 
           <p className="magda-tagline">
-            Trafne filmy dopasowane do Twojego nastroju — szybko i bez szukania.
+            Wybierz nastrój seansu lub zdaj się na filmowy bęben losu…
           </p>
         </motion.header>
 
@@ -695,6 +696,19 @@ export const MagdaLosuje: React.FC = () => {
                   />
                 )}
                 <div className="magda-ticket-body">
+                  {/* Top Header Ribbon */}
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-amber-200/60 mb-3">
+                    <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-amber-900 font-serif tracking-wider">
+                      <span className="text-amber-600">✦</span>
+                      <span>REKOMENDACJA SEANSU</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-[11px] font-bold text-amber-900 font-serif">
+                      <Sparkles className="w-3 h-3 text-amber-600" />
+                      <span>MAGDA</span>
+                      <span className="font-serif italic font-normal text-amber-700">· Cinema</span>
+                    </div>
+                  </div>
+
                   {/* Top Section: Poster (left) + Header Info (right) */}
                   <div className="flex flex-row gap-3 sm:gap-6 items-start">
                     {/* Left: Poster */}
