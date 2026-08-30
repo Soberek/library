@@ -4,11 +4,11 @@ import {
   BookOpen,
   Sparkles,
   Heart,
-  PanelLeftClose,
-  PanelLeft,
   LogOut,
   Layers,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { signOut } from 'firebase/auth';
@@ -146,61 +146,55 @@ export const Sidebar: React.FC = () => {
     <aside
       aria-label="Panel boczny aplikacji"
       className={cn(
-        'hidden md:flex flex-col sticky top-0 h-screen border-r border-slate-200/80 bg-white/95 backdrop-blur-xl z-40 transition-all duration-300 ease-in-out shrink-0 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]',
+        'hidden md:flex flex-col sticky top-0 h-screen border-r border-slate-200/80 bg-white/95 backdrop-blur-xl z-40 transition-all duration-300 ease-in-out shrink-0 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)] relative',
         collapsed ? 'w-20 min-w-[5rem]' : 'w-64 min-w-[16rem]',
       )}
     >
-      {/* Top Brand Header & Toggle Button */}
-      <div className="flex h-16 items-center justify-between px-3.5 border-b border-slate-100">
+      {/* Sleek Floating Edge Toggle Button on the sidebar border */}
+      <button
+        type="button"
+        onClick={toggleSidebar}
+        aria-label={collapsed ? 'Rozwiń pasek boczny (⌘B)' : 'Zwiń pasek boczny (⌘B)'}
+        title={collapsed ? 'Rozwiń pasek boczny (⌘B)' : 'Zwiń pasek boczny (⌘B)'}
+        className="absolute -right-3.5 top-4.5 z-50 flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-200 shadow-md text-slate-600 hover:text-indigo-600 hover:border-indigo-400 transition-all cursor-pointer hover:scale-115 active:scale-95 ring-4 ring-slate-50/80"
+      >
         {collapsed ? (
-          <div className="w-full flex items-center justify-center">
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              aria-label="Rozwiń pasek boczny (⌘B)"
-              title="Rozwiń pasek boczny (⌘B)"
-              className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20 hover:scale-105 transition-transform cursor-pointer"
-            >
-              <PanelLeft className="w-5 h-5" />
-            </button>
-          </div>
+          <ChevronRight className="w-4 h-4 text-slate-700" />
         ) : (
-          <>
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2.5 rounded-2xl transition-all cursor-pointer group text-left min-w-0"
-              title="MyLibrary"
-            >
-              <div className="w-9 h-9 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform shrink-0">
-                <BookOpen className="w-4 h-4" />
-              </div>
+          <ChevronLeft className="w-4 h-4 text-slate-700" />
+        )}
+      </button>
 
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base font-black tracking-tight text-slate-900 font-display leading-none">
-                    MyLibrary
-                  </span>
-                  <span className="rounded-full bg-indigo-50 px-1.5 py-0.5 text-[9px] font-extrabold text-indigo-700 border border-indigo-200/50">
-                    PRO
-                  </span>
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">
-                  Biblioteka
+      {/* Top Brand Header */}
+      <div className="flex h-16 items-center justify-between px-4 border-b border-slate-100">
+        <button
+          onClick={() => navigate('/')}
+          className={cn(
+            'flex items-center gap-2.5 rounded-2xl transition-all cursor-pointer group text-left min-w-0',
+            collapsed && 'w-full justify-center',
+          )}
+          title="MyLibrary — strona główna"
+        >
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform shrink-0">
+            <BookOpen className="w-4 h-4" />
+          </div>
+
+          {!collapsed && (
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-slate-900 font-display leading-none">
+                  MyLibrary
+                </span>
+                <span className="rounded-full bg-indigo-50 px-1.5 py-0.5 text-[9px] font-extrabold text-indigo-700 border border-indigo-200/50">
+                  PRO
                 </span>
               </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              aria-label="Zwiń pasek boczny (⌘B)"
-              title="Zwiń pasek boczny (⌘B)"
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border border-transparent hover:border-slate-200"
-            >
-              <PanelLeftClose className="w-4 h-4" />
-            </button>
-          </>
-        )}
+              <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">
+                Biblioteka
+              </span>
+            </div>
+          )}
+        </button>
       </div>
 
       {/* Quick Search Shortcut Bar (when expanded) */}
