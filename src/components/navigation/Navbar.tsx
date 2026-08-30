@@ -4,10 +4,9 @@ import {
   Heart,
   Sparkles,
   PanelLeft,
-  Search,
   ChevronRight,
 } from "lucide-react";
-import { useLocation, NavLink, Link } from "react-router-dom";
+import { useLocation, NavLink } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import UserMenu from "./UserMenu";
 import MagdaIcon from "../ui/MagdaIcon";
@@ -36,20 +35,19 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-30 hidden md:block w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-xl transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="mx-auto flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        {/* Left: Sidebar toggle + Breadcrumbs */}
+        {/* Left: Breadcrumbs + Expand button only when sidebar is collapsed */}
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            aria-label="Przełącz pasek boczny (⌘B)"
-            title="Przełącz pasek boczny (⌘B)"
-            className={cn(
-              "p-2 rounded-xl border border-slate-200/80 text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 transition-all cursor-pointer shadow-2xs",
-              sidebarCollapsed && "bg-indigo-50 text-indigo-700 border-indigo-200"
-            )}
-          >
-            <PanelLeft className="w-4 h-4" />
-          </button>
+          {sidebarCollapsed && (
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-label="Rozwiń pasek boczny (⌘B)"
+              title="Rozwiń pasek boczny (⌘B)"
+              className="p-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all cursor-pointer shadow-2xs"
+            >
+              <PanelLeft className="w-4 h-4" />
+            </button>
+          )}
 
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
             <span className="text-slate-500 font-medium">{currentRoute.category}</span>

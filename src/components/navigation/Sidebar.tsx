@@ -9,8 +9,6 @@ import {
   LogOut,
   Layers,
   Search,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { signOut } from 'firebase/auth';
@@ -148,29 +146,14 @@ export const Sidebar: React.FC = () => {
     <aside
       aria-label="Panel boczny aplikacji"
       className={cn(
-        'hidden md:flex flex-col sticky top-0 h-screen border-r border-slate-200/80 bg-white/95 backdrop-blur-xl z-40 transition-all duration-300 ease-in-out shrink-0 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)] relative',
+        'hidden md:flex flex-col sticky top-0 h-screen border-r border-slate-200/80 bg-white/95 backdrop-blur-xl z-40 transition-all duration-300 ease-in-out shrink-0 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]',
         collapsed ? 'w-20 min-w-[5rem]' : 'w-64 min-w-[16rem]',
       )}
     >
-      {/* Floating Edge Toggle Button on sidebar boundary */}
-      <button
-        type="button"
-        onClick={toggleSidebar}
-        aria-label={collapsed ? 'Rozwiń pasek boczny (⌘B)' : 'Zwiń pasek boczny (⌘B)'}
-        title={collapsed ? 'Rozwiń pasek boczny (⌘B)' : 'Zwiń pasek boczny (⌘B)'}
-        className="absolute -right-3.5 top-5 z-50 flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-200 shadow-md text-slate-500 hover:text-indigo-600 hover:border-indigo-300 transition-all cursor-pointer hover:scale-110 active:scale-95"
-      >
-        {collapsed ? (
-          <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-        ) : (
-          <ChevronLeft className="w-3.5 h-3.5 text-slate-600" />
-        )}
-      </button>
-
       {/* Top Brand Header & Toggle Button */}
       <div className="flex h-16 items-center justify-between px-3.5 border-b border-slate-100">
         {collapsed ? (
-          <div className="w-full flex flex-col items-center justify-center gap-1">
+          <div className="w-full flex items-center justify-center">
             <button
               type="button"
               onClick={toggleSidebar}
@@ -316,20 +299,10 @@ export const Sidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Footer / User Profile & Toggle */}
+      {/* Footer / User Profile */}
       <div className="p-3 border-t border-slate-100 space-y-2">
         {collapsed ? (
           <div className="flex flex-col items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              aria-label="Rozwiń pasek boczny (⌘B)"
-              title="Rozwiń pasek boczny (⌘B)"
-              className="p-2 rounded-xl text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
-            >
-              <PanelLeft className="w-4 h-4" />
-            </button>
-
             <button
               type="button"
               onClick={handleLogout}
