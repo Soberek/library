@@ -16,8 +16,8 @@ import {
   type PositionDifficulty,
 } from '../constants/sexualPositions';
 import PozycjeDrawAnimation from '../components/pozycje/PozycjeDrawAnimation';
-import { Modal } from '../components/ui/modal';
-import { Button } from '../components/ui/button';
+import { Modal, Button } from '../components/ui';
+import { toast } from '../stores';
 import { cn } from '../lib/utils';
 import './PozycjeSeksualne.css';
 
@@ -54,7 +54,7 @@ export const PozycjeSeksualne: React.FC = () => {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = 'Pozycje';
+    document.title = 'Pozycje dla par · MyLibrary';
     return () => {
       document.title = previousTitle;
     };
@@ -62,9 +62,15 @@ export const PozycjeSeksualne: React.FC = () => {
 
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((prev) => {
-      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      const isFav = prev.includes(id);
+      const next = isFav ? prev.filter((item) => item !== id) : [...prev, id];
       try {
         localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
+        if (isFav) {
+          toast.info("Usunięto pozycję z ulubionych.");
+        } else {
+          toast.success("Dodano pozycję do ulubionych!");
+        }
       } catch {
         // Ignore storage write errors
       }

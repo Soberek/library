@@ -3,6 +3,7 @@ import { useAuth } from './useAuth';
 import * as watchlistService from '../services/watchlistService';
 import type { Movie } from '../types/Movie';
 import type { WatchlistMovie } from '../types/WatchlistMovie';
+import { toast } from '../stores';
 
 export const watchlistKeys = {
   all: ['watchlist'] as const,
@@ -32,7 +33,11 @@ export function useWatchlistQuery() {
       return watchlistService.addToWatchlist(input);
     },
     onSuccess: () => {
+      toast.success('Film został dodany do watchlisty!');
       void queryClient.invalidateQueries({ queryKey: watchlistKeys.list(userId) });
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Nie udało się dodać filmu do watchlisty.');
     },
   });
 
@@ -42,12 +47,19 @@ export function useWatchlistQuery() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: watchlistKeys.list(userId) });
     },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Nie udało się zmienić statusu filmu.');
+    },
   });
 
   const removeMutation = useMutation({
     mutationFn: (entryId: string) => watchlistService.removeFromWatchlist(entryId),
     onSuccess: () => {
+      toast.success('Film został usunięty z watchlisty.');
       void queryClient.invalidateQueries({ queryKey: watchlistKeys.list(userId) });
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Nie udało się usunąć filmu.');
     },
   });
 
@@ -65,3 +77,5 @@ export function useWatchlistQuery() {
     removing: removeMutation.isPending,
   };
 }
+
+export default useWatchlistQuery;

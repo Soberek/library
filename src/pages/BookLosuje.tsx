@@ -46,7 +46,7 @@ import { Slider } from '../components/ui/slider';
 import { Select } from '../components/ui/select';
 import { Switch } from '../components/ui/switch';
 import { Button, buttonVariants } from '../components/ui/button';
-import { Toast } from '../components/ui/toast';
+import { toast } from '../stores';
 import { cn } from '../lib/utils';
 import './BookLosuje.css';
 
@@ -104,7 +104,6 @@ export const BookLosuje: React.FC = () => {
   const [isSynopsisExpanded, setIsSynopsisExpanded] = useState(false);
   const [savedToLibrary, setSavedToLibrary] = useState(false);
   const [savingToLibrary, setSavingToLibrary] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
   const [wishlistBooks, setWishlistBooks] = useState<Book[]>([]);
 
   const ratingApprox = needsClientRatingFilter(filters);
@@ -248,7 +247,7 @@ export const BookLosuje: React.FC = () => {
   const handleAddToLibrary = async () => {
     if (!drawn) return;
     if (!user) {
-      setSnackbarMsg('Zaloguj się, aby dodać książkę do swojej biblioteki.');
+      toast.warning('Zaloguj się, aby dodać książkę do swojej biblioteki.');
       return;
     }
     setSavingToLibrary(true);
@@ -273,9 +272,9 @@ export const BookLosuje: React.FC = () => {
       await addBook(newBook);
 
       setSavedToLibrary(true);
-      setSnackbarMsg(`Dodano „${drawn.title}” do Twojej biblioteki!`);
+      toast.success(`Dodano „${drawn.title}” do Twojej biblioteki!`);
     } catch (err) {
-      setSnackbarMsg(err instanceof Error ? err.message : 'Nie udało się dodać książki.');
+      toast.error(err instanceof Error ? err.message : 'Nie udało się dodać książki.');
     } finally {
       setSavingToLibrary(false);
     }
@@ -1106,12 +1105,6 @@ export const BookLosuje: React.FC = () => {
           </>
         )}
       </div>
-
-      <Toast
-        isOpen={Boolean(snackbarMsg)}
-        onClose={() => setSnackbarMsg(null)}
-        message={snackbarMsg || ''}
-      />
     </main>
   );
 };

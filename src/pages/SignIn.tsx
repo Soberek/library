@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate, Link, Navigate, useLocation } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebaseConfig";
-import { useAuth } from "../hooks/useAuth";
-import { useForm } from "react-hook-form";
+import React, { useState } from 'react';
+import { useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebaseConfig';
+import { useAuth } from '../hooks/useAuth';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Loader2,
   AlertCircle,
@@ -13,21 +14,18 @@ import {
   EyeOff,
   LogIn,
   ArrowRight,
-} from "lucide-react";
-import { AuthLayout, Button, ResetPasswordModal } from "../components/ui";
-import { cn } from "../lib/utils";
-
-type FormData = {
-  email: string;
-  password: string;
-};
+} from 'lucide-react';
+import { AuthLayout, Button, ResetPasswordModal } from '../components/ui';
+import { signInSchema, type SignInFormData } from '../schemas';
+import { toast } from '../stores';
+import { cn } from '../lib/utils';
 
 function resolveRedirectTarget(from: unknown): string {
-  if (typeof from !== "string" || !from.startsWith("/") || from.startsWith("//")) {
-    return "/";
+  if (typeof from !== 'string' || !from.startsWith('/') || from.startsWith('//')) {
+    return '/';
   }
-  if (from === "/sign-in" || from === "/sign-up") {
-    return "/";
+  if (from === '/sign-in' || from === '/sign-up') {
+    return '/';
   }
   return from;
 }
@@ -37,49 +35,54 @@ export const SignIn: React.FC = () => {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
-  } = useForm<FormData>();
+    formState: { errors, isSubmitting },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const userContext = useAuth();
-  const currentEmail = watch("email") || "";
+  const currentEmail = watch('email') || '';
 
   const redirectTo = resolveRedirectTarget(
     (location.state as { from?: unknown } | null)?.from,
   );
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: SignInFormData) => {
     setErrorMessage(null);
-    setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email.trim(), data.password);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      toast.success('Zalogowano pomyślnie! Witaj ponownie.');
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      let message = "Wystąpił błąd podczas logowania.";
+      let message = 'Wystąpił błąd podczas logowania.';
       if (error instanceof Error) {
         const errStr = error.message.toLowerCase();
         if (
-          errStr.includes("user-not-found") ||
-          errStr.includes("wrong-password") ||
-          errStr.includes("invalid-credential")
+          errStr.includes('user-not-found') ||
+          errStr.includes('wrong-password') ||
+          errStr.includes('invalid-credential')
         ) {
-          message = "Nieprawidłowy adres email lub hasło.";
-        } else if (errStr.includes("too-many-requests")) {
-          message = "Zbyt wiele nieudanych prób. Odczekaj chwilę przed kolejną próbą.";
-        } else if (errStr.includes("invalid-email")) {
-          message = "Niepoprawny format adresu email.";
+          message = 'Nieprawidłowy adres email lub hasło.';
+        } else if (errStr.includes('too-many-requests')) {
+          message = 'Zbyt wiele nieudanych prób. Odczekaj chwilę przed kolejną próbą.';
+        } else if (errStr.includes('invalid-email')) {
+          message = 'Niepoprawny format adresu email.';
         } else {
           message = error.message;
         }
       }
       setErrorMessage(message);
-    } finally {
-      setLoading(false);
+      toast.error(message);
     }
   };
 
@@ -94,10 +97,10 @@ export const SignIn: React.FC = () => {
         subtitle="Zaloguj się, aby zarządzać swoją biblioteką i odkrywać nowe pozycje."
         footer={
           <p className="text-xs text-slate-500">
-            Nie posiadasz jeszcze konta?{" "}
+            Nie posiadasz jeszcze konta?{' '}
             <Link
               to="/sign-up"
-              state={{ from: redirectTo === "/" ? undefined : redirectTo }}
+              state={{ from: redirectTo === '/' ? undefined : redirectTo }}
               className="font-bold text-indigo-600 hover:text-indigo-700 hover:underline inline-flex items-center gap-1 group"
             >
               <span>Zarejestruj się za darmo</span>
@@ -106,7 +109,7 @@ export const SignIn: React.FC = () => {
           </p>
         }
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           {/* Email Field */}
           <div>
             <label
@@ -124,19 +127,14 @@ export const SignIn: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 placeholder="twoj@email.com"
+                aria-invalid={Boolean(errors.email)}
                 className={cn(
-                  "flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3",
+                  'flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3',
                   errors.email
-                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                    : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15"
+                    ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15'
+                    : 'border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
                 )}
-                {...register("email", {
-                  required: "Adres email jest wymagany",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Wprowadź poprawny adres email",
-                  },
-                })}
+                {...register('email')}
               />
             </div>
             {errors.email && (
@@ -169,28 +167,23 @@ export const SignIn: React.FC = () => {
               </div>
               <input
                 id="signin-password"
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 placeholder="••••••••"
+                aria-invalid={Boolean(errors.password)}
                 className={cn(
-                  "flex h-11 w-full rounded-xl border bg-white pl-10 pr-10 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3",
+                  'flex h-11 w-full rounded-xl border bg-white pl-10 pr-10 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3',
                   errors.password
-                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                    : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15"
+                    ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15'
+                    : 'border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
                 )}
-                {...register("password", {
-                  required: "Hasło jest wymagane",
-                  minLength: {
-                    value: 6,
-                    message: "Hasło musi mieć co najmniej 6 znaków",
-                  },
-                })}
+                {...register('password')}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
+                aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -218,15 +211,15 @@ export const SignIn: React.FC = () => {
           <div className="pt-2">
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isSubmitting}
               className="w-full h-11 text-sm font-bold shadow-md hover:shadow-lg gap-2"
             >
-              {loading ? (
+              {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <LogIn className="w-4 h-4" />
               )}
-              <span>{loading ? "Logowanie do konta…" : "Zaloguj się"}</span>
+              <span>{isSubmitting ? 'Logowanie do konta…' : 'Zaloguj się'}</span>
             </Button>
           </div>
         </form>

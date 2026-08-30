@@ -1,15 +1,11 @@
-import { useState } from 'react';
+import React from 'react';
 
-import { SearchContext } from '../hooks/useSearch';
-
-export const SearchProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  return (
-    <SearchContext.Provider value={{ searchTerm, setSearchTerm }}>
-      {children}
-    </SearchContext.Provider>
-  );
+/**
+ * @deprecated Search state has migrated to Zustand useFilterStore.
+ * SearchProvider is kept for backward-compatibility as a passthrough component.
+ */
+export const SearchProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  return <>{children}</>;
 };
+
+export default SearchProvider;

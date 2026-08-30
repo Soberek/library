@@ -1,10 +1,14 @@
-import React, { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../config/firebaseConfig";
-import { Modal } from "./modal";
-import { Button } from "./button";
-import { Mail, Loader2, AlertCircle, CheckCircle2, KeyRound } from "lucide-react";
-import { cn } from "../../lib/utils";
+import React, { useState, useEffect } from 'react';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../config/firebaseConfig';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Modal } from './modal';
+import { Button } from './button';
+import { Mail, Loader2, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
+import { resetPasswordSchema, type ResetPasswordFormData } from '../../schemas';
+import { toast } from '../../stores';
+import { cn } from '../../lib/utils';
 
 interface ResetPasswordModalProps {
   isOpen: boolean;
@@ -15,50 +19,57 @@ interface ResetPasswordModalProps {
 export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
   isOpen,
   onClose,
-  defaultEmail = "",
+  defaultEmail = '',
 }) => {
-  const [email, setEmail] = useState(defaultEmail);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sync defaultEmail when modal opens
-  React.useEffect(() => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email: defaultEmail,
+    },
+  });
+
+  const currentEmail = watch('email');
+
+  useEffect(() => {
     if (isOpen) {
-      setEmail(defaultEmail);
+      setValue('email', defaultEmail);
       setError(null);
       setSuccess(false);
+    } else {
+      reset();
     }
-  }, [isOpen, defaultEmail]);
+  }, [isOpen, defaultEmail, setValue, reset]);
 
-  const handleReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes("@")) {
-      setError("Wprowadź prawidłowy adres email.");
-      return;
-    }
-
+  const onSubmit = async (data: ResetPasswordFormData) => {
     setError(null);
-    setLoading(true);
-
     try {
-      await sendPasswordResetEmail(auth, email.trim());
+      await sendPasswordResetEmail(auth, data.email);
       setSuccess(true);
+      toast.success('Wysłano link do resetowania hasła.');
     } catch (err: unknown) {
+      let message = 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.';
       if (err instanceof Error) {
         const errStr = err.message.toLowerCase();
-        if (errStr.includes("user-not-found")) {
-          setError("Nie znaleziono konta powiązanego z tym adresem email.");
-        } else if (errStr.includes("invalid-email")) {
-          setError("Podany adres email jest nieprawidłowy.");
+        if (errStr.includes('user-not-found')) {
+          message = 'Nie znaleziono konta powiązanego z tym adresem email.';
+        } else if (errStr.includes('invalid-email')) {
+          message = 'Podany adres email jest nieprawidłowy.';
         } else {
-          setError(err.message);
+          message = err.message;
         }
-      } else {
-        setError("Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.");
       }
-    } finally {
-      setLoading(false);
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -85,8 +96,8 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
           <div>
             <h4 className="text-base font-bold text-slate-900">Sprawdź swoją skrzynkę!</h4>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Wysłaliśmy wiadomość z instrukcją resetowania hasła na adres{" "}
-              <strong className="text-slate-800 font-semibold">{email}</strong>.
+              Wysłaliśmy wiadomość z instrukcją resetowania hasła na adres{' '}
+              <strong className="text-slate-800 font-semibold">{currentEmail}</strong>.
             </p>
           </div>
           <div className="pt-2">
@@ -101,10 +112,10 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
           </div>
         </div>
       ) : (
-        <form onSubmit={handleReset} className="space-y-4 pt-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2" noValidate>
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
@@ -120,16 +131,19 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               <input
                 id="reset-email"
                 type="email"
-                required
-                autoFocus
                 placeholder="twoj@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={Boolean(errors.email)}
                 className={cn(
-                  "flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3 border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15"
+                  'flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3 border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
                 )}
+                {...register('email')}
               />
             </div>
+            {errors.email && (
+              <p className="text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1">
+                <span>{errors.email.message}</span>
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
@@ -137,22 +151,22 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               type="button"
               variant="ghost"
               onClick={onClose}
-              disabled={loading}
+              disabled={isSubmitting}
               className="text-xs"
             >
               Anuluj
             </Button>
             <Button
               type="submit"
-              disabled={loading || !email}
+              disabled={isSubmitting}
               className="text-xs font-bold gap-2"
             >
-              {loading ? (
+              {isSubmitting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Mail className="w-3.5 h-3.5" />
               )}
-              <span>{loading ? "Wysyłanie..." : "Wyślij link resetujący"}</span>
+              <span>{isSubmitting ? 'Wysyłanie...' : 'Wyślij link resetujący'}</span>
             </Button>
           </div>
         </form>

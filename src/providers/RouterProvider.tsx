@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { PageLoader } from '../components/ui/PageLoader';
+import { PageError } from '../components/ui/PageError';
 import { ProtectedRoute } from '../components';
 import App from '../App';
 
@@ -22,6 +23,11 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <ProtectedRoute />,
+    errorElement: (
+      <div className="p-6 max-w-4xl mx-auto">
+        <PageError message="Wystąpił nieoczekiwany błąd podczas ładowania widoku." />
+      </div>
+    ),
     children: [
       {
         path: '',

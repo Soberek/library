@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { Heart, Edit3, Trash2, Check, Layers, User, CheckCircle2 } from "lucide-react";
 import type { Book, BookStatus } from "../../../types/Book";
 import StatusMenuButton from "../StatusMenuButton";
@@ -31,7 +31,7 @@ const GENRE_GRADIENTS: Record<string, string> = {
   psychologia: "from-teal-600 via-emerald-600 to-cyan-700",
 };
 
-export const BookCard: React.FC<BookCardProps> = ({
+export const BookCard: React.FC<BookCardProps> = memo(({
   book,
   onEdit,
   onDelete,
@@ -86,7 +86,7 @@ export const BookCard: React.FC<BookCardProps> = ({
           aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
           title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
           className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border shadow-2xs",
+            "w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500",
             isFavorite
               ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600"
               : "bg-slate-50 text-slate-400 border-slate-200 hover:text-rose-500 hover:border-rose-200 hover:bg-white"
@@ -108,7 +108,7 @@ export const BookCard: React.FC<BookCardProps> = ({
           }
         }}
         aria-label={`Edytuj książkę ${book.title}`}
-        className="relative h-56 w-full cursor-pointer flex items-center justify-center px-4 py-2 select-none"
+        className="relative h-56 w-full cursor-pointer flex items-center justify-center px-4 py-2 select-none focus-visible:outline-none"
       >
         {book.cover && !imgError ? (
           <div className="relative max-h-52 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
@@ -119,6 +119,8 @@ export const BookCard: React.FC<BookCardProps> = ({
               <img
                 src={book.cover}
                 alt={book.title}
+                loading="lazy"
+                decoding="async"
                 onError={() => setImgError(true)}
                 className="max-h-50 max-w-[155px] object-cover rounded-md"
               />
@@ -141,7 +143,7 @@ export const BookCard: React.FC<BookCardProps> = ({
                   {formattedGenre}
                 </span>
               )}
-              <h3 className="text-xs font-bold line-clamp-3 leading-snug text-white drop-shadow-xs">
+              <h3 className="text-xs font-bold line-clamp-3 leading-snug text-white drop-shadow-xs font-display">
                 {book.title}
               </h3>
             </div>
@@ -169,7 +171,7 @@ export const BookCard: React.FC<BookCardProps> = ({
 
           <h2
             onClick={() => onEdit(book.id)}
-            className="font-bold text-base text-slate-900 line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors leading-snug"
+            className="font-bold text-base text-slate-900 line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors leading-snug font-display"
           >
             {book.title}
           </h2>
@@ -213,7 +215,7 @@ export const BookCard: React.FC<BookCardProps> = ({
                   )
                 }
                 title="Dodaj 10 stron do przeczytanych"
-                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center"
+                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
               >
                 +10
               </button>
@@ -227,7 +229,7 @@ export const BookCard: React.FC<BookCardProps> = ({
                   )
                 }
                 title="Dodaj 50 stron do przeczytanych"
-                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center"
+                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
               >
                 +50
               </button>
@@ -235,7 +237,7 @@ export const BookCard: React.FC<BookCardProps> = ({
                 type="button"
                 onClick={handleFinishBook}
                 title="Oznacz całą książkę jako przeczytaną (100%)"
-                className="flex-[1.2] py-1 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1 active:scale-95"
+                className="flex-[1.2] py-1 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500"
               >
                 <Check className="w-3.5 h-3.5 shrink-0" />
                 <span>Przeczytana</span>
@@ -267,7 +269,7 @@ export const BookCard: React.FC<BookCardProps> = ({
               onClick={() => onEdit(book.id)}
               aria-label="Edytuj książkę"
               title="Edytuj książkę"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
             >
               <Edit3 className="w-4 h-4" />
             </button>
@@ -276,7 +278,7 @@ export const BookCard: React.FC<BookCardProps> = ({
               onClick={() => setOpenDeleteDialog(true)}
               aria-label="Usuń książkę"
               title="Usuń książkę"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -316,6 +318,8 @@ export const BookCard: React.FC<BookCardProps> = ({
       </Modal>
     </div>
   );
-};
+});
+
+BookCard.displayName = "BookCard";
 
 export default BookCard;

@@ -1,14 +1,13 @@
-import { createContext, useContext } from 'react';
-
-type SearchContextType = {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-};
-
-export const SearchContext = createContext<SearchContextType | undefined>(
-  undefined,
-);
+import { useFilterStore } from '../stores';
 
 export const useSearch = () => {
-  return useContext(SearchContext);
+  const searchTerm = useFilterStore((state) => state.filters.searchTerm);
+  const setFilter = useFilterStore((state) => state.setFilter);
+
+  return {
+    searchTerm,
+    setSearchTerm: (term: string) => setFilter('searchTerm', term),
+  };
 };
+
+export default useSearch;

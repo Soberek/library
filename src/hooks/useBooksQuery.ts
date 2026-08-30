@@ -8,7 +8,7 @@ import { useAuth } from "./useAuth";
 import * as booksService from "../services/booksService";
 import type { Book, BookStatus } from "../types/Book";
 import { useMemo, useState } from "react";
-import { useFilterStore } from "../stores";
+import { useFilterStore, toast } from "../stores";
 import type { PaginatedResult } from "../services/booksService";
 import { QueryDocumentSnapshot, type DocumentData } from "firebase/firestore";
 
@@ -261,6 +261,12 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       };
       return booksService.addBook(bookToAdd);
     },
+    onSuccess: () => {
+      toast.success("Książka została dodana do biblioteki!");
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Nie udało się dodać książki.");
+    },
     onSettled: () => {
       // Invalidate the correct query key based on current mode
       const queryKey =
@@ -335,6 +341,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onError: (_err, _variables, context) => {
+      toast.error("Nie udało się zaktualizować książki.");
       // Rollback to previous state on error
       if (usePagination && !useFallback && context?.previousData) {
         queryClient.setQueryData(
@@ -409,7 +416,11 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
         return { previousBooks };
       }
     },
+    onSuccess: () => {
+      toast.success("Książka została usunięta.");
+    },
     onError: (_err, _variables, context) => {
+      toast.error("Nie udało się usunąć książki.");
       // Rollback to previous state on error
       if (usePagination && !useFallback && context?.previousData) {
         queryClient.setQueryData(
@@ -500,6 +511,7 @@ export const useBooksQuery = (usePagination = true, pageSize = 12) => {
       }
     },
     onError: (_err, _variables, context) => {
+      toast.error("Błąd aktualizacji ulubionych.");
       // Rollback to previous state on error
       if (usePagination && !useFallback && context?.previousData) {
         queryClient.setQueryData(

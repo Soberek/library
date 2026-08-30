@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { ArrowUp, ArrowDown, Heart, Edit3, Trash2, BookOpen, Check, Layers, User } from "lucide-react";
 import type { Book, BookStatus } from "../../../types/Book";
 import { useFilterStore } from "../../../stores";
@@ -24,7 +24,7 @@ type SortField = NonNullable<
   ReturnType<typeof useFilterStore.getState>["filters"]["sortBy"]
 >;
 
-export const BookTable: React.FC<BookTableProps> = ({
+export const BookTable: React.FC<BookTableProps> = memo(({
   books,
   handleStatusChange,
   handleRatingChange,
@@ -141,6 +141,8 @@ export const BookTable: React.FC<BookTableProps> = ({
                             <img
                               src={book.cover}
                               alt=""
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -208,7 +210,7 @@ export const BookTable: React.FC<BookTableProps> = ({
                       <div className="min-w-[140px]">
                         <div className="flex justify-between items-center text-xs font-semibold text-slate-600 mb-1">
                           <span className="flex items-center gap-1">
-                            <Layers className="w-3 h-3 text-slate-400" />
+                            <Layers className="w-3.5 h-3.5 text-slate-400" />
                             <span>{read}/{overall}</span>
                           </span>
                           <span className="text-indigo-600 font-extrabold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200/60">
@@ -253,7 +255,7 @@ export const BookTable: React.FC<BookTableProps> = ({
                               className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-2xs"
                               title="Oznacz jako przeczytana"
                             >
-                              <Check className="w-3 h-3" />
+                              <Check className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         )}
@@ -335,6 +337,8 @@ export const BookTable: React.FC<BookTableProps> = ({
       </Modal>
     </div>
   );
-};
+});
+
+BookTable.displayName = "BookTable";
 
 export default BookTable;
