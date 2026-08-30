@@ -11,6 +11,7 @@ interface StatCardProps {
   percentage?: number;
   progress?: number;
   className?: string;
+  onClick?: () => void;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -22,11 +23,17 @@ export const StatCard: React.FC<StatCardProps> = ({
   percentage,
   progress,
   className,
+  onClick,
 }) => {
   return (
     <div
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
       className={cn(
         "relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        onClick && "cursor-pointer hover:border-indigo-300",
         className
       )}
     >
@@ -51,7 +58,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
 
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none">
+        <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none font-display">
           {value}
         </span>
         {typeof percentage === "number" && (

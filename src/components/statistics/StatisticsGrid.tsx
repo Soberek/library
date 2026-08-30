@@ -1,6 +1,7 @@
 import React from "react";
 import StatCard from "./StatCard";
 import { CheckCircle2, BookOpen, BookmarkPlus, XCircle } from "lucide-react";
+import { useFilterStore } from "../../stores";
 
 interface BooksStats {
   total: number;
@@ -20,22 +21,30 @@ interface StatisticsGridProps {
 }
 
 const STATUS_SEGMENTS = [
-  { key: "read", label: "Przeczytane", color: "#059669", bg: "bg-emerald-50" },
-  { key: "inProgress", label: "W trakcie", color: "#d97706", bg: "bg-amber-50" },
-  { key: "wantToRead", label: "Chcę przeczytać", color: "#2563eb", bg: "bg-blue-50" },
-  { key: "dropped", label: "Porzucone", color: "#e11d48", bg: "bg-rose-50" },
+  { key: "read", label: "Przeczytane", statusVal: "Przeczytana", color: "#059669", bg: "bg-emerald-50" },
+  { key: "inProgress", label: "W trakcie", statusVal: "W trakcie", color: "#d97706", bg: "bg-amber-50" },
+  { key: "wantToRead", label: "Chcę przeczytać", statusVal: "Chcę przeczytać", color: "#2563eb", bg: "bg-blue-50" },
+  { key: "dropped", label: "Porzucone", statusVal: "Porzucona", color: "#e11d48", bg: "bg-rose-50" },
 ] as const;
 
 export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
   booksStats,
   additionalStats,
 }) => {
+  const setFilter = useFilterStore((state) => state.setFilter);
+  const toggleTab = useFilterStore((state) => state.toggleTab);
+
   const total = Math.max(booksStats.total, 1);
   const segments = STATUS_SEGMENTS.map((segment) => ({
     ...segment,
     value: booksStats[segment.key],
     pct: (booksStats[segment.key] / total) * 100,
   }));
+
+  const handleStatusFilter = (statusValue: string) => {
+    setFilter("status", statusValue);
+    toggleTab("filters");
+  };
 
   return (
     <div className="space-y-3.5">
@@ -53,7 +62,7 @@ export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
 
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="text-xs font-extrabold">{additionalStats.completionRate}% przeczytane</span>
+            <span className="text-xs font-extrabold">{additionalStats.completionRate}% ukończonych</span>
           </div>
         </div>
 
@@ -85,14 +94,16 @@ export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
           {segments.map((segment) => (
             <div
               key={segment.key}
-              className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs"
+              onClick={() => handleStatusFilter(segment.statusVal)}
+              className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-indigo-300 hover:bg-slate-50 transition-all cursor-pointer group"
+              title={`Filtruj po: ${segment.label}`}
             >
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
                 style={{ backgroundColor: segment.color }}
               />
               <div className="min-w-0 flex-1 flex justify-between items-baseline gap-1">
-                <span className="text-[11px] font-semibold text-slate-600 truncate">
+                <span className="text-[11px] font-semibold text-slate-600 group-hover:text-indigo-600 truncate transition-colors">
                   {segment.label}
                 </span>
                 <span className="text-xs font-black text-slate-900">
@@ -113,6 +124,8 @@ export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
           icon={<CheckCircle2 className="w-4 h-4" />}
           accent="#059669"
           progress={additionalStats.completionRate}
+          onClick={() => handleStatusFilter("Przeczytana")}
+          hint="Kliknij, aby przefiltrować"
         />
         <StatCard
           title="W trakcie"
@@ -120,6 +133,8 @@ export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
           percentage={(booksStats.inProgress / total) * 100}
           icon={<BookOpen className="w-4 h-4" />}
           accent="#d97706"
+          onClick={() => handleStatusFilter("W trakcie")}
+          hint="Kliknij, aby przefiltrować"
         />
         <StatCard
           title="Chcę przeczytać"
@@ -127,6 +142,8 @@ export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
           percentage={(booksStats.wantToRead / total) * 100}
           icon={<BookmarkPlus className="w-4 h-4" />}
           accent="#2563eb"
+          onClick={() => handleStatusFilter("Chcę przeczytać")}
+          hint="Kliknij, aby przefiltrować"
         />
         <StatCard
           title="Porzucone"
@@ -134,6 +151,8 @@ export const StatisticsGrid: React.FC<StatisticsGridProps> = ({
           percentage={(booksStats.dropped / total) * 100}
           icon={<XCircle className="w-4 h-4" />}
           accent="#e11d48"
+          onClick={() => handleStatusFilter("Porzucona")}
+          hint="Kliknij, aby przefiltrować"
         />
       </div>
     </div>

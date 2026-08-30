@@ -21,8 +21,13 @@ import {
 import { BOOK_STATUSES, BOOK_STATUS_LABELS } from "../../constants/bookStatus";
 import { GENRES } from "../../constants/genres";
 import type { Book, BookStatus } from "../../types/Book";
-import StatisticsGrid from "../statistics/StatisticsGrid";
-import MetricsGrid from "../statistics/MetricsGrid";
+import {
+  StatisticsGrid,
+  MetricsGrid,
+  ReadingHighlights,
+  GenreBreakdown,
+  RatingDistribution,
+} from "../statistics";
 import { formatBookCount } from "../../utils/textHelpers";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
@@ -149,6 +154,18 @@ export const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
   }));
 
   const currentSortOpt = SORT_OPTIONS.find((s) => s.value === filters.sortBy) || SORT_OPTIONS[0];
+
+  const filteredBooksForStats = useMemo(() => {
+    if (filters.statsYear === "all") return books;
+    const targetYear =
+      typeof filters.statsYear === "number"
+        ? filters.statsYear
+        : parseInt(String(filters.statsYear), 10);
+    return books.filter((book) => {
+      if (!book.createdAt) return false;
+      return new Date(book.createdAt).getFullYear() === targetYear;
+    });
+  }, [books, filters.statsYear]);
 
   return (
     <Card className="overflow-hidden shadow-sm border-slate-200/90 bg-white rounded-2xl">
@@ -466,17 +483,29 @@ export const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
 
           {/* TAB 3: STATISTICS */}
           {activeTab === "stats" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2 flex-wrap pb-1 border-b border-slate-100">
-                <h3 className="text-sm font-bold text-slate-900 font-display">
-                  Podsumowanie i statystyki czytelnicze
-                </h3>
+            <div className="space-y-6">
+              {/* Year filter and title */}
+              <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-100">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 font-display">
+                    Statystyki i analityka czytelnicza
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Szczegółowe podsumowanie Twojej biblioteki
+                  </p>
+                </div>
+
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-500">Rok:</span>
-                  <div className="w-36">
+                  <span className="text-xs font-bold text-slate-500">Filtruj rok:</span>
+                  <div className="w-40">
                     <Select
-                      value={filters.statsYear}
-                      onChange={(e) => handleFilterChange("statsYear", e.target.value)}
+                      value={String(filters.statsYear)}
+                      onChange={(e) =>
+                        handleFilterChange(
+                          "statsYear",
+                          e.target.value === "all" ? "all" : parseInt(e.target.value, 10)
+                        )
+                      }
                     >
                       <option value="all">Wszystkie lata</option>
                       {availableYears.map((year) => (
@@ -489,12 +518,33 @@ export const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                 </div>
               </div>
 
+              {/* 1. Overview and Status Breakdown */}
               <StatisticsGrid
                 booksStats={booksStats}
                 additionalStats={additionalStats}
               />
 
-              <MetricsGrid additionalStats={additionalStats} />
+              {/* 2. Core Metrics */}
+              <div>
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                  Kluczowe wskaźniki
+                </span>
+                <MetricsGrid additionalStats={additionalStats} />
+              </div>
+
+              {/* 3. Highlights and Records */}
+              <div>
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                  Wyróżnienia i rekordy
+                </span>
+                <ReadingHighlights books={filteredBooksForStats} />
+              </div>
+
+              {/* 4. Genres and Rating Distribution */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <GenreBreakdown books={filteredBooksForStats} />
+                <RatingDistribution books={filteredBooksForStats} />
+              </div>
             </div>
           )}
         </div>
