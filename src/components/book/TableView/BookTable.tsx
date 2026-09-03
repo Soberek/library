@@ -221,8 +221,10 @@ export const BookTable: React.FC<BookTableProps> = memo(({
 
                         {handlePagesChange && book.read !== "Przeczytana" && (
                           <div className="flex items-center justify-end gap-1 mt-1.5">
-                            <button
+                            <Button
                               type="button"
+                              variant="outline"
+                              size="xs"
                               onClick={() =>
                                 handlePagesChange(
                                   book.id,
@@ -230,12 +232,14 @@ export const BookTable: React.FC<BookTableProps> = memo(({
                                   overall
                                 )
                               }
-                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-colors cursor-pointer shadow-2xs"
+                              className="h-6 px-1.5 text-[10px] font-bold"
                             >
                               +10
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type="button"
+                              variant="outline"
+                              size="xs"
                               onClick={() =>
                                 handlePagesChange(
                                   book.id,
@@ -243,20 +247,22 @@ export const BookTable: React.FC<BookTableProps> = memo(({
                                   overall
                                 )
                               }
-                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-colors cursor-pointer shadow-2xs"
+                              className="h-6 px-1.5 text-[10px] font-bold"
                             >
                               +50
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type="button"
+                              variant="success"
+                              size="xs"
                               onClick={() =>
                                 handlePagesChange(book.id, overall, overall)
                               }
-                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer shadow-2xs"
+                              className="h-6 px-1.5 text-[10px] font-bold"
                               title="Oznacz jako przeczytana"
                             >
                               <Check className="w-3.5 h-3.5" />
-                            </button>
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -264,39 +270,44 @@ export const BookTable: React.FC<BookTableProps> = memo(({
 
                     {/* Actions */}
                     <td className="px-4 py-3.5 text-right">
-                      <div className="inline-flex items-center gap-1">
-                        <button
+                      <div className="inline-flex items-center gap-0.5">
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => handleToggleFavorite(book.id, isFavorite)}
                           aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
                           title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
                           className={cn(
-                            "p-1.5 rounded-lg transition-colors cursor-pointer",
                             isFavorite
                               ? "text-amber-500 hover:bg-amber-50"
                               : "text-slate-400 hover:text-rose-500 hover:bg-rose-50"
                           )}
                         >
                           <Heart className={cn("w-4 h-4", isFavorite && "fill-amber-500 text-amber-500")} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => handleEdit(book.id)}
                           aria-label="Edytuj"
                           title="Edytuj"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                          className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
                         >
                           <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => setDeleteId(book.id)}
                           aria-label="Usuń"
                           title="Usuń"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

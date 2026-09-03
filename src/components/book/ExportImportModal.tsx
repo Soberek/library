@@ -96,33 +96,29 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     >
       <div className="space-y-4">
         {/* Tab switch */}
-        <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/80">
-          <button
+        <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/80 gap-1">
+          <Button
             type="button"
+            variant={tab === 'export' ? "outline" : "ghost"}
+            size="sm"
             onClick={() => setTab('export')}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
-              tab === 'export'
-                ? "bg-white text-indigo-600 shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
+            leftIcon={<Download className="w-4 h-4" />}
+            fullWidth
+            className={cn(tab === 'export' && "text-indigo-600 shadow-2xs bg-white border-white")}
           >
-            <Download className="w-4 h-4" />
-            <span>Eksportuj książki</span>
-          </button>
-          <button
+            Eksportuj książki
+          </Button>
+          <Button
             type="button"
+            variant={tab === 'import' ? "outline" : "ghost"}
+            size="sm"
             onClick={() => setTab('import')}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
-              tab === 'import'
-                ? "bg-white text-indigo-600 shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
+            leftIcon={<Upload className="w-4 h-4" />}
+            fullWidth
+            className={cn(tab === 'import' && "text-indigo-600 shadow-2xs bg-white border-white")}
           >
-            <Upload className="w-4 h-4" />
-            <span>Importuj z pliku</span>
-          </button>
+            Importuj z pliku
+          </Button>
         </div>
 
         {/* Feedback alerts */}
@@ -255,15 +251,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           {tab === 'import' && parsedBooks.length > 0 && (
             <Button
               onClick={handleExecuteImport}
-              disabled={importing}
-              className="gap-2"
+              loading={importing}
+              loadingText="Importowanie…"
+              leftIcon={<Upload className="w-4 h-4" />}
             >
-              {importing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Upload className="w-4 h-4" />
-              )}
-              <span>{importing ? 'Importowanie…' : `Zaimportuj ${parsedBooks.length} książek`}</span>
+              Zaimportuj {parsedBooks.length} książek
             </Button>
           )}
         </div>

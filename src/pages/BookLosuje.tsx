@@ -354,42 +354,36 @@ export const BookLosuje: React.FC = () => {
               )}
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setDrawerOpen(true)}
               disabled={busy}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer shrink-0"
+              leftIcon={<SlidersHorizontal className="w-3.5 h-3.5" />}
+              rightIcon={
+                advancedCount > 0 ? (
+                  <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold">
+                    {advancedCount}
+                  </span>
+                ) : undefined
+              }
+              className="bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 shrink-0"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Filtry</span>
-              {advancedCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold">
-                  {advancedCount}
-                </span>
-              )}
-            </button>
+              Filtry
+            </Button>
           </div>
 
           <div className="flex items-center gap-2">
             <Button
-              className="book-draw-btn flex-1 h-11 text-xs font-bold gap-1.5 cursor-pointer"
+              className="book-draw-btn flex-1 h-11 text-xs font-bold gap-1.5"
               disabled={busy || poolSize === 0}
+              loading={busy}
+              loadingText={loading ? 'Kartkuję…' : 'Losuję…'}
+              leftIcon={<Shuffle className="w-4 h-4" />}
               onClick={() => void handleDraw()}
             >
-              {busy ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Shuffle className="w-4 h-4" />
-              )}
-              <span>
-                {loading
-                  ? 'Kartkuję…'
-                  : drawing
-                    ? 'Losuję…'
-                    : drawn
-                      ? 'Losuj inną'
-                      : `Losuj (~${(poolSize ?? 0).toLocaleString('pl-PL')})`}
-              </span>
+              {drawn ? 'Losuj inną' : `Losuj (~${(poolSize ?? 0).toLocaleString('pl-PL')})`}
             </Button>
 
             {wishlistBooks.length > 0 && (
@@ -397,11 +391,11 @@ export const BookLosuje: React.FC = () => {
                 variant="outline"
                 className="h-11 px-3 text-xs font-bold gap-1 border-emerald-300 bg-emerald-50 text-emerald-950 rounded-xl shrink-0"
                 disabled={busy}
+                leftIcon={<BookMarked className="w-3.5 h-3.5 text-emerald-700" />}
                 onClick={handleDrawFromWishlist}
                 title="Losuj z półki 'Chcę przeczytać'"
               >
-                <BookMarked className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Półka ({wishlistBooks.length})</span>
+                Półka ({wishlistBooks.length})
               </Button>
             )}
           </div>
@@ -440,21 +434,26 @@ export const BookLosuje: React.FC = () => {
               </div>
 
               {/* Mobile Filter Drawer Button */}
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="xs"
+                rounded="full"
                 onClick={() => setDrawerOpen(true)}
                 disabled={busy}
-                className="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer transition-colors"
+                leftIcon={<SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />}
+                rightIcon={
+                  advancedCount > 0 ? (
+                    <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold">
+                      {advancedCount}
+                    </span>
+                  ) : undefined
+                }
+                className="sm:hidden"
                 title="Wszystkie filtry"
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Filtry</span>
-                {advancedCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold">
-                    {advancedCount}
-                  </span>
-                )}
-              </button>
+                Filtry
+              </Button>
             </div>
           </div>
 
@@ -964,22 +963,21 @@ export const BookLosuje: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 pt-3 border-t border-slate-200/70 mt-1">
                     <Button
-                      disabled={savingToLibrary || savedToLibrary}
+                      disabled={savedToLibrary}
+                      loading={savingToLibrary}
+                      loadingText="Zapisywanie…"
+                      variant={savedToLibrary ? 'success' : 'emerald'}
+                      size="default"
                       onClick={() => void handleAddToLibrary()}
-                      className={cn(
-                        'gap-1.5 h-10 px-3 rounded-xl font-bold text-xs justify-center cursor-pointer',
-                        savedToLibrary
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-emerald-700 text-white hover:bg-emerald-800 shadow-xs',
-                      )}
+                      leftIcon={
+                        savedToLibrary ? (
+                          <Check className="w-3.5 h-3.5" />
+                        ) : (
+                          <BookmarkPlus className="w-3.5 h-3.5" />
+                        )
+                      }
+                      className="gap-1.5 h-10 px-3 rounded-xl font-bold text-xs justify-center"
                     >
-                      {savedToLibrary ? (
-                        <Check className="w-3.5 h-3.5" />
-                      ) : savingToLibrary ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <BookmarkPlus className="w-3.5 h-3.5" />
-                      )}
                       <span className="truncate">
                         {savedToLibrary ? 'W bibliotece' : 'Do biblioteki'}
                       </span>

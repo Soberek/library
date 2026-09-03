@@ -16,7 +16,7 @@ import {
   type PositionDifficulty,
 } from '../constants/sexualPositions';
 import PozycjeDrawAnimation from '../components/pozycje/PozycjeDrawAnimation';
-import { Modal, Button } from '../components/ui';
+import { Modal, Button, SearchInput } from '../components/ui';
 import { toast } from '../stores';
 import { cn } from '../lib/utils';
 import './PozycjeSeksualne.css';
@@ -141,33 +141,29 @@ export const PozycjeSeksualne: React.FC = () => {
           <p className="pozycje-tagline">Jedno kliknięcie — jedna pozycja. Resztę zostawcie sobie.</p>
 
           <div className="flex justify-center mt-4">
-            <div className="flex p-1 bg-slate-100 rounded-full border border-slate-200">
-              <button
+            <div className="flex p-1 bg-slate-100 rounded-full border border-slate-200 gap-1">
+              <Button
                 type="button"
+                variant={activeTab === 'draw' ? 'rose' : 'ghost'}
+                size="sm"
+                rounded="full"
                 onClick={() => setActiveTab('draw')}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer",
-                  activeTab === 'draw'
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                )}
+                leftIcon={<Sparkles className="w-3.5 h-3.5" />}
+                className={cn(activeTab === 'draw' && "shadow-xs")}
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Losowanie</span>
-              </button>
-              <button
+                Losowanie
+              </Button>
+              <Button
                 type="button"
+                variant={activeTab === 'catalog' ? 'rose' : 'ghost'}
+                size="sm"
+                rounded="full"
                 onClick={() => setActiveTab('catalog')}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer",
-                  activeTab === 'catalog'
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                )}
+                leftIcon={<LayoutGrid className="w-3.5 h-3.5" />}
+                className={cn(activeTab === 'catalog' && "shadow-xs")}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Katalog ({SEXUAL_POSITIONS.length})</span>
-              </button>
+                Katalog ({SEXUAL_POSITIONS.length})
+              </Button>
             </div>
           </div>
         </motion.header>
@@ -231,13 +227,17 @@ export const PozycjeSeksualne: React.FC = () => {
                   >
                     <div className="flex justify-between items-center mb-1">
                       <p className="pozycje-card-kicker">Wylosowano</p>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        rounded="full"
                         onClick={() => toggleFavorite(result.id)}
-                        className="p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                        aria-label="Dodaj do ulubionych"
                       >
                         <Heart className={cn("w-5 h-5", favorites.includes(result.id) && "fill-rose-500 text-rose-500")} />
-                      </button>
+                      </Button>
                     </div>
 
                     <h2 className="pozycje-card-title">
@@ -269,81 +269,69 @@ export const PozycjeSeksualne: React.FC = () => {
           <div className="mt-2 space-y-4">
             {/* Catalog controls */}
             <div className="flex flex-col md:flex-row gap-3 justify-between items-center p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <div className="relative w-full md:w-80">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                  <Search className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
+              <div className="w-full md:w-80">
+                <SearchInput
                   placeholder="Szukaj pozycji..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                  onClear={() => setSearchQuery('')}
+                  inputSize="default"
+                  inputVariant="filled"
+                  fullWidth
                 />
               </div>
 
               <div className="flex flex-wrap gap-1.5">
-                <button
+                <Button
                   type="button"
+                  size="xs"
+                  variant={difficultyFilter === 'all' ? 'rose' : 'secondary'}
                   onClick={() => setDifficultyFilter('all')}
-                  className={cn(
-                    "px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer",
-                    difficultyFilter === 'all'
-                      ? "bg-rose-600 text-white border-rose-600 shadow-xs"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                  )}
                 >
                   Wszystkie ({SEXUAL_POSITIONS.length})
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="xs"
+                  variant={difficultyFilter === 'łatwa' ? 'emerald' : 'secondary'}
                   onClick={() => setDifficultyFilter('łatwa')}
-                  className={cn(
-                    "px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer",
-                    difficultyFilter === 'łatwa'
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                  )}
                 >
                   Łatwa
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="xs"
+                  variant={difficultyFilter === 'średnia' ? 'amber' : 'secondary'}
                   onClick={() => setDifficultyFilter('średnia')}
-                  className={cn(
-                    "px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer",
-                    difficultyFilter === 'średnia'
-                      ? "bg-amber-600 text-white border-amber-600 shadow-xs"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                  )}
                 >
                   Średnia
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="xs"
+                  variant={difficultyFilter === 'zaawansowana' ? 'rose' : 'secondary'}
                   onClick={() => setDifficultyFilter('zaawansowana')}
-                  className={cn(
-                    "px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer",
-                    difficultyFilter === 'zaawansowana'
-                      ? "bg-rose-600 text-white border-rose-600 shadow-xs"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                  )}
                 >
                   Zaawansowana
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="xs"
+                  variant={difficultyFilter === 'favorites' ? 'rose' : 'secondary'}
                   onClick={() => setDifficultyFilter('favorites')}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer",
-                    difficultyFilter === 'favorites'
-                      ? "bg-rose-600 text-white border-rose-600 shadow-xs"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                  )}
+                  leftIcon={
+                    <Heart
+                      className={cn(
+                        "w-3 h-3",
+                        difficultyFilter === 'favorites'
+                          ? "fill-white text-white"
+                          : "fill-rose-500 text-rose-500"
+                      )}
+                    />
+                  }
                 >
-                  <Heart className={cn("w-3 h-3", difficultyFilter === 'favorites' ? "fill-white text-white" : "fill-rose-500 text-rose-500")} />
-                  <span>Polubione ({favorites.length})</span>
-                </button>
+                  Polubione ({favorites.length})
+                </Button>
               </div>
             </div>
 
@@ -375,16 +363,20 @@ export const PozycjeSeksualne: React.FC = () => {
                           loading="lazy"
                           className="w-full h-44 object-contain rounded-xl bg-slate-50 border border-slate-100 p-2"
                         />
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          rounded="full"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleFavorite(pos.id);
                           }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm transition-colors cursor-pointer"
+                          className="absolute top-2 right-2 bg-white/90 text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm"
+                          aria-label={isFav ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
                         >
                           <Heart className={cn("w-4 h-4", isFav && "fill-rose-500 text-rose-500")} />
-                        </button>
+                        </Button>
                       </div>
 
                       <div className="flex justify-between items-center mb-1">

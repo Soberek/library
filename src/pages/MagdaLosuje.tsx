@@ -421,14 +421,16 @@ export const MagdaLosuje: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               {(activeMoodId || advancedCount > 0) && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="xs"
                   onClick={resetFiltersToDefault}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                  leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                  className="text-slate-500 hover:text-slate-800"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Domyślne</span>
-                </button>
+                  Domyślne
+                </Button>
               )}
             </div>
           </div>
@@ -1125,13 +1127,16 @@ export const MagdaLosuje: React.FC = () => {
                   Zwiastun: {movie.title}
                 </h3>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                rounded="full"
                 onClick={() => setTrailerOpen(false)}
                 aria-label="Zamknij zwiastun"
-                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-white hover:bg-slate-800"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
             <div className="relative w-full pb-[56.25%] bg-black">
               <iframe

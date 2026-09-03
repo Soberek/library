@@ -17,6 +17,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { Slider } from '../ui/slider';
 import { Select } from '../ui/select';
 import { Input } from '../ui/input';
+import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
 
 interface MagdaAdvancedFiltersProps {
@@ -347,30 +348,28 @@ export const MagdaAdvancedFilters: React.FC<MagdaAdvancedFiltersProps> = ({
             </label>
             <div className="flex flex-wrap gap-1.5">
               {RUNTIME_PRESETS.map((preset, index) => (
-                <button
+                <Button
                   key={preset.label}
                   type="button"
+                  size="xs"
+                  variant={runtimePresetIndex === index ? "amber" : "outline"}
                   disabled={disabled}
                   onClick={() =>
                     onChange({ runtimeMin: preset.min, runtimeMax: preset.max })
                   }
-                  className={cn(
-                    "px-3 py-1 rounded-xl text-xs font-semibold transition-all border cursor-pointer",
-                    runtimePresetIndex === index
-                      ? "bg-amber-600 text-white border-amber-600 shadow-xs"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                  )}
                 >
                   {preset.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           {/* Reset advanced button */}
           <div className="flex justify-end pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="xs"
               disabled={disabled || activeCount === 0}
               onClick={() => {
                 onChange({
@@ -394,10 +393,10 @@ export const MagdaAdvancedFilters: React.FC<MagdaAdvancedFiltersProps> = ({
                 setCrewQuery('');
                 setCompanyQuery('');
               }}
-              className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors disabled:opacity-40 cursor-pointer"
+              className="text-xs font-bold text-red-600 hover:text-red-800 hover:bg-red-50"
             >
               Wyczyść zaawansowane filtry
-            </button>
+            </Button>
           </div>
         </div>
       )}

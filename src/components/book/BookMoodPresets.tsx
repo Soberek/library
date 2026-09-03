@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, X } from 'lucide-react';
 import type { BookMoodPreset } from '../../types/LotteryBook';
 import { BOOK_MOOD_PRESETS } from '../../services/openLibraryService';
+import { Button } from '../ui';
 import { cn } from '../../lib/utils';
 
 interface BookMoodPresetsProps {
@@ -27,15 +28,17 @@ export const BookMoodPresets: React.FC<BookMoodPresetsProps> = ({
           <span>Szybki klimat czytelniczy</span>
         </span>
         {activeMoodId && onClearMood && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="xs"
             onClick={onClearMood}
             disabled={disabled}
-            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 cursor-pointer transition-colors"
+            leftIcon={<X className="w-3 h-3" />}
+            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 h-6 px-1.5"
           >
-            <X className="w-3 h-3" />
-            <span>Wyczyść klimat</span>
-          </button>
+            Wyczyść klimat
+          </Button>
         )}
       </div>
 

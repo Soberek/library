@@ -6,6 +6,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
 import { toast } from "../../stores";
 import MagdaIcon from "../ui/MagdaIcon";
+import { Button, buttonVariants } from "../ui";
 import { cn } from "../../lib/utils";
 
 interface MobileDrawerProps {
@@ -78,13 +79,16 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => 
               )}
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            rounded="full"
             onClick={onClose}
             aria-label="Zamknij menu"
-            className="p-2 rounded-full text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer"
+            className="text-slate-500 hover:bg-slate-200/60"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Navigation list */}
@@ -165,18 +169,21 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => 
         {/* Footer actions */}
         <div className="p-4 border-t border-[#e2e4ef]">
           {user ? (
-            <button
+            <Button
+              variant="destructive"
+              fullWidth
+              size="lg"
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+              leftIcon={<LogOut className="w-4 h-4" />}
+              className="bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 shadow-none"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Wyloguj się z konta</span>
-            </button>
+              Wyloguj się z konta
+            </Button>
           ) : (
             <Link
               to="/sign-in"
               onClick={onClose}
-              className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-colors"
+              className={cn(buttonVariants({ variant: "primary", size: "lg" }), "w-full shadow-md")}
             >
               <span>Zaloguj się</span>
             </Link>

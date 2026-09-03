@@ -175,25 +175,24 @@ export const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
           {TABS.map(({ id, label, Icon }) => {
             const selected = activeTab === id && expanded;
             return (
-              <button
+              <Button
                 key={id}
                 type="button"
+                variant={selected ? "subtle" : "ghost"}
+                size="xs"
                 onClick={() => handleTabClick(id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border",
-                  selected
-                    ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-2xs"
-                    : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                )}
+                leftIcon={<Icon size={14} className="shrink-0" />}
+                rightIcon={
+                  id === "filters" && activeFilters > 0 ? (
+                    <span className="ml-0.5 min-w-[18px] h-4.5 px-1 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold flex items-center justify-center leading-none">
+                      {activeFilters}
+                    </span>
+                  ) : undefined
+                }
+                className="h-8"
               >
-                <Icon size={14} className="shrink-0" />
-                <span>{label}</span>
-                {id === "filters" && activeFilters > 0 && (
-                  <span className="ml-1 min-w-[18px] h-4.5 px-1 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold flex items-center justify-center leading-none">
-                    {activeFilters}
-                  </span>
-                )}
-              </button>
+                {label}
+              </Button>
             );
           })}
         </div>
@@ -319,41 +318,35 @@ export const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Autor
                   </label>
-                  <div className="relative">
-                    <Input
-                      placeholder="Wpisz autora..."
-                      value={filters.author || ""}
-                      onChange={(e) => handleFilterChange("author", e.target.value)}
-                    />
-                    {filters.author && (
-                      <button
-                        type="button"
-                        onClick={() => handleFilterChange("author", "")}
-                        className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
+                  <Input
+                    placeholder="Wpisz autora..."
+                    value={filters.author || ""}
+                    onChange={(e) => handleFilterChange("author", e.target.value)}
+                    clearable
+                    onClear={() => handleFilterChange("author", "")}
+                  />
                 </div>
 
                 {/* Favorites toggle */}
                 <div className="flex flex-col justify-end">
-                  <button
+                  <Button
                     type="button"
+                    variant={filters.showOnlyFavorites ? "amber" : "outline"}
                     onClick={() =>
                       handleFilterChange("showOnlyFavorites", !filters.showOnlyFavorites)
                     }
-                    className={cn(
-                      "flex items-center justify-center gap-2 h-10 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer border",
-                      filters.showOnlyFavorites
-                        ? "bg-amber-50 border-amber-300 text-amber-800 shadow-2xs"
-                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                    )}
+                    leftIcon={
+                      <Star
+                        className={cn(
+                          "w-4 h-4",
+                          filters.showOnlyFavorites ? "fill-white text-white" : "text-slate-400"
+                        )}
+                      />
+                    }
+                    className="h-10 text-xs font-bold w-full"
                   >
-                    <Star className={cn("w-4 h-4", filters.showOnlyFavorites ? "fill-amber-500 text-amber-500" : "text-slate-400")} />
-                    <span>Tylko ulubione</span>
-                  </button>
+                    Tylko ulubione
+                  </Button>
                 </div>
               </div>
 
@@ -444,33 +437,25 @@ export const FilterStatisticsPanel: React.FC<FilterStatisticsPanelProps> = ({
               <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-slate-700">Kierunek sortowania:</span>
-                  <div className="flex items-center p-0.5 bg-white border border-slate-200 rounded-lg shadow-2xs">
-                    <button
+                  <div className="flex items-center p-0.5 bg-white border border-slate-200 rounded-lg shadow-2xs gap-1">
+                    <Button
                       type="button"
+                      variant={filters.sortOrder === "asc" ? "subtle" : "ghost"}
+                      size="xs"
                       onClick={() => handleFilterChange("sortOrder", "asc")}
-                      className={cn(
-                        "flex items-center gap-1 px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                        filters.sortOrder === "asc"
-                          ? "bg-indigo-50 text-indigo-700"
-                          : "text-slate-600 hover:text-slate-900"
-                      )}
+                      leftIcon={<ArrowUp className="w-3.5 h-3.5" />}
                     >
-                      <ArrowUp className="w-3.5 h-3.5" />
-                      <span>Rosnąco</span>
-                    </button>
-                    <button
+                      Rosnąco
+                    </Button>
+                    <Button
                       type="button"
+                      variant={filters.sortOrder === "desc" ? "subtle" : "ghost"}
+                      size="xs"
                       onClick={() => handleFilterChange("sortOrder", "desc")}
-                      className={cn(
-                        "flex items-center gap-1 px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                        filters.sortOrder === "desc"
-                          ? "bg-indigo-50 text-indigo-700"
-                          : "text-slate-600 hover:text-slate-900"
-                      )}
+                      leftIcon={<ArrowDown className="w-3.5 h-3.5" />}
                     >
-                      <ArrowDown className="w-3.5 h-3.5" />
-                      <span>Malejąco</span>
-                    </button>
+                      Malejąco
+                    </Button>
                   </div>
                 </div>
 

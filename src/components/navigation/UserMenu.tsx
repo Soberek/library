@@ -6,6 +6,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
 import { toast } from "../../stores";
 import { cn } from "../../lib/utils";
+import { Button, buttonVariants } from "../ui";
 
 export const UserMenu: React.FC = () => {
   const authContext = useAuth();
@@ -42,7 +43,7 @@ export const UserMenu: React.FC = () => {
     return (
       <RouterLink
         to="/sign-in"
-        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95"
+        className={cn(buttonVariants({ variant: "primary", size: "sm" }), "rounded-xl shadow-sm")}
       >
         Zaloguj się
       </RouterLink>
@@ -112,14 +113,17 @@ export const UserMenu: React.FC = () => {
             </div>
 
             {/* Logout */}
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
+              fullWidth
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+              leftIcon={<LogOut className="w-4 h-4 shrink-0 text-rose-600" />}
+              className="justify-start text-rose-600 hover:bg-rose-50 hover:text-rose-700"
             >
-              <LogOut className="w-4 h-4 shrink-0" />
-              <span>Wyloguj się</span>
-            </button>
+              Wyloguj się
+            </Button>
           </div>
         </div>
       )}

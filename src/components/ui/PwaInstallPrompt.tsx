@@ -105,30 +105,34 @@ export const PwaInstallPrompt: React.FC = () => {
               <Button
                 size="sm"
                 onClick={() => void handleInstallClick()}
-                className="h-7 px-3 text-[11px] font-bold bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg gap-1.5 shadow-xs cursor-pointer"
+                leftIcon={<Download className="w-3.5 h-3.5" />}
+                className="h-7 px-3 text-[11px] font-bold bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg shadow-xs"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Zainstaluj</span>
+                Zainstaluj
               </Button>
 
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="xs"
                 onClick={handleDismiss}
-                className="text-[11px] font-medium text-slate-400 hover:text-slate-200 px-2 py-1 transition-colors cursor-pointer"
+                className="text-[11px] font-medium text-slate-400 hover:text-slate-200 h-7 px-2"
               >
                 Później
-              </button>
+              </Button>
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={handleDismiss}
             aria-label="Zamknij"
-            className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-white"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </aside>
 
@@ -136,12 +140,14 @@ export const PwaInstallPrompt: React.FC = () => {
       {showIOSGuide && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="relative w-full max-w-xs rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 text-slate-900">
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setShowIOSGuide(false)}
-              className="absolute top-3 right-3 p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
 
             <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 border border-indigo-200/60 shadow-xs">
               <Smartphone className="w-6 h-6" />

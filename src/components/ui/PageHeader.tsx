@@ -79,50 +79,48 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             onClick={onExportImport}
             title="Kopia zapasowa / Import / Eksport"
             aria-label="Kopia zapasowa, import lub eksport biblioteki"
-            className="border-slate-200 bg-white hover:bg-slate-50 shadow-2xs font-semibold gap-1.5 h-10 px-3"
+            leftIcon={<ArrowUpDown className="w-4 h-4 text-slate-600" />}
+            className="border-slate-200 bg-white hover:bg-slate-50 shadow-2xs font-semibold"
           >
-            <ArrowUpDown className="w-4 h-4 text-slate-600" />
             <span className="hidden sm:inline text-xs">Kopia & Import</span>
           </Button>
         )}
 
         {!hideViewToggle && (
-          <div className="flex items-center p-1 bg-slate-100 border border-slate-200 rounded-xl shadow-2xs">
-            <button
+          <div className="flex items-center p-1 bg-slate-100 border border-slate-200 rounded-xl shadow-2xs gap-1">
+            <Button
               type="button"
+              variant={viewMode === "cards" ? "outline" : "ghost"}
+              size="xs"
               onClick={() => onViewModeChange("cards")}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                viewMode === "cards"
-                  ? "bg-white text-indigo-700 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
+              leftIcon={<LayoutGrid className="w-3.5 h-3.5" />}
               aria-label="Widok siatki"
+              className={cn(viewMode === "cards" && "bg-white text-indigo-700 shadow-2xs border-white")}
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Siatka</span>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={viewMode === "table" ? "outline" : "ghost"}
+              size="xs"
               onClick={() => onViewModeChange("table")}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                viewMode === "table"
-                  ? "bg-white text-indigo-700 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
+              leftIcon={<List className="w-3.5 h-3.5" />}
               aria-label="Widok tabeli"
+              className={cn(viewMode === "table" && "bg-white text-indigo-700 shadow-2xs border-white")}
             >
-              <List className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Tabela</span>
-            </button>
+            </Button>
           </div>
         )}
 
         {!hideAddButton && (
-          <Button onClick={onAddBook} className="gap-1.5 shadow-md hover:shadow-lg font-bold h-10 px-4">
-            <Plus className="w-4 h-4" />
-            <span>Dodaj książkę</span>
+          <Button
+            onClick={onAddBook}
+            leftIcon={<Plus className="w-4 h-4" />}
+            size="default"
+            className="shadow-md hover:shadow-lg font-bold"
+          >
+            Dodaj książkę
           </Button>
         )}
       </div>

@@ -5,10 +5,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Modal } from './modal';
 import { Button } from './button';
-import { Mail, Loader2, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
+import { Input } from './input';
+import { Mail, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
 import { resetPasswordSchema, type ResetPasswordFormData } from '../../schemas';
 import { toast } from '../../stores';
-import { cn } from '../../lib/utils';
 
 interface ResetPasswordModalProps {
   isOpen: boolean;
@@ -105,7 +105,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               type="button"
               variant="secondary"
               onClick={onClose}
-              className="w-full"
+              fullWidth
             >
               Rozumiem, zamknij
             </Button>
@@ -120,31 +120,15 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
             </div>
           )}
 
-          <div>
-            <label htmlFor="reset-email" className="block text-xs font-bold text-slate-700 mb-1.5">
-              Adres email konta
-            </label>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                <Mail className="h-4 w-4" />
-              </div>
-              <input
-                id="reset-email"
-                type="email"
-                placeholder="twoj@email.com"
-                aria-invalid={Boolean(errors.email)}
-                className={cn(
-                  'flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3 border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
-                )}
-                {...register('email')}
-              />
-            </div>
-            {errors.email && (
-              <p className="text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1">
-                <span>{errors.email.message}</span>
-              </p>
-            )}
-          </div>
+          <Input
+            id="reset-email"
+            type="email"
+            label="Adres email konta"
+            placeholder="twoj@email.com"
+            leftIcon={<Mail className="h-4 w-4" />}
+            error={errors.email?.message}
+            {...register('email')}
+          />
 
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
             <Button
@@ -152,21 +136,19 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               variant="ghost"
               onClick={onClose}
               disabled={isSubmitting}
-              className="text-xs"
+              size="sm"
             >
               Anuluj
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="text-xs font-bold gap-2"
+              loading={isSubmitting}
+              loadingText="Wysyłanie..."
+              leftIcon={<Mail className="w-3.5 h-3.5" />}
+              size="sm"
+              className="font-bold gap-2"
             >
-              {isSubmitting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Mail className="w-3.5 h-3.5" />
-              )}
-              <span>{isSubmitting ? 'Wysyłanie...' : 'Wyślij link resetujący'}</span>
+              Wyślij link resetujący
             </Button>
           </div>
         </form>

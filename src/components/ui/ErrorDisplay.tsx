@@ -48,23 +48,25 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         {onRetry && (
           <Button
             variant="outline"
-            size="sm"
+            size="xs"
             onClick={onRetry}
-            className="h-7 text-xs border-red-300 hover:bg-red-100"
+            leftIcon={<RotateCcw className="w-3 h-3" />}
+            className="border-red-300 hover:bg-red-100"
           >
-            <RotateCcw className="w-3 h-3 mr-1" />
             Ponów
           </Button>
         )}
         {onDismiss && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={onDismiss}
-            className="p-1 rounded-lg hover:bg-red-200/50 transition-colors cursor-pointer"
             aria-label="Zamknij"
+            className="hover:bg-red-200/50 text-red-600"
           >
-            <X className="w-4 h-4 text-red-600" />
-          </button>
+            <X className="w-4 h-4" />
+          </Button>
         )}
       </div>
     </div>

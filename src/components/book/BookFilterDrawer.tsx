@@ -81,23 +81,29 @@ export const BookFilterDrawer: React.FC<BookFilterDrawerProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
+              <div className="flex items-center gap-1.5">
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="xs"
                   onClick={onReset}
-                  className="text-xs font-semibold text-slate-500 hover:text-emerald-700 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                  leftIcon={<RotateCcw className="w-3 h-3" />}
+                  className="text-xs font-semibold text-slate-500 hover:text-emerald-700"
                   title="Przywróć domyślne filtry"
                 >
-                  <RotateCcw className="w-3 h-3" />
                   <span className="hidden xs:inline">Domyślne</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  rounded="full"
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer transition-colors"
+                  aria-label="Zamknij"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-600"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
 

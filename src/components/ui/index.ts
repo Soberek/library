@@ -3,6 +3,8 @@ export { default as ErrorDisplay } from './ErrorDisplay';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as PageLoader } from './PageLoader';
 export { default as Input } from './input';
+export { default as NumberInput } from './number-input';
+export { default as SearchInput } from './SearchInput';
 export { default as Textarea } from './textarea';
 export { default as Button, buttonVariants } from './button';
 export { default as Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './card';

@@ -6,19 +6,15 @@ import { useAuth } from '../hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Loader2,
   AlertCircle,
   Mail,
   Lock,
-  Eye,
-  EyeOff,
   LogIn,
   ArrowRight,
 } from 'lucide-react';
-import { AuthLayout, Button, ResetPasswordModal } from '../components/ui';
+import { AuthLayout, Button, Input, ResetPasswordModal } from '../components/ui';
 import { signInSchema, type SignInFormData } from '../schemas';
 import { toast } from '../stores';
-import { cn } from '../lib/utils';
 
 function resolveRedirectTarget(from: unknown): string {
   if (typeof from !== 'string' || !from.startsWith('/') || from.startsWith('//')) {
@@ -45,7 +41,6 @@ export const SignIn: React.FC = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -111,93 +106,44 @@ export const SignIn: React.FC = () => {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           {/* Email Field */}
-          <div>
-            <label
-              htmlFor="signin-email"
-              className="block text-xs font-bold text-slate-700 mb-1.5"
-            >
-              Adres email <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                <Mail className="h-4 w-4" />
-              </div>
-              <input
-                id="signin-email"
-                type="email"
-                autoComplete="email"
-                placeholder="twoj@email.com"
-                aria-invalid={Boolean(errors.email)}
-                className={cn(
-                  'flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3',
-                  errors.email
-                    ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15'
-                    : 'border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
-                )}
-                {...register('email')}
-              />
-            </div>
-            {errors.email && (
-              <p className="text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1">
-                <span>{errors.email.message}</span>
-              </p>
-            )}
-          </div>
+          <Input
+            id="signin-email"
+            type="email"
+            label="Adres email"
+            required
+            autoComplete="email"
+            placeholder="twoj@email.com"
+            leftIcon={<Mail className="h-4 w-4" />}
+            error={errors.email?.message}
+            inputSize="default"
+            {...register('email')}
+          />
 
           {/* Password Field */}
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label
-                htmlFor="signin-password"
-                className="block text-xs font-bold text-slate-700"
-              >
-                Hasło <span className="text-rose-500">*</span>
-              </label>
-              <button
+          <Input
+            id="signin-password"
+            type="password"
+            showPasswordToggle
+            label="Hasło"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            leftIcon={<Lock className="h-4 w-4" />}
+            labelRight={
+              <Button
                 type="button"
+                variant="link"
+                size="xs"
                 onClick={() => setIsResetModalOpen(true)}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer focus:outline-none"
+                className="p-0 h-auto font-semibold text-indigo-600 hover:text-indigo-700"
               >
                 Zapomniałeś hasła?
-              </button>
-            </div>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                <Lock className="h-4 w-4" />
-              </div>
-              <input
-                id="signin-password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                placeholder="••••••••"
-                aria-invalid={Boolean(errors.password)}
-                className={cn(
-                  'flex h-11 w-full rounded-xl border bg-white pl-10 pr-10 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3',
-                  errors.password
-                    ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15'
-                    : 'border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
-                )}
-                {...register('password')}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1">
-                <span>{errors.password.message}</span>
-              </p>
-            )}
-          </div>
+              </Button>
+            }
+            error={errors.password?.message}
+            inputSize="default"
+            {...register('password')}
+          />
 
           {/* Error Alert Box */}
           {errorMessage && (
@@ -211,15 +157,14 @@ export const SignIn: React.FC = () => {
           <div className="pt-2">
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full h-11 text-sm font-bold shadow-md hover:shadow-lg gap-2"
+              loading={isSubmitting}
+              loadingText="Logowanie do konta…"
+              leftIcon={<LogIn className="w-4 h-4" />}
+              fullWidth
+              size="lg"
+              className="shadow-md hover:shadow-lg gap-2"
             >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <LogIn className="w-4 h-4" />
-              )}
-              <span>{isSubmitting ? 'Logowanie do konta…' : 'Zaloguj się'}</span>
+              Zaloguj się
             </Button>
           </div>
         </form>

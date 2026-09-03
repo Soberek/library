@@ -15,6 +15,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
 import { useUIStore, useFilterStore, toast } from '../../stores';
 import MagdaIcon from '../ui/MagdaIcon';
+import { Button } from '../ui';
 import { cn } from '../../lib/utils';
 
 interface NavItemProps {
@@ -297,14 +298,16 @@ export const Sidebar: React.FC = () => {
       <div className="p-3 border-t border-slate-100 space-y-2">
         {collapsed ? (
           <div className="flex flex-col items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="icon"
               onClick={handleLogout}
               title={`Wyloguj (${email})`}
-              className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 flex items-center justify-center transition-colors cursor-pointer text-xs font-bold"
+              className="hover:bg-rose-50 hover:text-rose-600"
             >
               <LogOut className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -323,14 +326,16 @@ export const Sidebar: React.FC = () => {
                 </div>
               </div>
 
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={handleLogout}
                 title="Wyloguj się"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                className="text-slate-400 hover:text-rose-600 hover:bg-rose-50"
               >
                 <LogOut className="w-3.5 h-3.5" />
-              </button>
+              </Button>
             </div>
 
             <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 font-medium">

@@ -6,18 +6,15 @@ import { useAuth } from '../hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Loader2,
   AlertCircle,
   Mail,
   Lock,
-  Eye,
-  EyeOff,
   UserPlus,
   Check,
   ArrowRight,
   ShieldAlert,
 } from 'lucide-react';
-import { AuthLayout, Button } from '../components/ui';
+import { AuthLayout, Button, Input } from '../components/ui';
 import { signUpSchema, type SignUpFormData } from '../schemas';
 import { toast } from '../stores';
 import { cn } from '../lib/utils';
@@ -48,7 +45,6 @@ export const SignUp: React.FC = () => {
   });
 
   const [error, setLocalError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const authContext = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -142,83 +138,32 @@ export const SignUp: React.FC = () => {
         )}
 
         {/* Email Field */}
-        <div>
-          <label
-            htmlFor="signup-email"
-            className="block text-xs font-bold text-slate-700 mb-1.5"
-          >
-            Adres email <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              <Mail className="h-4 w-4" />
-            </div>
-            <input
-              id="signup-email"
-              type="email"
-              autoComplete="email"
-              placeholder="twoj@email.com"
-              aria-invalid={Boolean(errors.email)}
-              className={cn(
-                'flex h-11 w-full rounded-xl border bg-white pl-10 pr-3.5 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3',
-                errors.email
-                  ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15'
-                  : 'border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
-              )}
-              {...register('email')}
-            />
-          </div>
-          {errors.email && (
-            <p className="text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1">
-              <span>{errors.email.message}</span>
-            </p>
-          )}
-        </div>
+        <Input
+          id="signup-email"
+          type="email"
+          label="Adres email"
+          required
+          autoComplete="email"
+          placeholder="twoj@email.com"
+          leftIcon={<Mail className="h-4 w-4" />}
+          error={errors.email?.message}
+          {...register('email')}
+        />
 
         {/* Password Field */}
         <div>
-          <label
-            htmlFor="signup-password"
-            className="block text-xs font-bold text-slate-700 mb-1.5"
-          >
-            Hasło <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              <Lock className="h-4 w-4" />
-            </div>
-            <input
-              id="signup-password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="Minimum 6 znaków"
-              aria-invalid={Boolean(errors.password)}
-              className={cn(
-                'flex h-11 w-full rounded-xl border bg-white pl-10 pr-10 py-2 text-sm text-slate-900 shadow-2xs transition-all placeholder:text-slate-400 focus:outline-none focus:ring-3',
-                errors.password
-                  ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/15'
-                  : 'border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/15',
-              )}
-              {...register('password')}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-              aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-          {errors.password && (
-            <p className="text-xs font-semibold text-rose-500 mt-1.5 flex items-center gap-1">
-              <span>{errors.password.message}</span>
-            </p>
-          )}
+          <Input
+            id="signup-password"
+            type="password"
+            showPasswordToggle
+            label="Hasło"
+            required
+            autoComplete="new-password"
+            placeholder="Minimum 6 znaków"
+            leftIcon={<Lock className="h-4 w-4" />}
+            error={errors.password?.message}
+            {...register('password')}
+          />
 
           {/* Password Strength Meter */}
           {passwordVal && (
@@ -286,15 +231,14 @@ export const SignUp: React.FC = () => {
         <div className="pt-2">
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full h-11 text-sm font-bold shadow-md hover:shadow-lg gap-2"
+            loading={isSubmitting}
+            loadingText="Tworzenie konta…"
+            leftIcon={<UserPlus className="w-4 h-4" />}
+            fullWidth
+            size="lg"
+            className="shadow-md hover:shadow-lg gap-2"
           >
-            {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <UserPlus className="w-4 h-4" />
-            )}
-            <span>{isSubmitting ? 'Tworzenie konta…' : 'Zarejestruj się'}</span>
+            Zarejestruj się
           </Button>
         </div>
       </form>

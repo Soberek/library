@@ -12,6 +12,7 @@ import {
 } from '../../../services/openLibraryService';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Input } from '../../ui/input';
+import { NumberInput } from '../../ui/number-input';
 import { Select } from '../../ui/select';
 import { Button } from '../../ui/button';
 import { Rating } from '../../ui/rating';
@@ -52,8 +53,8 @@ const DEFAULT_VALUES = {
   author: '',
   read: 'W trakcie' as BookStatus,
   genre: '',
-  readPages: 0,
-  overallPages: 1,
+  readPages: '' as unknown as number,
+  overallPages: '' as unknown as number,
   cover: '',
   rating: 0,
 };
@@ -139,8 +140,10 @@ export const BookForm: React.FC<Props> = ({
   }, [coverUrl]);
 
   useEffect(() => {
-    if (Number(readPages) > Number(overallPages)) {
-      setValue('readPages', Number(overallPages), { shouldValidate: true, shouldDirty: true });
+    const overallNum = Number(overallPages);
+    const readNum = Number(readPages);
+    if (overallNum > 0 && readNum > overallNum) {
+      setValue('readPages', overallNum, { shouldValidate: true, shouldDirty: true });
     }
   }, [overallPages, readPages, setValue]);
 
@@ -166,32 +169,28 @@ export const BookForm: React.FC<Props> = ({
               <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
               Szybkie uzupełnianie z Open Library
             </span>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="xs"
               onClick={() => setOlShowSearch(false)}
-              className="text-[11px] font-medium text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="h-6 text-[11px] text-slate-400 hover:text-slate-600"
             >
               Ukryj
-            </button>
+            </Button>
           </div>
 
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-              <Search className="h-4 w-4" />
-            </div>
-            <input
-              type="text"
-              placeholder="Wpisz tytuł lub autora (np. Wiedźmin, Tolkien)..."
-              value={olQuery}
-              onChange={(e) => setOlQuery(e.target.value)}
-              className="h-9 w-full rounded-xl border border-indigo-200 bg-white pl-9 pr-8 text-xs text-slate-900 shadow-2xs focus:border-indigo-500 focus:outline-none"
-            />
-            {olLoading && (
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2.5">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-600" />
-              </div>
-            )}
-          </div>
+          <Input
+            inputSize="sm"
+            placeholder="Wpisz tytuł lub autora (np. Wiedźmin, Tolkien)..."
+            value={olQuery}
+            onChange={(e) => setOlQuery(e.target.value)}
+            leftIcon={<Search className="h-3.5 w-3.5" />}
+            loading={olLoading}
+            clearable
+            onClear={() => setOlQuery('')}
+            className="border-indigo-200"
+          />
 
           {olResults.length > 0 && (
             <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 divide-y divide-slate-100 shadow-lg">
@@ -323,57 +322,40 @@ export const BookForm: React.FC<Props> = ({
 
       {/* Pages: read & overall */}
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="book-read-pages-input" className="block text-xs font-bold text-slate-700 mb-1">
-            Przeczytane strony
-          </label>
-          <Controller
-            name="readPages"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="book-read-pages-input"
-                type="number"
-                min={0}
-                max={5000}
-                error={!!errors.readPages}
-                onChange={(e) =>
-                  field.onChange(e.target.value === '' ? 0 : Number(e.target.value))
-                }
-              />
-            )}
-          />
-          {errors.readPages && (
-            <p className="text-xs text-red-500 mt-1">{errors.readPages.message}</p>
+        <Controller
+          name="readPages"
+          control={control}
+          render={({ field }) => (
+            <NumberInput
+              {...field}
+              id="book-read-pages-input"
+              label="Przeczytane strony"
+              placeholder="np. 0"
+              suffixText="str."
+              min={0}
+              max={5000}
+              error={errors.readPages?.message}
+            />
           )}
-        </div>
+        />
 
-        <div>
-          <label htmlFor="book-overall-pages-input" className="block text-xs font-bold text-slate-700 mb-1">
-            Liczba stron *
-          </label>
-          <Controller
-            name="overallPages"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="book-overall-pages-input"
-                type="number"
-                min={1}
-                max={5000}
-                error={!!errors.overallPages}
-                onChange={(e) =>
-                  field.onChange(e.target.value === '' ? 1 : Number(e.target.value))
-                }
-              />
-            )}
-          />
-          {errors.overallPages && (
-            <p className="text-xs text-red-500 mt-1">{errors.overallPages.message}</p>
+        <Controller
+          name="overallPages"
+          control={control}
+          render={({ field }) => (
+            <NumberInput
+              {...field}
+              id="book-overall-pages-input"
+              label="Liczba stron"
+              required
+              placeholder="np. 350"
+              suffixText="str."
+              min={1}
+              max={5000}
+              error={errors.overallPages?.message}
+            />
           )}
-        </div>
+        />
       </div>
 
       {/* Rating */}
@@ -453,13 +435,13 @@ export const BookForm: React.FC<Props> = ({
       <div className="pt-2">
         <Button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full h-11 text-sm font-bold"
+          loading={isSubmitting}
+          loadingText={initialData ? 'Zapisywanie zmian…' : 'Dodawanie książki…'}
+          fullWidth
+          size="lg"
+          className="text-sm font-bold shadow-md hover:shadow-lg"
         >
-          {isSubmitting ? (
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          ) : null}
-          <span>{initialData ? 'Zapisz zmiany' : 'Dodaj książkę'}</span>
+          {initialData ? 'Zapisz zmiany' : 'Dodaj książkę'}
         </Button>
       </div>
     </form>

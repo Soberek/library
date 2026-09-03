@@ -1,5 +1,5 @@
 import React, { useState, memo } from "react";
-import { Heart, Edit3, Trash2, Check, Layers, User, CheckCircle2 } from "lucide-react";
+import { Heart, Edit3, Trash2, Check, Layers, User, CheckCircle2, Star } from "lucide-react";
 import type { Book, BookStatus } from "../../../types/Book";
 import StatusMenuButton from "../StatusMenuButton";
 import { Modal } from "../../ui/modal";
@@ -80,20 +80,23 @@ export const BookCard: React.FC<BookCardProps> = memo(({
           size="sm"
         />
 
-        <button
+        <Button
           type="button"
+          variant={isFavorite ? "amber" : "ghost"}
+          size="icon-sm"
+          rounded="full"
           onClick={() => onToggleFavorite(book.id, isFavorite)}
           aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
           title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
           className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500",
+            "border shadow-2xs",
             isFavorite
               ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600"
               : "bg-slate-50 text-slate-400 border-slate-200 hover:text-rose-500 hover:border-rose-200 hover:bg-white"
           )}
         >
           <Heart className={cn("w-4 h-4", isFavorite && "fill-white text-white")} />
-        </button>
+        </Button>
       </div>
 
       {/* Book Cover Container */}
@@ -205,8 +208,10 @@ export const BookCard: React.FC<BookCardProps> = memo(({
               className="flex items-center justify-between gap-1.5 mt-2.5 pt-2 border-t border-slate-200/60"
               onClick={(e) => e.stopPropagation()}
             >
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 onClick={() =>
                   onPagesChange(
                     book.id,
@@ -215,12 +220,14 @@ export const BookCard: React.FC<BookCardProps> = memo(({
                   )
                 }
                 title="Dodaj 10 stron do przeczytanych"
-                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
+                className="flex-1 text-xs font-bold"
               >
                 +10
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 onClick={() =>
                   onPagesChange(
                     book.id,
@@ -229,60 +236,77 @@ export const BookCard: React.FC<BookCardProps> = memo(({
                   )
                 }
                 title="Dodaj 50 stron do przeczytanych"
-                className="flex-1 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs text-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
+                className="flex-1 text-xs font-bold"
               >
                 +50
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="success"
+                size="xs"
                 onClick={handleFinishBook}
                 title="Oznacz całą książkę jako przeczytaną (100%)"
-                className="flex-[1.2] py-1 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500"
+                leftIcon={<Check className="w-3.5 h-3.5 shrink-0" />}
+                className="flex-[1.2] text-xs font-bold"
               >
-                <Check className="w-3.5 h-3.5 shrink-0" />
-                <span>Przeczytana</span>
-              </button>
+                Przeczytana
+              </Button>
             </div>
           ) : null}
         </div>
+      </div>
 
-        {/* Footer with Rating & Action buttons */}
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-1.5">
+      {/* Card Footer: rating & actions */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50/70 border-t border-slate-100">
+        <div className="flex items-center gap-1.5">
+          {onRatingChange ? (
             <Rating
               value={book.rating / 2}
               size="sm"
               onChange={(_, val) => {
-                if (val !== null && onRatingChange) {
+                if (val !== null) {
                   onRatingChange(book.id, val * 2);
                 }
               }}
             />
-            <span className="text-xs font-black text-slate-700 ml-0.5">
-              {book.rating > 0 ? book.rating.toFixed(1) : "—"}
-            </span>
-          </div>
+          ) : (
+            <Star
+              className={cn(
+                "w-4 h-4",
+                book.rating > 0
+                  ? "text-amber-500 fill-amber-400"
+                  : "text-slate-300"
+              )}
+            />
+          )}
+          <span className="text-xs font-black text-slate-700 ml-0.5">
+            {book.rating > 0 ? book.rating.toFixed(1) : "—"}
+          </span>
+        </div>
 
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => onEdit(book.id)}
-              aria-label="Edytuj książkę"
-              title="Edytuj książkę"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
-            >
-              <Edit3 className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpenDeleteDialog(true)}
-              aria-label="Usuń książkę"
-              title="Usuń książkę"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => onEdit(book.id)}
+            aria-label="Edytuj książkę"
+            title="Edytuj książkę"
+            className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+          >
+            <Edit3 className="w-4 h-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setOpenDeleteDialog(true)}
+            aria-label="Usuń książkę"
+            title="Usuń książkę"
+            className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 

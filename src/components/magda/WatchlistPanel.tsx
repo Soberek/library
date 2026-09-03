@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2, Circle, Trash2, Film, Loader2 } from 'lucide-react';
 import type { WatchlistMovie } from '../../types/WatchlistMovie';
 import { posterUrl, releaseYear } from '../../services/tmdbService';
+import { Button } from '../ui';
 import { cn } from '../../lib/utils';
 
 type WatchlistFilter = 'all' | 'todo' | 'watched';
@@ -64,43 +65,34 @@ export const WatchlistPanel: React.FC<WatchlistPanelProps> = ({
         </div>
 
         {/* Tab pill filter */}
-        <div className="flex w-full sm:w-auto overflow-x-auto p-1 bg-slate-100 border border-slate-200 rounded-xl text-xs">
-          <button
+        <div className="flex w-full sm:w-auto overflow-x-auto p-1 bg-slate-100 border border-slate-200 rounded-xl gap-1">
+          <Button
             type="button"
+            variant={filter === 'all' ? "outline" : "ghost"}
+            size="xs"
             onClick={() => setFilter('all')}
-            className={cn(
-              "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap text-[11px] sm:text-xs text-center",
-              filter === 'all'
-                ? "bg-white text-amber-700 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
+            className={cn(filter === 'all' && "bg-white text-amber-700 shadow-xs border-white")}
           >
             Wszystkie ({items.length})
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={filter === 'todo' ? "outline" : "ghost"}
+            size="xs"
             onClick={() => setFilter('todo')}
-            className={cn(
-              "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap text-[11px] sm:text-xs text-center",
-              filter === 'todo'
-                ? "bg-white text-amber-700 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
+            className={cn(filter === 'todo' && "bg-white text-amber-700 shadow-xs border-white")}
           >
             Do obejrzenia ({todoCount})
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={filter === 'watched' ? "outline" : "ghost"}
+            size="xs"
             onClick={() => setFilter('watched')}
-            className={cn(
-              "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap text-[11px] sm:text-xs text-center",
-              filter === 'watched'
-                ? "bg-white text-amber-700 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
+            className={cn(filter === 'watched' && "bg-white text-amber-700 shadow-xs border-white")}
           >
             Obejrzane ({watchedCount})
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -163,40 +155,38 @@ export const WatchlistPanel: React.FC<WatchlistPanelProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 mt-2">
-                    <button
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Button
                       type="button"
+                      variant={item.watched ? "success" : "amber"}
+                      size="xs"
                       disabled={isBusy}
                       onClick={() => void handleToggle(item)}
-                      className={cn(
-                        "flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer",
-                        item.watched
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200"
-                          : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100"
-                      )}
+                      leftIcon={
+                        item.watched ? (
+                          <CheckCircle2 className="w-3 h-3" />
+                        ) : (
+                          <Circle className="w-3 h-3" />
+                        )
+                      }
+                      className="text-[11px] font-bold"
                     >
-                      {item.watched ? (
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                      ) : (
-                        <Circle className="w-3 h-3 text-amber-600" />
-                      )}
-                      <span>{item.watched ? 'Cofnij' : 'Obejrzane'}</span>
-                    </button>
+                      {item.watched ? 'Cofnij' : 'Obejrzane'}
+                    </Button>
 
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       disabled={isBusy}
+                      loading={pendingId === item.id}
                       onClick={() => void handleRemove(item)}
                       aria-label={`Usuń ${item.title}`}
                       title="Usuń z listy"
-                      className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      className="text-slate-400 hover:text-red-600 hover:bg-red-50"
                     >
-                      {pendingId === item.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
-                      ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      )}
-                    </button>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
                 </div>
               </li>
