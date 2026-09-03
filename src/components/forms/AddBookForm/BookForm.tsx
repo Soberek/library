@@ -15,7 +15,7 @@ import { Input } from '../../ui/input';
 import { NumberInput } from '../../ui/number-input';
 import { Select } from '../../ui/select';
 import { Button } from '../../ui/button';
-import { Rating } from '../../ui/rating';
+import { BookRatingInput } from './BookRatingInput';
 
 type Props = {
   initialData?: Book;
@@ -359,33 +359,16 @@ export const BookForm: React.FC<Props> = ({
       </div>
 
       {/* Rating */}
-      <div>
-        <label className="block text-xs font-bold text-slate-700 mb-1">
-          Twoja ocena
-        </label>
-        <div className="flex items-center gap-3">
-          <Controller
-            name="rating"
-            control={control}
-            render={({ field }) => (
-              <Rating
-                value={Number(field.value) / 2}
-                size="md"
-                onChange={(_, value) => field.onChange((value ?? 0) * 2)}
-              />
-            )}
+      <Controller
+        name="rating"
+        control={control}
+        render={({ field }) => (
+          <BookRatingInput
+            value={Number(field.value) || 0}
+            onChange={(newScore) => field.onChange(newScore)}
           />
-          <Controller
-            name="rating"
-            control={control}
-            render={({ field }) => (
-              <span className="text-xs font-bold text-slate-600">
-                {Number(field.value).toFixed(1)} / 10
-              </span>
-            )}
-          />
-        </div>
-      </div>
+        )}
+      />
 
       {/* Cover URL */}
       <div>
